@@ -7,8 +7,8 @@ import toast from "react-hot-toast";
 
 const INFO = [
   { Icon: MapPin,  label: "Address",    value: "123 Luxury Lane, Victoria Island, Lagos, Nigeria" },
-  { Icon: Phone,   label: "Phone",      value: "+234 800 000 0000" },
-  { Icon: Mail,    label: "Email",      value: "hello@mercyhomeessentials.com" },
+  { Icon: Phone,   label: "Phone",      value: "+234 9034240648" },
+  { Icon: Mail,    label: "Email",      value: "anuoluwapoayoola78@gmail.com" },
   { Icon: Clock,   label: "Hours",      value: "Mon–Fri: 9am–6pm · Sat: 10am–4pm" },
 ];
 
