@@ -5,8 +5,9 @@ import { Product } from "@/lib/models";
 import { ProductDetail } from "./ProductDetail";
 import type { IProduct } from "@/types";
 
+// ✅ Next.js 15: params is a Promise
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 async function getProduct(slug: string): Promise<IProduct | null> {
@@ -22,7 +23,8 @@ async function getProduct(slug: string): Promise<IProduct | null> {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const product = await getProduct(params.slug);
+  const { slug } = await params; // ✅ await params
+  const product = await getProduct(slug);
   if (!product) return { title: "Product Not Found" };
 
   return {
@@ -38,7 +40,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function ProductPage({ params }: PageProps) {
-  const product = await getProduct(params.slug);
+  const { slug } = await params; // ✅ await params
+  const product = await getProduct(slug);
   if (!product) notFound();
 
   return <ProductDetail product={product} />;
