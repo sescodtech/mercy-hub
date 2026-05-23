@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Google Fonts ─────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+
+@layer base {
+  :root {
+    --font-display: 'Cormorant Garamond', serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+
+    --radius: 0.5rem;
+
+    --background:   0 0% 99%;
+    --foreground:   30 40% 8%;
+    --card:         0 0% 100%;
+    --card-foreground: 30 40% 8%;
+    --popover:      0 0% 100%;
+    --popover-foreground: 30 40% 8%;
+    --primary:      33 72% 51%;
+    --primary-foreground: 0 0% 99%;
+    --secondary:    33 20% 94%;
+    --secondary-foreground: 30 40% 8%;
+    --muted:        33 15% 96%;
+    --muted-foreground: 30 15% 46%;
+    --accent:       33 20% 94%;
+    --accent-foreground: 30 40% 8%;
+    --destructive:  0 84% 60%;
+    --destructive-foreground: 0 0% 99%;
+    --border:       33 20% 88%;
+    --input:        33 20% 88%;
+    --ring:         33 72% 51%;
+  }
+
+  .dark {
+    --background:   30 30% 5%;
+    --foreground:   33 20% 94%;
+    --card:         30 25% 8%;
+    --card-foreground: 33 20% 94%;
+    --popover:      30 25% 8%;
+    --popover-foreground: 33 20% 94%;
+    --primary:      33 72% 51%;
+    --primary-foreground: 30 40% 8%;
+    --secondary:    30 20% 14%;
+    --secondary-foreground: 33 20% 94%;
+    --muted:        30 20% 12%;
+    --muted-foreground: 33 15% 55%;
+    --accent:       30 20% 14%;
+    --accent-foreground: 33 20% 94%;
+    --destructive:  0 72% 51%;
+    --destructive-foreground: 0 0% 99%;
+    --border:       30 20% 18%;
+    --input:        30 20% 18%;
+    --ring:         33 72% 51%;
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+}
+
+@layer components {
+  /* ─── Container ─── */
+  .container-site {
+    @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+  }
+
+  /* ─── Buttons ─── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-brand-600 px-6 py-3 text-sm font-medium text-white tracking-wide uppercase transition-all duration-300 hover:bg-brand-700 hover:shadow-brand-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-brand-600 px-6 py-3 text-sm font-medium text-brand-700 tracking-wide uppercase transition-all duration-300 hover:bg-brand-50 active:scale-[0.98] disabled:opacity-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2 text-sm font-medium text-neutral-700 transition-all duration-200 hover:bg-neutral-100 active:scale-[0.98];
+  }
+
+  .btn-icon {
+    @apply inline-flex items-center justify-center rounded-sm p-2 text-neutral-600 transition-all duration-200 hover:bg-neutral-100 hover:text-neutral-900 active:scale-[0.95];
+  }
+
+  /* ─── Cards ─── */
+  .card-luxury {
+    @apply rounded-lg bg-white border border-neutral-100 shadow-luxury overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-brand-md;
+  }
+
+  /* ─── Inputs ─── */
+  .input-field {
+    @apply w-full rounded-sm border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 placeholder-neutral-400 transition-all duration-200 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+  }
+
+  /* ─── Section headings ─── */
+  .section-tag {
+    @apply inline-block text-xs font-medium tracking-[0.2em] uppercase text-brand-600 mb-3;
+  }
+
+  .section-heading {
+    @apply font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-neutral-900;
+  }
+
+  .section-subheading {
+    @apply text-base text-neutral-500 leading-relaxed max-w-2xl;
+  }
+
+  /* ─── Badges ─── */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .badge-new      { @apply badge bg-emerald-50 text-emerald-700; }
+  .badge-sale     { @apply badge bg-red-50 text-red-700; }
+  .badge-trending { @apply badge bg-brand-50 text-brand-700; }
+  .badge-oos      { @apply badge bg-neutral-100 text-neutral-500; }
+
+  /* ─── Skeleton ─── */
+  .skeleton {
+    @apply animate-pulse rounded bg-neutral-200;
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded;
+  }
+
+  /* ─── Dividers ─── */
+  .divider-brand {
+    @apply w-12 h-0.5 bg-brand-500 rounded-full;
+  }
+
+  /* ─── Product price ─── */
+  .price-current {
+    @apply font-display text-xl font-semibold text-neutral-900;
+  }
+
+  .price-original {
+    @apply font-body text-sm text-neutral-400 line-through;
+  }
+
+  /* ─── Scrollbar ─── */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #d98c2a #f5f0e8;
+  }
+  .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: #f5f0e8; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #d98c2a; border-radius: 4px; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .bg-mesh {
+    background-image:
+      radial-gradient(at 40% 20%, hsla(33,80%,95%,1) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsla(40,80%,96%,1) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(33,60%,97%,1) 0px, transparent 50%);
+  }
+}
+
+/* ─── Page transitions ─── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.25s;
+}
