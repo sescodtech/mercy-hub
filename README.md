@@ -206,3 +206,4 @@ Visit `/admin` (admin login required):
 ## 📄 License
 
 MIT © 2025 Mercy Home Essentials
+ 
