@@ -120,8 +120,8 @@ export function Footer() {
         <div className="mt-14 pt-10 border-t border-white/10 grid sm:grid-cols-3 gap-6">
           {[
             { Icon: MapPin,  text: "Lagos, Nigeria" },
-            { Icon: Phone,   text: "+234 800 000 0000" },
-            { Icon: Mail,    text: "hello@mercyhomeessentials.com" },
+            { Icon: Phone,   text: "+234 903 424 0648" },
+            { Icon: Mail,    text: "anuoluwapoayoola78@gmail.com" },
           ].map(({ Icon, text }) => (
             <div key={text} className="flex items-center gap-3 text-sm text-cream/50">
               <Icon className="w-4 h-4 text-brand-500 flex-shrink-0" />
