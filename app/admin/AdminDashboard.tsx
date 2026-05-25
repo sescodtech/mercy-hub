@@ -28,8 +28,13 @@ const STATUS_CONFIG: Record<string, { color: string; icon: React.ElementType; la
 };
 
 export function AdminDashboard() {
+  const [mounted, setMounted] = useState(false);
   const [range, setRange]               = useState("30");
   const [updatingOrder, setUpdatingOrder] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { data: analytics, loading, lastUpdated, refresh } = useRealtimeAnalytics(range);
 
@@ -42,7 +47,10 @@ export function AdminDashboard() {
     finally { setUpdatingOrder(null); }
   };
 
+  if (!mounted) return null;
+
   const a                  = analytics as Record<string, unknown> | null;
+
   const overview           = a?.overview            as Record<string, number> | undefined;
   const revenueOverTime    = (a?.revenueOverTime    as unknown[] | undefined) ?? [];
   const topProducts        = (a?.topProducts        as Record<string, unknown>[] | undefined) ?? [];
