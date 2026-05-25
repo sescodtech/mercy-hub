@@ -13,7 +13,10 @@ export const authConfig: NextAuthConfig = {
     signOut: "/auth/login",
     error:   "/auth/login",
   },
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   secret:  process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, user }) {
@@ -24,7 +27,7 @@ export const authConfig: NextAuthConfig = {
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      if (token && session.user) {
         session.user.id   = token.id as string;
         session.user.role = token.role as string;
       }
