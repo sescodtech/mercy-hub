@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
     }
     await connectDB();
     const body = await req.json();
-    const { title, subtitle, image, mobileImage, ctaText, ctaLink, badge, sortOrder } = body;
+    // Match your existing BannerSchema field names
+    const { title, subtitle, image, mobileImage, buttonText, link, badge, sortOrder } = body;
 
     if (!title || !image) {
       return NextResponse.json({ success: false, error: "Title and image are required" }, { status: 400 });
@@ -34,10 +35,10 @@ export async function POST(req: NextRequest) {
 
     const banner = await Banner.create({
       title, subtitle, image, mobileImage,
-      ctaText: ctaText || "Shop Now",
-      ctaLink: ctaLink || "/shop",
-      badge, sortOrder: sortOrder ?? 0,
-      isActive: true,
+      buttonText: buttonText || "Shop Now",
+      link:       link       || "/shop",
+      sortOrder:  sortOrder  ?? 0,
+      isActive:   true,
     });
     return NextResponse.json({ success: true, data: banner }, { status: 201 });
   } catch {

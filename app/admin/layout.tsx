@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, Bell, RefreshCw, X } from "lucide-react";
+import { Menu, Bell, X } from "lucide-react";
 import Link from "next/link";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { useRealtimeOrders } from "@/hooks/useRealtime";
@@ -15,7 +15,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { notifications, unreadCount, markAllRead } = useRealtimeOrders({ interval: 30000 });
 
   return (
-    <div className="flex h-screen bg-neutral-100 overflow-hidden">
+    // Full screen takeover — completely independent from store layout
+    <div className="fixed inset-0 flex bg-neutral-100 z-[9999]">
+
       {/* Desktop sidebar */}
       <AdminSidebar />
 
@@ -38,23 +40,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         )}
       </AnimatePresence>
 
-      {/* Main content area */}
+      {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Top bar */}
         <header className="bg-white border-b border-neutral-200 px-4 sm:px-6 py-3.5 flex items-center justify-between flex-shrink-0">
-          {/* Hamburger (mobile) */}
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-2 rounded-md hover:bg-neutral-100 text-neutral-500"
           >
             <Menu className="w-5 h-5" />
           </button>
-
-          {/* Spacer on desktop */}
           <div className="hidden lg:block" />
 
-          {/* Right actions */}
           <div className="flex items-center gap-2">
             {/* Notification bell */}
             <div className="relative">
@@ -70,7 +68,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 )}
               </button>
 
-              {/* Notification dropdown */}
               <AnimatePresence>
                 {notifOpen && (
                   <motion.div
@@ -79,16 +76,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   >
                     <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
                       <h3 className="font-semibold text-sm text-neutral-900">
-                        Notifications{" "}
-                        {unreadCount > 0 && (
-                          <span className="text-xs text-[#d98c2a]">({unreadCount} new)</span>
-                        )}
+                        Notifications{unreadCount > 0 && <span className="text-xs text-[#d98c2a] ml-1">({unreadCount} new)</span>}
                       </h3>
                       <div className="flex items-center gap-2">
                         {unreadCount > 0 && (
-                          <button onClick={markAllRead} className="text-xs text-[#d98c2a] hover:underline">
-                            Mark all read
-                          </button>
+                          <button onClick={markAllRead} className="text-xs text-[#d98c2a] hover:underline">Mark all read</button>
                         )}
                         <button onClick={() => setNotifOpen(false)}>
                           <X className="w-4 h-4 text-neutral-400" />
@@ -98,34 +90,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <div className="max-h-72 overflow-y-auto">
                       {notifications.length === 0 ? (
                         <div className="py-8 text-center text-sm text-neutral-400">No notifications yet</div>
-                      ) : (
-                        notifications.map((n) => (
-                          <div
-                            key={n.id}
-                            className={cn(
-                              "px-4 py-3 border-b border-neutral-50 text-sm",
-                              !n.read && "bg-[#d98c2a]/5"
-                            )}
-                          >
-                            <div className="flex items-start gap-2">
-                              <div className={cn(
-                                "w-2 h-2 rounded-full mt-1.5 flex-shrink-0",
-                                !n.read ? "bg-[#d98c2a]" : "bg-neutral-300"
-                              )} />
-                              <div>
-                                <p className="text-neutral-800 font-medium">{n.message}</p>
-                                <p className="text-neutral-400 text-xs mt-0.5">
-                                  {new Date(n.createdAt).toLocaleTimeString()}
-                                </p>
-                              </div>
+                      ) : notifications.map((n) => (
+                        <div key={n.id} className={cn("px-4 py-3 border-b border-neutral-50 text-sm", !n.read && "bg-[#d98c2a]/5")}>
+                          <div className="flex items-start gap-2">
+                            <div className={cn("w-2 h-2 rounded-full mt-1.5 flex-shrink-0", !n.read ? "bg-[#d98c2a]" : "bg-neutral-300")} />
+                            <div>
+                              <p className="text-neutral-800 font-medium">{n.message}</p>
+                              <p className="text-neutral-400 text-xs mt-0.5">{new Date(n.createdAt).toLocaleTimeString()}</p>
                             </div>
                           </div>
-                        ))
-                      )}
+                        </div>
+                      ))}
                     </div>
                     <div className="px-4 py-3 border-t border-neutral-100">
-                      <Link href="/admin/orders" onClick={() => setNotifOpen(false)}
-                        className="text-xs text-[#d98c2a] hover:underline">
+                      <Link href="/admin/orders" onClick={() => setNotifOpen(false)} className="text-xs text-[#d98c2a] hover:underline">
                         View all orders →
                       </Link>
                     </div>
@@ -135,13 +113,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
 
             <Link href="/shop"
-              className="hidden sm:flex items-center gap-1 text-xs text-[#d98c2a] px-3 py-1.5 border border-[#d98c2a]/30 rounded-lg hover:bg-[#d98c2a]/5 transition-colors">
+              className="hidden sm:flex items-center text-xs text-[#d98c2a] px-3 py-1.5 border border-[#d98c2a]/30 rounded-lg hover:bg-[#d98c2a]/5 transition-colors">
               View Store →
             </Link>
           </div>
         </header>
 
-        {/* Page content — scrollable */}
+        {/* Scrollable page content */}
         <main className="flex-1 overflow-y-auto">
           {children}
         </main>
