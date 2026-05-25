@@ -28,6 +28,7 @@ function LoginPage() {
       email:    form.email,
       password: form.password,
       redirect: false,
+      callbackUrl,
     });
     setLoading(false);
 
@@ -35,6 +36,7 @@ function LoginPage() {
       toast.error("Invalid email or password.");
     } else {
       toast.success("Welcome back!");
+      router.refresh();
       router.push(callbackUrl);
     }
   };

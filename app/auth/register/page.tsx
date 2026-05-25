@@ -41,7 +41,8 @@ export default function RegisterPage() {
     try {
       await axios.post("/api/auth/register", { name: form.name, email: form.email, password: form.password });
       toast.success("Account created! Signing you in…");
-      await signIn("credentials", { email: form.email, password: form.password, redirect: false });
+      await signIn("credentials", { email: form.email, password: form.password, redirect: false, callbackUrl: "/dashboard" });
+      router.refresh();
       router.push("/dashboard");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
