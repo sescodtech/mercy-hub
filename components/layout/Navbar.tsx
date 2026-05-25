@@ -73,7 +73,7 @@ export function Navbar() {
     <>
       {/* Announcement bar */}
       <div className="bg-ebony text-cream/90 text-xs tracking-widest uppercase py-2 text-center font-body">
-        Free shipping on orders over ₦50,000 &nbsp;·&nbsp; Quality you can trust
+        Free shipping on orders over ₦150,000 &nbsp;·&nbsp; Quality you can trust
       </div>
 
       <header
