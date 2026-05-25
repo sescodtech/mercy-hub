@@ -24,19 +24,17 @@ function LoginPage() {
       return;
     }
     setLoading(true);
-    const result = await signIn("credentials", {
-      email:    form.email,
-      password: form.password,
-      redirect: false,
-      callbackUrl,
-    });
-    setLoading(false);
-
-    if (result?.error) {
+    try {
+      await signIn("credentials", {
+        email:    form.email,
+        password: form.password,
+        callbackUrl,
+      });
+      // If signIn is successful with redirect: true (default),
+      // this code will not be reached as the browser will redirect.
+    } catch (error) {
+      setLoading(false);
       toast.error("Invalid email or password.");
-    } else {
-      toast.success("Welcome back!");
-      window.location.href = callbackUrl;
     }
   };
 
