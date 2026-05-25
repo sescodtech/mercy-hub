@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { signIn } from "next-auth/react";
 import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
-export default function LoginPage() {
+function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,11 +35,11 @@ export default function LoginPage() {
       toast.error("Invalid email or password.");
     } else {
       toast.success("Welcome back!");
-      router.push("/dashboard");
+      router.push(callbackUrl);
     }
   };
 
-  const handleGoogle = () => signIn("google", { callbackUrl: "/dashboard" });
+  const handleGoogle = () => signIn("google", { callbackUrl });
 
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
@@ -142,5 +145,13 @@ export default function LoginPage() {
         </p>
       </motion.div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense>
+      <LoginPage />
+    </Suspense>
   );
 }
