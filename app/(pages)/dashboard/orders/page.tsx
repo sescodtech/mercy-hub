@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -33,7 +33,7 @@ interface Order {
   trackingNumber?: string;
 }
 
-export default function DashboardOrdersPage() {
+function OrdersContent() {
   const { data: session, status } = useSession();
   const router       = useRouter();
   const searchParams = useSearchParams();
@@ -228,5 +228,17 @@ export default function DashboardOrdersPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function DashboardOrdersPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" />
+      </div>
+    }>
+      <OrdersContent />
+    </Suspense>
   );
 }
