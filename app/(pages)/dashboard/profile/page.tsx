@@ -60,7 +60,7 @@ export default function ProfilePage() {
   // Redirect if not logged in
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/sign-in?callbackUrl=/dashboard/profile");
+      router.push("/auth/login?callbackUrl=/dashboard/profile");
     }
   }, [status, router]);
 

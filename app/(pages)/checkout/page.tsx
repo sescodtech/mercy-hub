@@ -98,7 +98,7 @@ export default function CheckoutPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push(`/sign-in?callbackUrl=/checkout`);
+      router.push(`/auth/login?callbackUrl=/checkout`);
     }
   }, [status, router]);
 
@@ -169,7 +169,7 @@ export default function CheckoutPage() {
   };
 
   const placeOrder = async () => {
-    if (!session?.user) { router.push("/sign-in?callbackUrl=/checkout"); return; }
+    if (!session?.user) { router.push("/auth/login?callbackUrl=/checkout"); return; }
     setPlacing(true);
     try {
       const { data } = await axios.post("/api/orders", {
