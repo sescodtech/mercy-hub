@@ -8,6 +8,13 @@ export const authConfig: NextAuthConfig = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+  pages: {
+    signIn:  "/auth/login",
+    signOut: "/auth/login",
+    error:   "/auth/login",
+  },
+  session: { strategy: "jwt" },
+  secret:  process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -24,11 +31,4 @@ export const authConfig: NextAuthConfig = {
       return session;
     },
   },
-  pages: {
-    signIn:  "/auth/login",
-    signOut: "/auth/login",
-    error:   "/auth/login",
-  },
-  session: { strategy: "jwt" },
-  secret:  process.env.NEXTAUTH_SECRET,
 };
