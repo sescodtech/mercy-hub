@@ -7,44 +7,51 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const { code, orderAmount } = await req.json();
 
-    if (!code) {
-      return NextResponse.json({ success: false, error: "Coupon code is required" }, { status: 400 });
+    if (!code?.trim()) {
+      return NextResponse.json({ success: false, error: "Coupon code required" }, { status: 400 });
     }
 
     const coupon = await Coupon.findOne({
-      code: code.toUpperCase().trim(),
+      code:     code.toUpperCase().trim(),
       isActive: true,
     });
 
     if (!coupon) {
-      return NextResponse.json({ success: false, error: "Invalid or expired coupon" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Invalid or expired coupon code" }, { status: 404 });
     }
 
-    const now = new Date();
-    if (coupon.startDate && now < coupon.startDate) {
-      return NextResponse.json({ success: false, error: "Coupon is not yet active" }, { status: 400 });
+    // Check expiry
+    if (coupon.endDate && new Date() > new Date(coupon.endDate)) {
+      return NextResponse.json({ success: false, error: "This coupon has expired" }, { status: 400 });
     }
-    if (coupon.endDate && now > coupon.endDate) {
-      return NextResponse.json({ success: false, error: "Coupon has expired" }, { status: 400 });
+
+    // Check start date
+    if (coupon.startDate && new Date() < new Date(coupon.startDate)) {
+      return NextResponse.json({ success: false, error: "This coupon is not yet active" }, { status: 400 });
     }
+
+    // Check usage limit
     if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
-      return NextResponse.json({ success: false, error: "Coupon usage limit reached" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "This coupon has reached its usage limit" }, { status: 400 });
     }
+
+    // Check minimum order amount
     if (coupon.minOrderAmount && orderAmount < coupon.minOrderAmount) {
       return NextResponse.json({
         success: false,
-        error: `Minimum order of ₦${coupon.minOrderAmount.toLocaleString()} required`,
+        error: `Minimum order of ${new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 0 }).format(coupon.minOrderAmount)} required for this coupon`,
       }, { status: 400 });
     }
 
+    // Calculate discount
     let discount = 0;
     if (coupon.type === "percent") {
-      discount = (orderAmount * coupon.value) / 100;
+      discount = Math.round((orderAmount * coupon.value) / 100);
       if (coupon.maxDiscountAmount) discount = Math.min(discount, coupon.maxDiscountAmount);
     } else if (coupon.type === "fixed") {
       discount = Math.min(coupon.value, orderAmount);
     } else if (coupon.type === "free_shipping") {
-      discount = 0; // handled in checkout
+      discount = 0; // handled separately in checkout
     }
 
     return NextResponse.json({
@@ -53,7 +60,8 @@ export async function POST(req: NextRequest) {
         code:     coupon.code,
         type:     coupon.type,
         value:    coupon.value,
-        discount: Math.round(discount),
+        discount,
+        isFreeShipping: coupon.type === "free_shipping",
       },
     });
   } catch (error) {
