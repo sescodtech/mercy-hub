@@ -1,17 +1,14 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
 import { User } from "@/lib/models";
-import type { NextAuthConfig } from "next-auth";
+import { authConfig } from "./auth.config";
 
-export const authConfig: NextAuthConfig = {
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
+    ...authConfig.providers,
     Credentials({
       name: "credentials",
       credentials: {
@@ -39,20 +36,7 @@ export const authConfig: NextAuthConfig = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id   = user.id;
-        token.role = (user as { role?: string }).role ?? "user";
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.id   = token.id as string;
-        session.user.role = token.role as string;
-      }
-      return session;
-    },
+    ...authConfig.callbacks,
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         await connectDB();
@@ -70,13 +54,4 @@ export const authConfig: NextAuthConfig = {
       return true;
     },
   },
-  pages: {
-    signIn:  "/auth/login",
-    signOut: "/auth/login",
-    error:   "/auth/login",
-  },
-  session: { strategy: "jwt" },
-  secret:  process.env.NEXTAUTH_SECRET,
-};
-
-export const { handlers, signIn, signOut, auth } = NextAuth(authConfig);
+});
