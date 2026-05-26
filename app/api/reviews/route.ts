@@ -100,6 +100,12 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    return NextResponse.json({ success: true, data: review }, { status: 201 });
+  } catch {
+    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
+  }
+}
+
 export async function PUT(req: NextRequest) {
   try {
     const session = await auth();
