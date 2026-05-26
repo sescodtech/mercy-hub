@@ -15,6 +15,6 @@ export default async function DashboardPage() {
     redirect("/admin");
   }
 
-  console.log("[DashboardPage] User user, redirecting to /dashboard/orders");
-  redirect("/dashboard/orders");
+  console.log("[DashboardPage] User user, redirecting to /dashboard/profile");
+  redirect("/dashboard/profile");
 }

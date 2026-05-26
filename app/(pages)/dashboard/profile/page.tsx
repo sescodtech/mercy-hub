@@ -67,7 +67,7 @@ export default function ProfilePage() {
   // Load profile
   useEffect(() => {
     if (status !== "authenticated") return;
-    axios.get("/api/user/profile")
+    axios.get("/api/users")
       .then(({ data }) => {
         if (data.success) {
           setProfile(data.data);
@@ -87,7 +87,7 @@ export default function ProfilePage() {
       fd.append("folder", "avatars");
       const { data } = await axios.post("/api/upload", fd);
       if (data.success) {
-        await axios.put("/api/user/profile", { avatar: data.url });
+        await axios.put("/api/users", { avatar: data.url });
         setProfile((p) => p ? { ...p, avatar: data.url } : p);
         await update({ avatar: data.url });
         toast.success("Avatar updated!");
@@ -100,7 +100,7 @@ export default function ProfilePage() {
     if (!name.trim()) { toast.error("Name is required"); return; }
     setSaving(true);
     try {
-      const { data } = await axios.put("/api/user/profile", { name, phone });
+      const { data } = await axios.put("/api/users", { name, phone });
       if (data.success) {
         setProfile(data.data);
         await update({ name });
@@ -116,7 +116,7 @@ export default function ProfilePage() {
     if (newPw !== confirmPw) { toast.error("Passwords don't match"); return; }
     setSaving(true);
     try {
-      const { data } = await axios.put("/api/user/profile", {
+      const { data } = await axios.put("/api/users", {
         currentPassword: currentPw,
         newPassword:     newPw,
       });
