@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
-import { WishlistClient } from "./WishlistClient";
+import WishlistClient from "./WishlistClient";
 
 export const metadata: Metadata = {
   title: "My Wishlist — Mercy Hub",
