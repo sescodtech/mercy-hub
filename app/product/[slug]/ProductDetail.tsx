@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useCartStore } from "@/hooks/useCart";
 import { useWishlistStore } from "@/hooks/useWishlist";
-import { formatPrice, calculateDiscount, cn } from "@/utils";
+import { ReviewSection } from "@/components/product/ReviewSection";
 import toast from "react-hot-toast";
 import type { IProduct, IVariant } from "@/types";
 
@@ -342,13 +342,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
               )}
 
               {activeTab === "reviews" && (
-                <div>
-                  {product.reviewCount === 0 ? (
-                    <p className="text-neutral-400 text-sm">No reviews yet. Be the first to review this product!</p>
-                  ) : (
-                    <p className="text-neutral-400 text-sm">Loading reviews…</p>
-                  )}
-                </div>
+                <ReviewSection productId={product._id} />
               )}
             </motion.div>
           </AnimatePresence>

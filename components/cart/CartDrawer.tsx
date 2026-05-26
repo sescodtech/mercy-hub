@@ -6,12 +6,11 @@ import Link from "next/link";
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight } from "lucide-react";
 import { useCartStore } from "@/hooks/useCart";
 import { formatPrice } from "@/utils";
-import { calculateShipping } from "@/utils";
 
 export function CartDrawer() {
   const { isOpen, closeCart, items, updateQuantity, removeItem, getSubtotal } = useCartStore();
   const subtotal = getSubtotal();
-  const shipping = calculateShipping(subtotal);
+  const shipping = 0;
   const freeShippingThreshold = 50000;
   const remaining = freeShippingThreshold - subtotal;
 
@@ -174,12 +173,12 @@ export function CartDrawer() {
                   <div className="flex justify-between text-neutral-600">
                     <span>Shipping</span>
                     <span className="font-medium text-neutral-900">
-                      {shipping === 0 ? "Free" : formatPrice(shipping)}
+                      Calculated at checkout
                     </span>
                   </div>
                   <div className="flex justify-between text-base font-semibold text-neutral-900 pt-2 border-t border-neutral-200">
                     <span>Total</span>
-                    <span className="font-display text-lg">{formatPrice(subtotal + shipping)}</span>
+                    <span className="font-display text-lg">{formatPrice(subtotal)}</span>
                   </div>
                 </div>
                 <Link href="/checkout" onClick={closeCart} className="btn-primary w-full justify-center group">

@@ -100,7 +100,88 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ success: true, data: review }, { status: 201 });
+export async function PUT(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ success: false, error: "Please sign in" }, { status: 401 });
+    }
+    await connectDB();
+    const body = await req.json();
+    const { reviewId, rating, title, comment } = body;
+
+    if (!reviewId) {
+      return NextResponse.json({ success: false, error: "Review ID required" }, { status: 400 });
+    }
+
+    const review = await Review.findOne({ _id: reviewId, user: session.user.id });
+    if (!review) {
+      return NextResponse.json({ success: false, error: "Review not found or unauthorized" }, { status: 404 });
+    }
+
+    if (rating !== undefined) {
+      if (rating < 1 || rating > 5) {
+        return NextResponse.json({ success: false, error: "Rating must be 1–5" }, { status: 400 });
+      }
+      review.rating = rating;
+    }
+    if (title !== undefined) review.title = title.trim();
+    if (comment !== undefined) review.comment = comment.trim();
+
+    await review.save();
+
+    // Recalculate product rating
+    const stats = await Review.aggregate([
+      { $match: { product: review.product, isApproved: true } },
+      { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } },
+    ]);
+    if (stats[0]) {
+      await Product.findByIdAndUpdate(review.product, {
+        rating:      Math.round(stats[0].avg * 10) / 10,
+        reviewCount: stats[0].count,
+      });
+    }
+
+    return NextResponse.json({ success: true, data: review });
+  } catch {
+    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ success: false, error: "Please sign in" }, { status: 401 });
+    }
+    await connectDB();
+    const { searchParams } = new URL(req.url);
+    const reviewId = searchParams.get("id");
+
+    if (!reviewId) {
+      return NextResponse.json({ success: false, error: "Review ID required" }, { status: 400 });
+    }
+
+    const review = await Review.findOneAndDelete({ _id: reviewId, user: session.user.id });
+    if (!review) {
+      return NextResponse.json({ success: false, error: "Review not found or unauthorized" }, { status: 404 });
+    }
+
+    // Recalculate product rating
+    const stats = await Review.aggregate([
+      { $match: { product: review.product, isApproved: true } },
+      { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } },
+    ]);
+    if (stats[0]) {
+      await Product.findByIdAndUpdate(review.product, {
+        rating:      Math.round(stats[0].avg * 10) / 10,
+        reviewCount: stats[0].count,
+      });
+    } else {
+      await Product.findByIdAndUpdate(review.product, { rating: 0, reviewCount: 0 });
+    }
+
+    return NextResponse.json({ success: true, message: "Review deleted" });
   } catch {
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }

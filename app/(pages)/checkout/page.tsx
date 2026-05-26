@@ -14,15 +14,8 @@ import toast from "react-hot-toast";
 import { useCartStore } from "@/hooks/useCart";
 import { formatPrice, cn } from "@/utils";
 
-type Step = "address" | "shipping" | "payment";
+type Step = "address" | "payment";
 type PaymentMethod = "paystack" | "flutterwave" | "cod";
-
-interface ShippingOption {
-  cost: number;
-  label: string;
-  estimatedDays: string;
-  isFree: boolean;
-}
 
 interface Address {
   firstName: string;
@@ -82,8 +75,6 @@ export default function CheckoutPage() {
 
   const [step,          setStep]          = useState<Step>("address");
   const [address,       setAddress]       = useState<Address>(EMPTY_ADDRESS);
-  const [shipping,      setShipping]      = useState<ShippingOption | null>(null);
-  const [loadingShip,   setLoadingShip]   = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("paystack");
   const [couponCode,    setCouponCode]    = useState("");
   const [discount,      setDiscount]      = useState(0);
@@ -92,7 +83,7 @@ export default function CheckoutPage() {
   const [placing,       setPlacing]       = useState(false);
 
   const subtotal = getSubtotal();
-  const shippingCost = shipping?.cost ?? 0;
+  const shippingCost = 0;
   const total = subtotal + shippingCost - discount;
 
   // Redirect if not authenticated
@@ -108,28 +99,6 @@ export default function CheckoutPage() {
       router.push("/cart");
     }
   }, [items, status, router]);
-
-  // Calculate shipping when state changes
-  const calculateShipping = useCallback(async (state: string) => {
-    if (!state) return;
-    setLoadingShip(true);
-    try {
-      const { data } = await axios.post("/api/shipping/calculate", {
-        state,
-        orderTotal: subtotal,
-      });
-      if (data.success) setShipping(data.data);
-    } catch {
-      // Fallback shipping
-      setShipping({ cost: 2500, label: "Standard Delivery", estimatedDays: "3-7 days", isFree: false });
-    } finally {
-      setLoadingShip(false);
-    }
-  }, [subtotal]);
-
-  useEffect(() => {
-    if (address.state) calculateShipping(address.state);
-  }, [address.state, calculateShipping]);
 
   const set = (key: keyof Address, val: string) =>
     setAddress((a) => ({ ...a, [key]: val }));
@@ -244,7 +213,6 @@ export default function CheckoutPage() {
 
   const steps: { id: Step; label: string }[] = [
     { id: "address",  label: "Delivery" },
-    { id: "shipping", label: "Shipping" },
     { id: "payment",  label: "Payment" },
   ];
 
@@ -346,10 +314,10 @@ export default function CheckoutPage() {
                     </Field>
                   </div>
                   <button
-                    onClick={() => { if (validateAddress()) setStep("shipping"); }}
+                    onClick={() => { if (validateAddress()) setStep("payment"); }}
                     className="w-full py-3.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors flex items-center justify-center gap-2"
                   >
-                    Continue to Shipping <ChevronRight className="w-4 h-4" />
+                    Continue to Payment <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
@@ -360,67 +328,20 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            {/* STEP 2: Shipping */}
-            {(step === "shipping" || step === "payment") && (
-              <div className={cn("bg-white rounded-2xl border transition-all", step === "shipping" ? "border-[#d98c2a]/30 shadow-sm" : "border-neutral-100")}>
-                <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
-                  <div className="flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-[#d98c2a]" />
-                    <h2 className="font-semibold text-neutral-900">Shipping Method</h2>
-                  </div>
-                  {step === "payment" && (
-                    <button onClick={() => setStep("shipping")} className="text-xs text-[#d98c2a] hover:underline">Edit</button>
-                  )}
+            {/* SHIPPING NOTICE */}
+            <div className="bg-white rounded-2xl border border-neutral-100 p-6 mb-6">
+              <div className="flex items-start gap-3">
+                <Truck className="w-5 h-5 text-[#d98c2a] flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-neutral-900">Shipping Information</h3>
+                  <p className="text-sm text-neutral-600 leading-relaxed mt-1">
+                    Shipping fees are calculated manually based on your location.
+                    Our admin will contact you to confirm the exact fee for
+                    <strong className="text-neutral-900"> Standard</strong> or <strong className="text-neutral-900"> Express</strong> shipping before dispatch.
+                  </p>
                 </div>
-
-                {step === "shipping" ? (
-                  <div className="p-6 space-y-4">
-                    {loadingShip ? (
-                      <div className="flex items-center gap-2 text-sm text-neutral-500">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Calculating shipping for {address.state}…
-                      </div>
-                    ) : shipping ? (
-                      <div className="p-4 border-2 border-[#d98c2a] rounded-xl bg-[#d98c2a]/5">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-neutral-900 text-sm">{shipping.label}</p>
-                            <p className="text-xs text-neutral-500 mt-0.5">Estimated {shipping.estimatedDays} business days</p>
-                          </div>
-                          <p className="font-semibold text-neutral-900">
-                            {shipping.isFree ? (
-                              <span className="text-green-600">Free</span>
-                            ) : formatPrice(shipping.cost)}
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800 flex items-start gap-2">
-                        <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                        Select a state above to calculate shipping cost.
-                      </div>
-                    )}
-
-                    <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-700">
-                      <strong>Note:</strong> Delivery fees are estimates. The admin may adjust the final delivery cost before dispatch, and you will be notified of any changes.
-                    </div>
-
-                    <button
-                      onClick={() => setStep("payment")}
-                      disabled={!shipping}
-                      className="w-full py-3.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
-                    >
-                      Continue to Payment <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="px-6 py-4 text-sm text-neutral-600 flex items-center justify-between">
-                    <span>{shipping?.label}</span>
-                    <span className="font-medium">{shipping?.isFree ? "Free" : formatPrice(shipping?.cost ?? 0)}</span>
-                  </div>
-                )}
               </div>
-            )}
+            </div>
 
             {/* STEP 3: Payment */}
             {step === "payment" && (
