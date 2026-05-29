@@ -11,6 +11,7 @@ import {
 import { useCartStore } from "@/hooks/useCart";
 import { useWishlistStore } from "@/hooks/useWishlist";
 import { ReviewSection } from "@/components/product/ReviewSection";
+import { formatPrice, calculateDiscount, cn } from "@/utils";
 import toast from "react-hot-toast";
 import type { IProduct, IVariant } from "@/types";
 
