@@ -98,7 +98,7 @@ export function BannerSection() {
                 </Link>
               </div>
             </div>
-          </motiondiv>
+          </motion.div>
 
           {/* Small banners */}
           <div className="flex flex-col gap-6">
