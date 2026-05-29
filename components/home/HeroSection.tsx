@@ -109,7 +109,7 @@ export function HeroSection() {
               <div className="h-px w-10 bg-brand-400" />
               <span className="text-xs tracking-[0.25em] uppercase text-brand-300 font-medium">
                 Featured Collection
-              </span
+              </span>
             </motion.div>
 
             {/* Heading */}
