@@ -9,26 +9,46 @@ import axios from "axios";
 import { ProductCard } from "@/components/product/ProductCard";
 
 interface IBanner {
-  _id: string;
+  _id?: string;
+  id?: number;
   title: string;
   subtitle?: string;
   image: string;
   link?: string;
   buttonText?: string;
-  position: string;
+  position?: string;
 }
 
+const HARDCODED_BANNERS: IBanner[] = [
+  {
+    id: 1,
+    title: "Kitchen Essentials",
+    subtitle: "New Arrivals",
+    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80",
+    link: "/shop?category=kitchenware&filter=new",
+    position: "secondary",
+  },
+  {
+    id: 2,
+    title: "Bath & Wellness",
+    subtitle: "Luxury Self-Care",
+    image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600&q=80",
+    link: "/shop?category=bath-body",
+    position: "secondary",
+  },
+];
+
 export function BannerSection() {
-  const [banners, setBanners] = useState<IBanner[]>([]);
+  const [banners, setBanners] = useState<IBanner[]>(HARDCODED_BANNERS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBanners = async () => {
       try {
         const { data } = await axios.get("/api/banners");
-        if (data.success) {
-          const secondaryBanners = data.data.filter((b: any) => b.position === "secondary" || b.position === "promotional");
-          setBanners(secondaryBanners);
+        if (data.success && data.data.length > 0) {
+          const apiSecondaryBanners = data.data.filter((b: any) => b.position === "secondary" || b.position === "promotional");
+          setBanners([...apiSecondaryBanners, ...HARDCODED_BANNERS]);
         }
       } catch (error) {
         console.error("Failed to fetch banners:", error);
@@ -78,13 +98,13 @@ export function BannerSection() {
                 </Link>
               </div>
             </div>
-          </motion.div>
+          </motiondiv>
 
           {/* Small banners */}
           <div className="flex flex-col gap-6">
             {otherBanners.map((b, i) => (
               <motion.div
-                key={b._id}
+                key={b._id || b.id}
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -114,8 +134,6 @@ export function BannerSection() {
 
 // ─── Best Sellers ────────────────────────────────────────────
 export function BestSellers() {
-  // In production this calls /api/products?filter=bestseller
-  // For now, renders with mock UI — replace with real data via useQuery
   return (
     <section className="py-20 bg-neutral-950">
       <div className="container-site">
