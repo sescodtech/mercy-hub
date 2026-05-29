@@ -1,13 +1,50 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Star, Quote } from "lucide-react";
+import axios from "axios";
 import { ProductCard } from "@/components/product/ProductCard";
 
-// ─── Banner Section ──────────────────────────────────────────
+interface IBanner {
+  _id: string;
+  title: string;
+  subtitle?: string;
+  image: string;
+  link?: string;
+  buttonText?: string;
+  position: string;
+}
+
 export function BannerSection() {
+  const [banners, setBanners] = useState<IBanner[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const { data } = await axios.get("/api/banners");
+        if (data.success) {
+          const secondaryBanners = data.data.filter((b: any) => b.position === "secondary" || b.position === "promotional");
+          setBanners(secondaryBanners);
+        }
+      } catch (error) {
+        console.error("Failed to fetch banners:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBanners();
+  }, []);
+
+  if (loading) return <div className="py-20 bg-cream animate-pulse" />;
+  if (banners.length === 0) return null;
+
+  const mainBanner = banners[0];
+  const otherBanners = banners.slice(1, 3);
+
   return (
     <section className="py-20 bg-cream">
       <div className="container-site">
@@ -20,47 +57,34 @@ export function BannerSection() {
             className="relative rounded-2xl overflow-hidden h-80 lg:h-auto lg:min-h-[480px] bg-neutral-800"
           >
             <Image
-              src="https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=800&q=80"
-              alt="Premium Bedding"
+              src={mainBanner.image}
+              alt={mainBanner.title}
               fill
               className="object-cover opacity-80"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-ebony/80 to-transparent flex items-center">
               <div className="p-10">
                 <span className="text-xs tracking-[0.25em] uppercase text-brand-300 font-medium block mb-3">
-                  Limited Offer
+                  Featured Offer
                 </span>
                 <h3 className="font-display text-4xl font-semibold text-white mb-3 leading-tight">
-                  Up to 40%<br />Off Bedding
+                  {mainBanner.title}
                 </h3>
                 <p className="text-white/60 text-sm mb-6 max-w-xs">
-                  Transform your bedroom into a sanctuary with our premium Egyptian cotton collection.
+                  {mainBanner.subtitle}
                 </p>
-                <Link href="/shop?category=bedding&filter=sale" className="btn-primary">
-                  Shop Sale <ArrowRight className="w-4 h-4" />
+                <Link href={mainBanner.link || "/shop"} className="btn-primary">
+                  {mainBanner.buttonText || "Shop Now"} <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
           </motion.div>
 
-          {/* Two small banners */}
+          {/* Small banners */}
           <div className="flex flex-col gap-6">
-            {[
-              {
-                title: "Kitchen Essentials",
-                subtitle: "New Arrivals",
-                image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80",
-                href: "/shop?category=kitchenware&filter=new",
-              },
-              {
-                title: "Bath & Wellness",
-                subtitle: "Luxury Self-Care",
-                image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600&q=80",
-                href: "/shop?category=bath-body",
-              },
-            ].map((b, i) => (
+            {otherBanners.map((b, i) => (
               <motion.div
-                key={b.title}
+                key={b._id}
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -70,9 +94,11 @@ export function BannerSection() {
                 <Image src={b.image} alt={b.title} fill className="object-cover opacity-70 group-hover:scale-105 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex items-center">
                   <div className="p-8">
-                    <p className="text-xs tracking-[0.2em] uppercase text-brand-300 mb-1">{b.subtitle}</p>
+                    <p className="text-xs tracking-[0.2em] uppercase text-brand-300 mb-1">
+                      Special
+                    </p>
                     <h4 className="font-display text-2xl text-white font-semibold mb-3">{b.title}</h4>
-                    <Link href={b.href} className="text-white/70 text-sm hover:text-brand-300 flex items-center gap-1 transition-colors">
+                    <Link href={b.link || "/shop"} className="text-white/70 text-sm hover:text-brand-300 flex items-center gap-1 transition-colors">
                       Shop Now <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
@@ -86,7 +112,7 @@ export function BannerSection() {
   );
 }
 
-// ─── Best Sellers (client placeholder — real data via API) ───
+// ─── Best Sellers ────────────────────────────────────────────
 export function BestSellers() {
   // In production this calls /api/products?filter=bestseller
   // For now, renders with mock UI — replace with real data via useQuery

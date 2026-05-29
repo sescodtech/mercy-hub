@@ -30,8 +30,6 @@ function LoginPage() {
         password: form.password,
         callbackUrl,
       });
-      // If signIn is successful with redirect: true (default),
-      // this code will not be reached as the browser will redirect.
     } catch (error) {
       setLoading(false);
       toast.error("Invalid email or password.");
@@ -149,7 +147,7 @@ function LoginPage() {
 
 export default function Page() {
   return (
-    <Suspense>
+    <Suspense fallback={null}>
       <LoginPage />
     </Suspense>
   );

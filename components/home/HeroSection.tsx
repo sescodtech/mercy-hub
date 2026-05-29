@@ -5,62 +5,50 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import axios from "axios";
 
-const slides = [
-  {
-    id: 1,
-    tag: "New Collection 2025",
-    heading: "Elevate Every\nCorner of Home",
-    subheading: "Premium home essentials designed for those who appreciate the art of beautiful living.",
-    cta: "Shop New Arrivals",
-    ctaHref: "/shop?filter=new",
-    secondary: "View Lookbook",
-    secondaryHref: "/about",
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1400&q=80",
-    accent: "#d98c2a",
-    position: "left",
-  },
-  {
-    id: 2,
-    tag: "Curated Bedding",
-    heading: "Sleep in\nPure Luxury",
-    subheading: "Egyptian cotton, temperature-regulating weaves and hand-finished details for your sanctuary.",
-    cta: "Explore Bedding",
-    ctaHref: "/shop?category=bedding",
-    secondary: "Learn More",
-    secondaryHref: "/about",
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1400&q=80",
-    accent: "#c47020",
-    position: "right",
-  },
-  {
-    id: 3,
-    tag: "Kitchen & Dining",
-    heading: "Cook, Serve,\nEntertain",
-    subheading: "Timeless kitchenware that turns everyday cooking into an artful experience.",
-    cta: "Shop Kitchenware",
-    ctaHref: "/shop?category=kitchenware",
-    secondary: "Gift Ideas",
-    secondaryHref: "/shop?filter=gift",
-    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1400&q=80",
-    accent: "#a3551c",
-    position: "left",
-  },
-];
+interface IBanner {
+  _id: string;
+  title: string;
+  subtitle?: string;
+  image: string;
+  link?: string;
+  buttonText?: string;
+  position: string;
+}
 
 export function HeroSection() {
+  const [slides, setSlides] = useState<IBanner[]>([]);
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    const fetchBanners = async () => {
+      try {
+        const { data } = await axios.get("/api/banners");
+        if (data.success) {
+          const heroBanners = data.data.filter((b: any) => b.position === "hero" || !b.position);
+          setSlides(heroBanners);
+        }
+      } catch (error) {
+        console.error("Failed to fetch hero banners:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBanners();
+  }, []);
+
+  useEffect(() => {
+    if (!isAutoPlaying || slides.length <= 1) return;
     const interval = setInterval(() => {
       setDirection(1);
       setCurrent((c) => (c + 1) % slides.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, [isAutoPlaying]);
+  }, [isAutoPlaying, slides.length]);
 
   const go = (idx: number) => {
     setDirection(idx > current ? 1 : -1);
@@ -69,6 +57,9 @@ export function HeroSection() {
     setTimeout(() => setIsAutoPlaying(true), 8000);
   };
 
+  if (loading) return <div className="h-[90vh] bg-neutral-900 animate-pulse" />;
+  if (slides.length === 0) return null;
+
   const slide = slides[current];
 
   return (
@@ -76,7 +67,7 @@ export function HeroSection() {
       {/* Background images */}
       <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
-          key={slide.id}
+          key={slide._id}
           custom={direction}
           initial={{ opacity: 0, scale: 1.04 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -86,7 +77,7 @@ export function HeroSection() {
         >
           <Image
             src={slide.image}
-            alt={slide.heading}
+            alt={slide.title}
             fill
             priority
             className="object-cover"
@@ -101,12 +92,12 @@ export function HeroSection() {
       <div className="relative h-full container-site flex items-center">
         <AnimatePresence mode="wait">
           <motion.div
-            key={slide.id}
+            key={slide._id}
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className={`max-w-lg ${slide.position === "right" ? "ml-auto text-right" : ""}`}
+            className="max-w-lg"
           >
             {/* Tag */}
             <motion.div
@@ -117,28 +108,25 @@ export function HeroSection() {
             >
               <div className="h-px w-10 bg-brand-400" />
               <span className="text-xs tracking-[0.25em] uppercase text-brand-300 font-medium">
-                {slide.tag}
-              </span>
+                Featured Collection
+              </span
             </motion.div>
 
             {/* Heading */}
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-white leading-[1.1] mb-5 whitespace-pre-line">
-              {slide.heading}
+              {slide.title}
             </h1>
 
             {/* Subheading */}
             <p className="text-base text-white/70 leading-relaxed mb-8 max-w-md">
-              {slide.subheading}
+              {slide.subtitle}
             </p>
 
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-4">
-              <Link href={slide.ctaHref} className="btn-primary group">
-                {slide.cta}
+              <Link href={slide.link || "/shop"} className="btn-primary group">
+                {slide.buttonText || "Shop Now"}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link href={slide.secondaryHref} className="text-white/80 text-sm font-medium hover:text-white underline-offset-4 hover:underline transition-colors">
-                {slide.secondary}
               </Link>
             </div>
           </motion.div>

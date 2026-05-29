@@ -7,10 +7,11 @@ export const metadata: Metadata = {
   description: "Browse our full collection of premium home essentials.",
 };
 
-export default function ShopPage({ searchParams }: { searchParams: Record<string, string> }) {
+export default async function ShopPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
+  const resolvedSearchParams = await searchParams;
   return (
     <Suspense fallback={<div className="container-site py-10">Loading…</div>}>
-      <ShopClient searchParams={searchParams} />
+      <ShopClient searchParams={resolvedSearchParams} />
     </Suspense>
   );
 }
