@@ -13,7 +13,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { cn } from "@/utils";
 
-type Tab = "general" | "contact" | "social" | "footer" | "shipping" | "payments" | "notifications" | "advanced";
+type Tab = "general" | "contact" | "social" | "footer" | "shipping" | "payments" | "notifications" | "advanced" | "admin-users";
 
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "general",       label: "General",       icon: Building2 },
@@ -24,6 +24,7 @@ const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "payments",      label: "Payments",       icon: CreditCard },
   { id: "notifications", label: "Notifications",  icon: Bell },
   { id: "advanced",      label: "Advanced",       icon: AlertTriangle },
+  { id: "admin-users",   label: "Admin Users",    icon: Mail },
 ];
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
@@ -79,6 +80,8 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
 
 export default function AdminSettingsPage() {
   const [tab, setTab] = useState<Tab>("general");
+  const [promoteEmail, setPromoteEmail] = useState("");
+  const [promoteLoading, setPromoteLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -492,6 +495,85 @@ export default function AdminSettingsPage() {
               }} className="flex items-center gap-2 px-4 py-2 border border-neutral-200 text-sm rounded-lg hover:bg-neutral-50 transition-colors">
                 <RefreshCw className="w-4 h-4 text-neutral-500" /> Clear Cache
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── ADMIN USERS ── */}
+        {tab === "admin-users" && (
+          <div className="space-y-5">
+            <div className="bg-white rounded-xl border border-neutral-100 p-6 space-y-5">
+              <h2 className="font-semibold text-neutral-900">Promote User to Admin</h2>
+              <p className="text-sm text-neutral-500">
+                Enter a registered customer email to grant them admin access. They must log out and back in for the change to take effect.
+              </p>
+              <div className="flex gap-3">
+                <input
+                  type="email"
+                  value={promoteEmail}
+                  onChange={(e) => setPromoteEmail(e.target.value)}
+                  placeholder="customer@example.com"
+                  className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] transition-colors"
+                />
+                <button
+                  onClick={async () => {
+                    if (!promoteEmail.trim()) return toast.error("Enter an email address");
+                    setPromoteLoading(true);
+                    try {
+                      const { data } = await axios.post("/api/admin/promote", { email: promoteEmail });
+                      if (data.success) { toast.success(data.message); setPromoteEmail(""); }
+                      else toast.error(data.error);
+                    } catch (err: any) {
+                      toast.error(err?.response?.data?.error ?? "Failed to promote user");
+                    } finally { setPromoteLoading(false); }
+                  }}
+                  disabled={promoteLoading}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[#d98c2a] text-white text-sm rounded-lg hover:bg-[#c47020] disabled:opacity-60 transition-colors font-medium flex-shrink-0"
+                >
+                  {promoteLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                  Make Admin
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-neutral-100 p-6 space-y-5">
+              <h2 className="font-semibold text-neutral-900">Demote Admin to Customer</h2>
+              <p className="text-sm text-neutral-500">
+                Revoke admin access from a user and restore them to a regular customer account.
+              </p>
+              <div className="flex gap-3">
+                <input
+                  type="email"
+                  value={promoteEmail}
+                  onChange={(e) => setPromoteEmail(e.target.value)}
+                  placeholder="admin@example.com"
+                  className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] transition-colors"
+                />
+                <button
+                  onClick={async () => {
+                    if (!promoteEmail.trim()) return toast.error("Enter an email address");
+                    setPromoteLoading(true);
+                    try {
+                      const { data } = await axios.delete("/api/admin/promote", { data: { email: promoteEmail } });
+                      if (data.success) { toast.success(data.message); setPromoteEmail(""); }
+                      else toast.error(data.error);
+                    } catch (err: any) {
+                      toast.error(err?.response?.data?.error ?? "Failed to demote user");
+                    } finally { setPromoteLoading(false); }
+                  }}
+                  disabled={promoteLoading}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 disabled:opacity-60 transition-colors font-medium flex-shrink-0"
+                >
+                  {promoteLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  Remove Admin
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-800">
+              <p className="font-semibold mb-1">Default Admin Account</p>
+              <p>Email: <span className="font-mono font-medium">admin@mercyhomeessentials.com</span></p>
+              <p className="mt-1 text-xs text-amber-700">This account was created by the seed script. Change its password from the Customers page or via the login page.</p>
             </div>
           </div>
         )}

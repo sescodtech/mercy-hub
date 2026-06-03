@@ -452,15 +452,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-neutral-600">
                   <span>Shipping</span>
-                  <span>
-                    {!shipping ? (
-                      <span className="text-neutral-400 text-xs">Calculated at next step</span>
-                    ) : shipping.isFree ? (
-                      <span className="text-green-600 font-medium">Free</span>
-                    ) : (
-                      formatPrice(shippingCost)
-                    )}
-                  </span>
+                  <span className="text-neutral-400 text-xs italic">Confirmed by admin</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-green-600">
