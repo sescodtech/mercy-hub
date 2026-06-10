@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /api
+Disallow: /auth
+Disallow: /dashboard
+
+Sitemap: https://mercyhomeessentials.com/sitemap.xml

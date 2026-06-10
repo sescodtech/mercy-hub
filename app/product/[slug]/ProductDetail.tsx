@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useCartStore } from "@/hooks/useCart";
 import { useWishlistStore } from "@/hooks/useWishlist";
+import { useSettings } from "@/hooks/useSettings";
 import { ReviewSection } from "@/components/product/ReviewSection";
 import { formatPrice, calculateDiscount, cn } from "@/utils";
 import toast from "react-hot-toast";
@@ -28,6 +29,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
   const addItem = useCartStore((s) => s.addItem);
   const { toggleItem, isWishlisted } = useWishlistStore();
+  const { settings } = useSettings();
   const wishlisted = isWishlisted(product._id);
 
   const price = selectedVariant?.price ?? product.price;
@@ -266,7 +268,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             {/* Trust badges */}
             <div className="border-t border-neutral-100 pt-6 space-y-3">
               {[
-                { Icon: Truck,       text: "Free delivery on orders over ₦50,000" },
+                { Icon: Truck,       text: settings?.shipping?.freeShippingEnabled ? `Free delivery on orders over ₦${(settings?.shipping?.freeShippingThreshold ?? 50000).toLocaleString()}` : "Shipping calculated at checkout" },
                 { Icon: RefreshCw,   text: "30-day hassle-free returns" },
                 { Icon: ShieldCheck, text: "Secure payment — Paystack & Flutterwave" },
               ].map(({ Icon, text }) => (

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, X } from "lucide-react";
 import { useCartStore } from "@/hooks/useCart";
+import { useSettings } from "@/hooks/useSettings";
 import { formatPrice, calculateShipping } from "@/utils";
 import { cn } from "@/utils";
 import axios from "axios";
@@ -15,6 +16,7 @@ import toast from "react-hot-toast";
 export default function CartPage() {
   const router = useRouter();
   const { items, removeItem, updateQuantity, getSubtotal, clearCart } = useCartStore();
+  const { settings } = useSettings();
   const subtotal = getSubtotal();
   const shipping = calculateShipping(subtotal);
   const [couponCode, setCouponCode] = useState("");
@@ -276,7 +278,9 @@ export default function CartPage() {
                 )}
                 {shipping > 0 && (
                   <p className="text-xs text-neutral-400">
-                    Free shipping on orders over ₦50,000
+                    {settings?.shipping?.freeShippingEnabled
+                      ? `Free shipping on orders over ₦${(settings?.shipping?.freeShippingThreshold ?? 50000).toLocaleString()}`
+                      : "Shipping calculated at checkout"}
                   </p>
                 )}
                 <div className="flex justify-between font-semibold text-base text-neutral-900 pt-2 border-t border-neutral-100">

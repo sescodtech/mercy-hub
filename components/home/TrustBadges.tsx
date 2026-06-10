@@ -2,15 +2,26 @@
 
 import { motion } from "framer-motion";
 import { ShieldCheck, RefreshCw, Truck, CreditCard } from "lucide-react";
-
-const badges = [
-  { Icon: Truck,       title: "Free Delivery",    desc: "On orders above ₦50,000" },
-  { Icon: RefreshCw,   title: "Easy Returns",     desc: "30-day return policy" },
-  { Icon: ShieldCheck, title: "Secure Payment",   desc: "100% protected checkout" },
-  { Icon: CreditCard,  title: "Flexible Payment", desc: "Paystack & Flutterwave" },
-];
+import { useSettings } from "@/hooks/useSettings";
 
 export function TrustBadges() {
+  const { settings } = useSettings();
+  const shippingThreshold = settings?.shipping?.freeShippingThreshold ?? 50000;
+  const shippingEnabled   = settings?.shipping?.enabled !== false;
+  const freeEnabled       = settings?.shipping?.freeShippingEnabled !== false;
+  const freeDeliveryDesc  = !shippingEnabled
+    ? "Free delivery on all orders"
+    : freeEnabled
+    ? `On orders above ₦${shippingThreshold.toLocaleString()}`
+    : "Shipping calculated at checkout";
+
+  const badges = [
+    { Icon: Truck,       title: "Free Delivery",    desc: freeDeliveryDesc },
+    { Icon: RefreshCw,   title: "Easy Returns",     desc: "30-day return policy" },
+    { Icon: ShieldCheck, title: "Secure Payment",   desc: "100% protected checkout" },
+    { Icon: CreditCard,  title: "Flexible Payment", desc: "Paystack · Card · Transfer" },
+  ];
+
   return (
     <section className="border-y border-neutral-100 bg-white">
       <div className="container-site py-8">
