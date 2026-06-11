@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Eye, EyeOff, Loader2, Save, X, Calendar } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Loader2, Save, X, Upload, ImageIcon } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import Image from "next/image";
 import { cn } from "@/utils";
 
 interface Post { _id: string; title: string; slug: string; category: string; isPublished: boolean; publishedAt: string; viewCount: number; author: string; excerpt: string; content: string; coverImage: string; tags: string[]; }
@@ -14,10 +15,12 @@ const EMPTY: Omit<Post, "_id"|"slug"|"viewCount"|"publishedAt"> = {
 };
 
 export default function AdminBlogPage() {
-  const [posts,   setPosts]   = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<Partial<Post> | null>(null);
-  const [saving,  setSaving]  = useState(false);
+  const [posts,     setPosts]     = useState<Post[]>([]);
+  const [loading,   setLoading]   = useState(true);
+  const [editing,   setEditing]   = useState<Partial<Post> | null>(null);
+  const [saving,    setSaving]    = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const fetchPosts = async () => {
     try { const { data } = await axios.get("/api/admin/blog"); setPosts(data.data || []); }
@@ -26,6 +29,26 @@ export default function AdminBlogPage() {
   };
 
   useEffect(() => { fetchPosts(); }, []);
+
+  const uploadImage = async (file: File) => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "blog");
+      const { data } = await axios.post("/api/upload", formData);
+      if (data.success) {
+        setEditing((prev) => ({ ...prev, coverImage: data.url }));
+        toast.success("Image uploaded!");
+      } else {
+        toast.error(data.error || "Upload failed");
+      }
+    } catch {
+      toast.error("Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const save = async () => {
     if (!editing?.title) { toast.error("Title is required"); return; }
@@ -67,13 +90,60 @@ export default function AdminBlogPage() {
         <button onClick={() => setEditing(null)} className="text-neutral-400 hover:text-neutral-700"><X className="w-5 h-5" /></button>
       </div>
       <div className="space-y-4 bg-white rounded-2xl border p-6">
-        {[["Title", "title", "Post title"], ["Category", "category", "General"], ["Author", "author", "Mercy Home Team"], ["Cover Image URL", "coverImage", "https://..."]].map(([label, key, ph]) => (
+
+        {/* Simple fields */}
+        {[["Title", "title", "Post title"], ["Category", "category", "General"], ["Author", "author", "Mercy Home Team"]].map(([label, key, ph]) => (
           <div key={key}>
             <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">{label}</label>
             <input value={(editing as any)[key] || ""} onChange={(e) => setEditing({ ...editing, [key]: e.target.value })} placeholder={ph}
               className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
           </div>
         ))}
+
+        {/* Cover Image with Upload */}
+        <div>
+          <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">Cover Image</label>
+
+          {/* Image preview */}
+          {editing.coverImage && (
+            <div className="relative w-full h-48 rounded-xl overflow-hidden border border-neutral-200 mb-3 bg-neutral-50">
+              <Image src={editing.coverImage} alt="Cover preview" fill className="object-cover" unoptimized />
+              <button onClick={() => setEditing({ ...editing, coverImage: "" })}
+                className="absolute top-2 right-2 p-1 bg-white rounded-full shadow text-neutral-500 hover:text-red-500">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* Upload button + URL input */}
+          <div className="flex gap-2">
+            <input
+              value={editing.coverImage || ""}
+              onChange={(e) => setEditing({ ...editing, coverImage: e.target.value })}
+              placeholder="Paste image URL or upload below"
+              className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]"
+            />
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-neutral-700 disabled:opacity-60 transition-colors whitespace-nowrap"
+            >
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              {uploading ? "Uploading…" : "Upload"}
+            </button>
+          </div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ""; }}
+          />
+          <p className="text-xs text-neutral-400 mt-1.5 flex items-center gap-1">
+            <ImageIcon className="w-3 h-3" /> Upload from your device or paste a URL. Max 5MB. JPG, PNG, WebP.
+          </p>
+        </div>
+
         <div>
           <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">Excerpt</label>
           <textarea value={editing.excerpt || ""} onChange={(e) => setEditing({ ...editing, excerpt: e.target.value })} rows={3}
