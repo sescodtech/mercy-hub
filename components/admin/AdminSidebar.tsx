@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Package, ShoppingCart, Users,
   BarChart3, Tag, Image as ImageIcon, Settings, X,
-  FileText, Briefcase,
+  FileText, Briefcase, Megaphone,
 } from "lucide-react";
 import { cn } from "@/utils";
 
@@ -17,8 +17,9 @@ export const NAV = [
   { icon: BarChart3,       label: "Analytics",  href: "/admin/analytics" },
   { icon: Tag,             label: "Coupons",    href: "/admin/coupons" },
   { icon: ImageIcon,       label: "Banners",    href: "/admin/banners" },
-  { icon: FileText,        label: "Blog",       href: "/admin/blog" },
-  { icon: Briefcase,       label: "Careers",    href: "/admin/careers" },
+  { icon: FileText,        label: "Blog",           href: "/admin/blog" },
+  { icon: Briefcase,       label: "Careers",         href: "/admin/careers" },
+  { icon: Megaphone,       label: "Announcements",   href: "/admin/announcements" },
   { icon: Settings,        label: "Settings",   href: "/admin/settings" },
 ];
 

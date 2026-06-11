@@ -9,6 +9,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useCartStore } from "@/hooks/useCart";
 import { useWishlistStore } from "@/hooks/useWishlist";
 import { useSettings } from "@/hooks/useSettings";
+import { NotificationBell } from "@/components/ui/NotificationBell";
 import { cn } from "@/utils";
 
 const navLinks = [
@@ -129,6 +130,7 @@ export function Navbar() {
                 <Heart className="w-5 h-5" />
                 {wishlistCount > 0 && <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-brand-500 text-white text-[10px] flex items-center justify-center font-medium">{wishlistCount > 9 ? "9+" : wishlistCount}</span>}
               </Link>
+              <NotificationBell />
               <button onClick={openCart} className="btn-icon relative" aria-label="Cart">
                 <ShoppingBag className="w-5 h-5" />
                 {cartCount > 0 && <motion.span key={cartCount} initial={{ scale: 1.4 }} animate={{ scale: 1 }}

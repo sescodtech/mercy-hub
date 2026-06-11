@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Toaster } from "react-hot-toast";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { AnnouncementBanners } from "@/components/ui/AnnouncementBanner";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -57,18 +58,6 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
-  icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-    ],
-    apple: "/apple-touch-icon.png",
-    other: [
-      { rel: "android-chrome-192x192", url: "/android-chrome-192x192.png" },
-      { rel: "android-chrome-512x512", url: "/android-chrome-512x512.png" },
-    ],
-  },
 };
 
 export const viewport: Viewport = {
@@ -83,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-cream antialiased">
         <Providers>
           <Navbar />
+          <AnnouncementBanners />
           <CartDrawer />
           <main className="min-h-[70vh]">{children}</main>
           <Footer />
