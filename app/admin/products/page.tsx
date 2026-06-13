@@ -4,13 +4,15 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Plus, Search, Filter, Trash2, Edit2, Eye, EyeOff,
+  Plus, Search, Trash2, Edit2, Eye, EyeOff,
   Star, Package, Upload, X, ChevronLeft, ChevronRight,
-  Loader2, ImageIcon, ArrowUpDown, Check,
+  Loader2, ImageIcon, Check, Palette,
 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { formatPrice, cn } from "@/utils";
+import { ColorVariantManager } from "@/components/admin/ColorVariantManager";
+import type { IColorVariant } from "@/types";
 
 interface Category { _id: string; name: string; slug: string }
 interface ProductImage { url: string; publicId?: string; alt?: string; isFeatured?: boolean }
@@ -20,6 +22,7 @@ interface Product {
   images: ProductImage[]; category: Category | string; stock: number;
   isActive: boolean; isFeatured: boolean; isNewArrival: boolean;
   sku?: string; rating: number; reviewCount: number; createdAt: string;
+  hasColorVariants?: boolean; colorVariants?: IColorVariant[];
 }
 
 const EMPTY = {
@@ -30,23 +33,25 @@ const EMPTY = {
   category: "", tags: "",
   images: [] as ProductImage[],
   variants: [] as Variant[],
+  colorVariants: [] as IColorVariant[],
 };
 
 export default function AdminProductsPage() {
-  const [products,    setProducts]   = useState<Product[]>([]);
-  const [categories,  setCategories] = useState<Category[]>([]);
-  const [loading,     setLoading]    = useState(true);
-  const [page,        setPage]       = useState(1);
-  const [pages,       setPages]      = useState(1);
-  const [total,       setTotal]      = useState(0);
-  const [search,      setSearch]     = useState("");
-  const [catFilter,   setCatFilter]  = useState("");
-  const [statusFilter,setStatusFilter] = useState("");
-  const [showForm,    setShowForm]   = useState(false);
-  const [editing,     setEditing]    = useState<Product | null>(null);
-  const [form,        setForm]       = useState(EMPTY);
-  const [saving,      setSaving]     = useState(false);
-  const [uploading,   setUploading]  = useState(false);
+  const [products,     setProducts]    = useState<Product[]>([]);
+  const [categories,   setCategories]  = useState<Category[]>([]);
+  const [loading,      setLoading]     = useState(true);
+  const [page,         setPage]        = useState(1);
+  const [pages,        setPages]       = useState(1);
+  const [total,        setTotal]       = useState(0);
+  const [search,       setSearch]      = useState("");
+  const [catFilter,    setCatFilter]   = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [showForm,     setShowForm]    = useState(false);
+  const [editing,      setEditing]     = useState<Product | null>(null);
+  const [form,         setForm]        = useState(EMPTY);
+  const [saving,       setSaving]      = useState(false);
+  const [uploading,    setUploading]   = useState(false);
+  const [activeFormTab, setActiveFormTab] = useState<"details" | "colors">("details");
   const fileRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout>();
 
@@ -77,7 +82,6 @@ export default function AdminProductsPage() {
     debounceRef.current = setTimeout(load, 400);
   };
 
-  // Image upload
   const uploadImages = async (files: FileList) => {
     if (form.images.length + files.length > 5) { toast.error("Maximum 5 images per product"); return; }
     setUploading(true);
@@ -110,38 +114,49 @@ export default function AdminProductsPage() {
     setForm((f) => ({ ...f, images: f.images.map((img, j) => ({ ...img, isFeatured: j === i })) }));
   };
 
-  const addVariant = () => setForm((f) => ({ ...f, variants: [...f.variants, { name: "Size", value: "", price: Number(f.price), stock: 0 }] }));
-  const removeVariant = (i: number) => setForm((f) => ({ ...f, variants: f.variants.filter((_, j) => j !== i) }));
-  const updateVariant = (i: number, key: keyof Variant, val: string | number) => {
+  const addVariant = () => setForm((f) => ({
+    ...f, variants: [...f.variants, { name: "Size", value: "", price: Number(f.price), stock: 0 }],
+  }));
+  const removeVariant  = (i: number) => setForm((f) => ({ ...f, variants: f.variants.filter((_, j) => j !== i) }));
+  const updateVariant  = (i: number, key: keyof Variant, val: string | number) => {
     setForm((f) => { const vs = [...f.variants]; vs[i] = { ...vs[i], [key]: val }; return { ...f, variants: vs }; });
   };
 
-  const openCreate = () => { setEditing(null); setForm(EMPTY); setShowForm(true); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  const openEdit   = (p: Product) => {
+  const openCreate = () => {
+    setEditing(null); setForm(EMPTY); setShowForm(true); setActiveFormTab("details");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const openEdit = (p: Product) => {
     setEditing(p);
     setForm({
       name: p.name, description: "", shortDescription: "", sku: p.sku ?? "",
       price: String(p.price), comparePrice: String(p.comparePrice ?? ""),
       weight: "", stock: String(p.stock), lowStockThreshold: "5",
       trackInventory: true, isActive: p.isActive, isFeatured: p.isFeatured,
-      isNewArrival: p.isNewArrival, category: typeof p.category === "object" ? p.category._id : p.category,
-      tags: "", images: [...p.images], variants: [],
+      isNewArrival: p.isNewArrival,
+      category: typeof p.category === "object" ? p.category._id : p.category,
+      tags: "", images: [...p.images],
+      variants: [],
+      colorVariants: p.colorVariants ?? [],
     });
-    setShowForm(true);
+    setShowForm(true); setActiveFormTab("details");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const save = async () => {
-    if (!form.name.trim() || !form.price || !form.category) { toast.error("Name, price, and category are required"); return; }
+    if (!form.name.trim() || !form.price || !form.category) {
+      toast.error("Name, price, and category are required"); return;
+    }
     setSaving(true);
     try {
       const payload = {
         ...form,
-        price:            Number(form.price),
-        comparePrice:     form.comparePrice ? Number(form.comparePrice) : undefined,
-        stock:            Number(form.stock),
+        price:             Number(form.price),
+        comparePrice:      form.comparePrice ? Number(form.comparePrice) : undefined,
+        stock:             Number(form.stock),
         lowStockThreshold: Number(form.lowStockThreshold),
-        tags:             form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        tags:              form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        hasColorVariants:  form.colorVariants.length > 0,
       };
       if (editing) {
         await axios.put(`/api/admin/products/${editing._id}`, payload);
@@ -184,7 +199,8 @@ export default function AdminProductsPage() {
             <p className="text-sm text-neutral-400">{total} total products</p>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-[#d98c2a] text-white text-sm rounded-lg hover:bg-[#c47020]">
+            <button onClick={openCreate}
+              className="flex items-center gap-2 px-4 py-2 bg-[#d98c2a] text-white text-sm rounded-lg hover:bg-[#c47020]">
               <Plus className="w-4 h-4" /> Add Product
             </button>
             <Link href="/admin" className="text-sm text-[#d98c2a]">← Dashboard</Link>
@@ -198,150 +214,230 @@ export default function AdminProductsPage() {
         {showForm && (
           <div className="bg-white rounded-xl border border-neutral-100 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-semibold text-neutral-900 text-lg">{editing ? `Edit: ${editing.name}` : "New Product"}</h2>
-              <button onClick={() => { setShowForm(false); setEditing(null); }}><X className="w-5 h-5 text-neutral-400" /></button>
+              <h2 className="font-semibold text-neutral-900 text-lg">
+                {editing ? `Edit: ${editing.name}` : "New Product"}
+              </h2>
+              <button onClick={() => { setShowForm(false); setEditing(null); }}>
+                <X className="w-5 h-5 text-neutral-400" />
+              </button>
             </div>
 
-            <div className="grid lg:grid-cols-[1fr_320px] gap-8">
-              {/* Left */}
-              <div className="space-y-5">
-                {/* Basic info */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="form-label">Product Name *</label>
-                    <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Premium Bedding Set" className="form-input w-full" />
-                  </div>
-                  <div>
-                    <label className="form-label">Short Description</label>
-                    <input value={form.shortDescription} onChange={(e) => setForm((f) => ({ ...f, shortDescription: e.target.value }))} placeholder="One-line product summary" className="form-input w-full" />
-                  </div>
-                  <div>
-                    <label className="form-label">Full Description</label>
-                    <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={4} placeholder="Detailed product description…" className="form-input w-full resize-none" />
-                  </div>
-                </div>
+            {/* Form Tabs */}
+            <div className="flex gap-1 mb-6 bg-neutral-50 rounded-xl p-1">
+              {[
+                { id: "details", label: "Product Details",   Icon: Package },
+                { id: "colors",  label: "Color Variants",    Icon: Palette },
+              ].map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveFormTab(id as "details" | "colors")}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium flex-1 justify-center transition-colors",
+                    activeFormTab === id ? "bg-white shadow text-neutral-900" : "text-neutral-500 hover:text-neutral-700"
+                  )}
+                >
+                  <Icon className="w-4 h-4" />{label}
+                  {id === "colors" && form.colorVariants.length > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 bg-[#d98c2a] text-white text-xs rounded-full">
+                      {form.colorVariants.length}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
 
-                {/* Images */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="form-label mb-0">Images (max 5)</label>
-                    <button onClick={() => fileRef.current?.click()} disabled={uploading || form.images.length >= 5}
-                      className="flex items-center gap-1.5 text-xs text-[#d98c2a] disabled:opacity-40">
-                      {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-                      Upload
-                    </button>
+            {activeFormTab === "details" && (
+              <div className="grid lg:grid-cols-[1fr_320px] gap-8">
+                {/* Left */}
+                <div className="space-y-5">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="form-label">Product Name *</label>
+                      <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                        placeholder="Premium Bedding Set" className="form-input w-full" />
+                    </div>
+                    <div>
+                      <label className="form-label">Short Description</label>
+                      <input value={form.shortDescription}
+                        onChange={(e) => setForm((f) => ({ ...f, shortDescription: e.target.value }))}
+                        placeholder="One-line product summary" className="form-input w-full" />
+                    </div>
+                    <div>
+                      <label className="form-label">Full Description</label>
+                      <textarea value={form.description}
+                        onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                        rows={4} placeholder="Detailed product description…"
+                        className="form-input w-full resize-none" />
+                    </div>
                   </div>
-                  <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
-                    onChange={(e) => e.target.files && uploadImages(e.target.files)} />
-                  <div className="grid grid-cols-5 gap-2">
-                    {form.images.map((img, i) => (
-                      <div key={i} className={cn("relative aspect-square rounded-lg overflow-hidden border-2 cursor-pointer", img.isFeatured ? "border-[#d98c2a]" : "border-neutral-200")}>
-                        <Image src={img.url} alt={`Product ${i + 1}`} fill className="object-cover" sizes="80px" />
-                        <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-colors flex items-end justify-center gap-1 pb-1 opacity-0 hover:opacity-100">
-                          <button onClick={() => setFeatured(i)} title="Set as featured"
-                            className="p-1 bg-[#d98c2a] rounded text-white"><Star className="w-3 h-3" /></button>
-                          <button onClick={() => removeImage(i)} className="p-1 bg-red-500 rounded text-white"><X className="w-3 h-3" /></button>
+
+                  {/* Images */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="form-label mb-0">Images (max 5)</label>
+                      <button onClick={() => fileRef.current?.click()} disabled={uploading || form.images.length >= 5}
+                        className="flex items-center gap-1.5 text-xs text-[#d98c2a] disabled:opacity-40">
+                        {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                        Upload
+                      </button>
+                    </div>
+                    <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
+                      onChange={(e) => e.target.files && uploadImages(e.target.files)} />
+                    <div className="grid grid-cols-5 gap-2">
+                      {form.images.map((img, i) => (
+                        <div key={i} className={cn("relative aspect-square rounded-lg overflow-hidden border-2 cursor-pointer",
+                          img.isFeatured ? "border-[#d98c2a]" : "border-neutral-200")}>
+                          <Image src={img.url} alt={`Product ${i + 1}`} fill className="object-cover" sizes="80px" />
+                          <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-colors flex items-end justify-center gap-1 pb-1 opacity-0 hover:opacity-100">
+                            <button onClick={() => setFeatured(i)} title="Set as featured"
+                              className="p-1 bg-[#d98c2a] rounded text-white"><Star className="w-3 h-3" /></button>
+                            <button onClick={() => removeImage(i)} className="p-1 bg-red-500 rounded text-white">
+                              <X className="w-3 h-3" /></button>
+                          </div>
+                          {img.isFeatured && (
+                            <div className="absolute top-1 left-1 bg-[#d98c2a] rounded px-1 text-[9px] text-white font-bold">MAIN</div>
+                          )}
                         </div>
-                        {img.isFeatured && (
-                          <div className="absolute top-1 left-1 bg-[#d98c2a] rounded px-1 text-[9px] text-white font-bold">MAIN</div>
-                        )}
+                      ))}
+                      {form.images.length < 5 && (
+                        <button onClick={() => fileRef.current?.click()} disabled={uploading}
+                          className="aspect-square rounded-lg border-2 border-dashed border-neutral-200 flex items-center justify-center text-neutral-300 hover:border-[#d98c2a] hover:text-[#d98c2a] transition-colors">
+                          {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Generic Variants */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="form-label mb-0">Size/Other Variants (optional)</label>
+                      <button onClick={addVariant} className="text-xs text-[#d98c2a] flex items-center gap-1">
+                        <Plus className="w-3 h-3" />Add variant
+                      </button>
+                    </div>
+                    {form.variants.map((v, i) => (
+                      <div key={i} className="flex gap-2 mb-2 items-center">
+                        <input value={v.name}  onChange={(e) => updateVariant(i, "name",  e.target.value)}
+                          placeholder="Name (e.g. Size)" className="form-input flex-1 text-xs" />
+                        <input value={v.value} onChange={(e) => updateVariant(i, "value", e.target.value)}
+                          placeholder="Value (e.g. Large)" className="form-input flex-1 text-xs" />
+                        <input value={v.price} onChange={(e) => updateVariant(i, "price", Number(e.target.value))}
+                          type="number" placeholder="Price" className="form-input w-24 text-xs" />
+                        <input value={v.stock} onChange={(e) => updateVariant(i, "stock", Number(e.target.value))}
+                          type="number" placeholder="Stock" className="form-input w-20 text-xs" />
+                        <button onClick={() => removeVariant(i)} className="text-red-400 hover:text-red-600">
+                          <X className="w-4 h-4" /></button>
                       </div>
                     ))}
-                    {form.images.length < 5 && (
-                      <button onClick={() => fileRef.current?.click()} disabled={uploading}
-                        className="aspect-square rounded-lg border-2 border-dashed border-neutral-200 flex items-center justify-center text-neutral-300 hover:border-[#d98c2a] hover:text-[#d98c2a] transition-colors">
-                        {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
-                      </button>
-                    )}
                   </div>
-                  <p className="text-xs text-neutral-400 mt-1">Click ★ to set main image. First image is default.</p>
                 </div>
 
-                {/* Variants */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="form-label mb-0">Variants (optional)</label>
-                    <button onClick={addVariant} className="text-xs text-[#d98c2a] flex items-center gap-1"><Plus className="w-3 h-3" />Add variant</button>
-                  </div>
-                  {form.variants.map((v, i) => (
-                    <div key={i} className="flex gap-2 mb-2 items-center">
-                      <input value={v.name}  onChange={(e) => updateVariant(i, "name",  e.target.value)} placeholder="Name (e.g. Size)" className="form-input flex-1 text-xs" />
-                      <input value={v.value} onChange={(e) => updateVariant(i, "value", e.target.value)} placeholder="Value (e.g. Large)" className="form-input flex-1 text-xs" />
-                      <input value={v.price} onChange={(e) => updateVariant(i, "price", Number(e.target.value))} type="number" placeholder="Price" className="form-input w-24 text-xs" />
-                      <input value={v.stock} onChange={(e) => updateVariant(i, "stock", Number(e.target.value))} type="number" placeholder="Stock" className="form-input w-20 text-xs" />
-                      <button onClick={() => removeVariant(i)} className="text-red-400 hover:text-red-600"><X className="w-4 h-4" /></button>
+                {/* Right sidebar */}
+                <div className="space-y-4">
+                  <div className="bg-neutral-50 rounded-xl p-4 space-y-3">
+                    <h3 className="text-sm font-semibold text-neutral-700">Pricing</h3>
+                    <div>
+                      <label className="form-label">Price (₦) *</label>
+                      <input type="number" value={form.price}
+                        onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                        placeholder="0" className="form-input w-full" />
                     </div>
-                  ))}
+                    <div>
+                      <label className="form-label">Compare Price (₦)</label>
+                      <input type="number" value={form.comparePrice}
+                        onChange={(e) => setForm((f) => ({ ...f, comparePrice: e.target.value }))}
+                        placeholder="Strikethrough price" className="form-input w-full" />
+                    </div>
+                  </div>
+
+                  <div className="bg-neutral-50 rounded-xl p-4 space-y-3">
+                    <h3 className="text-sm font-semibold text-neutral-700">Inventory</h3>
+                    <div>
+                      <label className="form-label">SKU</label>
+                      <input value={form.sku} onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
+                        placeholder="MHE-001" className="form-input w-full font-mono" />
+                    </div>
+                    <div>
+                      <label className="form-label">Base Stock Quantity</label>
+                      <input type="number" value={form.stock}
+                        onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
+                        placeholder="0" className="form-input w-full" />
+                    </div>
+                    <div>
+                      <label className="form-label">Low Stock Alert At</label>
+                      <input type="number" value={form.lowStockThreshold}
+                        onChange={(e) => setForm((f) => ({ ...f, lowStockThreshold: e.target.value }))}
+                        className="form-input w-full" />
+                    </div>
+                  </div>
+
+                  <div className="bg-neutral-50 rounded-xl p-4 space-y-3">
+                    <h3 className="text-sm font-semibold text-neutral-700">Organisation</h3>
+                    <div>
+                      <label className="form-label">Category *</label>
+                      <select value={form.category}
+                        onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                        className="form-input w-full">
+                        <option value="">Select category…</option>
+                        {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="form-label">Tags (comma-separated)</label>
+                      <input value={form.tags} onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
+                        placeholder="bedroom, luxury, gift" className="form-input w-full" />
+                    </div>
+                  </div>
+
+                  <div className="bg-neutral-50 rounded-xl p-4 space-y-3">
+                    <h3 className="text-sm font-semibold text-neutral-700">Status</h3>
+                    {[
+                      { key: "isActive",      label: "Published (visible in shop)" },
+                      { key: "isFeatured",    label: "Featured product" },
+                      { key: "isNewArrival",  label: "New arrival badge" },
+                      { key: "trackInventory",label: "Track inventory" },
+                    ].map(({ key, label }) => (
+                      <label key={key} className="flex items-center gap-2.5 cursor-pointer">
+                        <div
+                          className={cn("w-4 h-4 rounded border-2 flex items-center justify-center transition-colors",
+                            (form as any)[key] ? "bg-[#d98c2a] border-[#d98c2a]" : "border-neutral-300")}
+                          onClick={() => setForm((f) => ({ ...f, [key]: !(f as any)[key] }))}
+                        >
+                          {(form as any)[key] && <Check className="w-2.5 h-2.5 text-white" />}
+                        </div>
+                        <span className="text-sm text-neutral-700">{label}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <button onClick={save} disabled={saving}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60">
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                    {saving ? "Saving…" : editing ? "Update Product" : "Create Product"}
+                  </button>
                 </div>
               </div>
+            )}
 
-              {/* Right sidebar */}
-              <div className="space-y-4">
-                {/* Pricing */}
-                <div className="bg-neutral-50 rounded-xl p-4 space-y-3">
-                  <h3 className="text-sm font-semibold text-neutral-700">Pricing</h3>
-                  <div>
-                    <label className="form-label">Price (₦) *</label>
-                    <input type="number" value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} placeholder="0" className="form-input w-full" />
-                  </div>
-                  <div>
-                    <label className="form-label">Compare Price (₦)</label>
-                    <input type="number" value={form.comparePrice} onChange={(e) => setForm((f) => ({ ...f, comparePrice: e.target.value }))} placeholder="Strikethrough price" className="form-input w-full" />
-                  </div>
+            {/* Color Variants Tab */}
+            {activeFormTab === "colors" && (
+              <div className="max-w-2xl space-y-4">
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                  <p className="text-sm text-amber-800 font-medium">
+                    Color variants let customers choose product colors with per-color images and stock levels.
+                  </p>
+                  <p className="text-xs text-amber-700 mt-1">
+                    Add colors, upload images per color, and set individual stock quantities.
+                    Leave "Price Override" blank to use the base product price.
+                  </p>
                 </div>
 
-                {/* Inventory */}
-                <div className="bg-neutral-50 rounded-xl p-4 space-y-3">
-                  <h3 className="text-sm font-semibold text-neutral-700">Inventory</h3>
-                  <div>
-                    <label className="form-label">SKU</label>
-                    <input value={form.sku} onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))} placeholder="MHE-001" className="form-input w-full font-mono" />
-                  </div>
-                  <div>
-                    <label className="form-label">Stock Quantity</label>
-                    <input type="number" value={form.stock} onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))} placeholder="0" className="form-input w-full" />
-                  </div>
-                  <div>
-                    <label className="form-label">Low Stock Alert At</label>
-                    <input type="number" value={form.lowStockThreshold} onChange={(e) => setForm((f) => ({ ...f, lowStockThreshold: e.target.value }))} className="form-input w-full" />
-                  </div>
-                </div>
-
-                {/* Organisation */}
-                <div className="bg-neutral-50 rounded-xl p-4 space-y-3">
-                  <h3 className="text-sm font-semibold text-neutral-700">Organisation</h3>
-                  <div>
-                    <label className="form-label">Category *</label>
-                    <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} className="form-input w-full">
-                      <option value="">Select category…</option>
-                      {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="form-label">Tags (comma-separated)</label>
-                    <input value={form.tags} onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))} placeholder="bedroom, luxury, gift" className="form-input w-full" />
-                  </div>
-                </div>
-
-                {/* Status */}
-                <div className="bg-neutral-50 rounded-xl p-4 space-y-3">
-                  <h3 className="text-sm font-semibold text-neutral-700">Status</h3>
-                  {[
-                    { key: "isActive",     label: "Published (visible in shop)" },
-                    { key: "isFeatured",   label: "Featured product" },
-                    { key: "isNewArrival", label: "New arrival badge" },
-                    { key: "trackInventory", label: "Track inventory" },
-                  ].map(({ key, label }) => (
-                    <label key={key} className="flex items-center gap-2.5 cursor-pointer">
-                      <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center transition-colors",
-                        (form as Record<string, unknown>)[key] ? "bg-[#d98c2a] border-[#d98c2a]" : "border-neutral-300")}
-                        onClick={() => setForm((f) => ({ ...f, [key]: !(f as Record<string, unknown>)[key] }))}>
-                        {(form as Record<string, unknown>)[key] && <Check className="w-2.5 h-2.5 text-white" />}
-                      </div>
-                      <span className="text-sm text-neutral-700">{label}</span>
-                    </label>
-                  ))}
-                </div>
+                <ColorVariantManager
+                  productId={editing?._id ?? "new"}
+                  variants={form.colorVariants}
+                  onChange={(variants) => setForm((f) => ({ ...f, colorVariants: variants }))}
+                />
 
                 <button onClick={save} disabled={saving}
                   className="w-full flex items-center justify-center gap-2 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60">
@@ -349,7 +445,7 @@ export default function AdminProductsPage() {
                   {saving ? "Saving…" : editing ? "Update Product" : "Create Product"}
                 </button>
               </div>
-            </div>
+            )}
           </div>
         )}
 
@@ -380,7 +476,7 @@ export default function AdminProductsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-neutral-100 bg-neutral-50">
-                  {["Product", "Category", "Price", "Stock", "Status", "Actions"].map((h) => (
+                  {["Product", "Category", "Price", "Stock", "Colors", "Status", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3.5 text-xs font-medium text-neutral-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -388,13 +484,19 @@ export default function AdminProductsPage() {
               <tbody className="divide-y divide-neutral-50">
                 {loading ? (
                   [...Array(5)].map((_, i) => (
-                    <tr key={i}>{[...Array(6)].map((_, j) => <td key={j} className="px-4 py-4"><div className="h-4 bg-neutral-100 rounded animate-pulse" /></td>)}</tr>
+                    <tr key={i}>{[...Array(7)].map((_, j) => (
+                      <td key={j} className="px-4 py-4">
+                        <div className="h-4 bg-neutral-100 rounded animate-pulse" />
+                      </td>
+                    ))}</tr>
                   ))
                 ) : products.length === 0 ? (
-                  <tr><td colSpan={6} className="px-4 py-14 text-center">
+                  <tr><td colSpan={7} className="px-4 py-14 text-center">
                     <Package className="w-10 h-10 text-neutral-200 mx-auto mb-3" />
                     <p className="text-neutral-400">No products found.</p>
-                    <button onClick={openCreate} className="mt-3 text-sm text-[#d98c2a] hover:underline">Add your first product</button>
+                    <button onClick={openCreate} className="mt-3 text-sm text-[#d98c2a] hover:underline">
+                      Add your first product
+                    </button>
                   </td></tr>
                 ) : products.map((p) => {
                   const img = p.images?.[0]?.url;
@@ -404,7 +506,9 @@ export default function AdminProductsPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0">
-                            {img ? <Image src={img} alt={p.name} width={40} height={40} className="object-cover w-full h-full" /> : <Package className="w-5 h-5 text-neutral-300 m-auto mt-2.5" />}
+                            {img
+                              ? <Image src={img} alt={p.name} width={40} height={40} className="object-cover w-full h-full" />
+                              : <Package className="w-5 h-5 text-neutral-300 m-auto mt-2.5" />}
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-neutral-900 truncate max-w-[180px]">{p.name}</p>
@@ -418,9 +522,27 @@ export default function AdminProductsPage() {
                         {p.comparePrice && <p className="text-xs text-neutral-400 line-through">{formatPrice(p.comparePrice)}</p>}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={cn("text-sm font-medium", p.stock === 0 ? "text-red-500" : p.stock <= 5 ? "text-orange-500" : "text-neutral-700")}>
+                        <span className={cn("text-sm font-medium",
+                          p.stock === 0 ? "text-red-500" : p.stock <= 5 ? "text-orange-500" : "text-neutral-700")}>
                           {p.stock}
                         </span>
+                      </td>
+                      {/* Color dots */}
+                      <td className="px-4 py-3">
+                        {p.hasColorVariants && p.colorVariants && p.colorVariants.length > 0 ? (
+                          <div className="flex gap-1 flex-wrap">
+                            {p.colorVariants.slice(0, 5).map((cv, ci) => (
+                              <div key={ci} title={cv.label}
+                                className="w-4 h-4 rounded-full border border-white shadow-sm"
+                                style={{ backgroundColor: cv.colorHex }} />
+                            ))}
+                            {p.colorVariants.length > 5 && (
+                              <span className="text-xs text-neutral-400">+{p.colorVariants.length - 5}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-neutral-300">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-col gap-1">
@@ -429,19 +551,26 @@ export default function AdminProductsPage() {
                             <span className={cn("w-1.5 h-1.5 rounded-full", p.isActive ? "bg-green-500" : "bg-neutral-400")} />
                             {p.isActive ? "Active" : "Hidden"}
                           </span>
-                          {p.isFeatured && <span className="text-[10px] text-[#d98c2a] font-medium flex items-center gap-0.5"><Star className="w-2.5 h-2.5" />Featured</span>}
+                          {p.isFeatured && (
+                            <span className="text-[10px] text-[#d98c2a] font-medium flex items-center gap-0.5">
+                              <Star className="w-2.5 h-2.5" />Featured
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
-                          <button onClick={() => toggleActive(p._id, p.isActive)} title={p.isActive ? "Hide product" : "Publish product"}
+                          <button onClick={() => toggleActive(p._id, p.isActive)}
+                            title={p.isActive ? "Hide product" : "Publish product"}
                             className="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-700">
                             {p.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
-                          <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-[#d98c2a]">
+                          <button onClick={() => openEdit(p)}
+                            className="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-[#d98c2a]">
                             <Edit2 className="w-4 h-4" />
                           </button>
-                          <button onClick={() => del(p._id, p.name)} className="p-1.5 rounded-lg hover:bg-red-50 text-neutral-400 hover:text-red-500">
+                          <button onClick={() => del(p._id, p.name)}
+                            className="p-1.5 rounded-lg hover:bg-red-50 text-neutral-400 hover:text-red-500">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -453,7 +582,6 @@ export default function AdminProductsPage() {
             </table>
           </div>
 
-          {/* Pagination */}
           {pages > 1 && (
             <div className="flex items-center justify-between px-4 py-4 border-t border-neutral-100">
               <p className="text-xs text-neutral-400">Page {page} of {pages}</p>

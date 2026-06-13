@@ -1,0 +1,59 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "regions": ["iad1"],
+  "images": {
+    "domains": ["res.cloudinary.com", "images.unsplash.com", "plus.unsplash.com"],
+    "formats": ["image/avif", "image/webp"],
+    "minimumCacheTTL": 86400,
+    "deviceSizes": [640, 750, 828, 1080, 1200, 1920],
+    "imageSizes": [16, 32, 48, 64, 96, 128, 256]
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options",            "value": "nosniff" },
+        { "key": "X-Frame-Options",                   "value": "SAMEORIGIN" },
+        { "key": "X-XSS-Protection",                  "value": "1; mode=block" },
+        { "key": "Referrer-Policy",                   "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy",                "value": "camera=(), microphone=(), geolocation=()" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" }
+  ],
+  "redirects": [
+    {
+      "source": "/sign-in",
+      "destination": "/auth/login",
+      "permanent": true
+    }
+  ],
+  "functions": {
+    "app/api/admin/analytics/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/payments/paystack/initialize/route.ts": {
+      "maxDuration": 15
+    },
+    "app/api/payments/flutterwave/initialize/route.ts": {
+      "maxDuration": 15
+    }
+  }
+}

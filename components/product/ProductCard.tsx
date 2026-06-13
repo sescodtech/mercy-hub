@@ -17,18 +17,19 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
-  const [imgIdx, setImgIdx] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
+  const [imgIdx,     setImgIdx]     = useState(0);
+  const [isHovered,  setIsHovered]  = useState(false);
 
   const addItem = useCartStore((s) => s.addItem);
   const { toggleItem, isWishlisted } = useWishlistStore();
   const wishlisted = isWishlisted(product._id);
 
-  const discount = calculateDiscount(product.price, product.comparePrice);
-  const primaryImage = product.images?.[imgIdx]?.url;
+  const discount       = calculateDiscount(product.price, product.comparePrice);
+  const primaryImage   = product.images?.[imgIdx]?.url;
   const secondaryImage = product.images?.[1]?.url;
-  const inStock = !product.trackInventory || product.stock > 0;
-  const isLowStock = product.trackInventory && product.stock > 0 && product.stock <= product.lowStockThreshold;
+  const inStock        = !product.trackInventory || product.stock > 0;
+  const isLowStock     = product.trackInventory && product.stock > 0 && product.stock <= product.lowStockThreshold;
+  const isOnSale       = discount > 0 && product.comparePrice;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -61,14 +62,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Image container */}
-        <div className="relative overflow-hidden rounded-lg bg-neutral-100 aspect-[4/5] mb-4">
+        <div className="relative overflow-hidden rounded-lg bg-neutral-100 aspect-[4/5] mb-3">
           {/* Badges */}
           <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
             {product.isNewArrival && <span className="badge-new">New</span>}
-            {discount > 0 && <span className="badge-sale">-{discount}%</span>}
+            {discount > 0   && <span className="badge-sale">-{discount}%</span>}
             {product.isBestSeller && <span className="badge-trending">Best Seller</span>}
-            {!inStock && <span className="badge-oos">Out of Stock</span>}
-            {isLowStock && <span className="badge badge-sale">Only {product.stock} left</span>}
+            {!inStock        && <span className="badge-oos">Out of Stock</span>}
+            {isLowStock      && <span className="badge-sale">Only {product.stock} left</span>}
           </div>
 
           {/* Action buttons */}
@@ -146,7 +147,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           >
             <button
               onClick={handleAddToCart}
-              className="w-full flex items-center justify-center gap-2 py-3.5 text-cream text-sm font-medium tracking-wide hover:bg-brand-700 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3.5 text-cream text-sm font-semibold tracking-wide hover:bg-brand-700 transition-colors"
+              style={{ fontFamily: "var(--font-body)", letterSpacing: "0.04em" }}
             >
               <ShoppingBag className="w-4 h-4" />
               Add to Cart
@@ -154,20 +156,26 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </motion.div>
         </div>
 
-        {/* Info */}
-        <div className="px-1">
-          <p className="text-xs text-neutral-400 mb-1 uppercase tracking-wide">
+        {/* ── Product info ── */}
+        <div className="px-0.5 space-y-1.5">
+
+          {/* Category label */}
+          <p className="product-category-label">
             {typeof product.category === "object" ? product.category?.name : ""}
           </p>
-          <h3 className="font-medium text-neutral-900 text-sm leading-snug line-clamp-2 group-hover:text-brand-600 transition-colors mb-2">
+
+          {/* Product name */}
+          <h3 className={cn(
+            "product-name line-clamp-2 group-hover:text-brand-600 transition-colors",
+          )}>
             {product.name}
           </h3>
 
           {/* Rating */}
           {product.reviewCount > 0 && (
-            <div className="flex items-center gap-1.5 mb-2">
+            <div className="flex items-center gap-1.5">
               <div className="flex">
-                {[1,2,3,4,5].map((i) => (
+                {[1, 2, 3, 4, 5].map((i) => (
                   <Star
                     key={i}
                     className={cn(
@@ -179,17 +187,24 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   />
                 ))}
               </div>
-              <span className="text-xs text-neutral-400">({product.reviewCount})</span>
+              <span className="text-xs text-neutral-400" style={{ fontFamily: "var(--font-body)" }}>
+                ({product.reviewCount})
+              </span>
             </div>
           )}
 
-          {/* Price */}
-          <div className="flex items-center gap-2">
-            <span className="price-current">{formatPrice(product.price)}</span>
+          {/* Price row */}
+          <div className="flex items-baseline gap-2 pt-0.5">
+            <span className={isOnSale ? "price-sale" : "price-current"}>
+              {formatPrice(product.price)}
+            </span>
             {product.comparePrice && product.comparePrice > product.price && (
-              <span className="price-original">{formatPrice(product.comparePrice)}</span>
+              <span className="price-original">
+                {formatPrice(product.comparePrice)}
+              </span>
             )}
           </div>
+
         </div>
       </Link>
     </motion.div>

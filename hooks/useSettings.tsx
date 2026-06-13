@@ -1,37 +1,41 @@
-"use client";
+import { useEffect, useState } from "react";
+import type { ISiteSettings } from "@/types";
 
-import { useState, useEffect, useCallback, createContext, useContext } from "react";
-import axios from "axios";
-import type { ISettings } from "@/lib/models/Settings";
-
-interface SettingsContext {
-  settings: Partial<ISettings> | null;
-  loading: boolean;
-  refresh: () => void;
-}
-
-const Ctx = createContext<SettingsContext>({ settings: null, loading: true, refresh: () => {} });
-
-export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<Partial<ISettings> | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const fetch = useCallback(async () => {
-    try {
-      const { data } = await axios.get("/api/settings");
-      if (data.success) setSettings(data.data);
-    } catch {
-      // silent
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { fetch(); }, [fetch]);
-
-  return <Ctx.Provider value={{ settings, loading, refresh: fetch }}>{children}</Ctx.Provider>;
-}
+let cache: ISiteSettings | null = null;
+let cacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 min client-side cache
 
 export function useSettings() {
-  return useContext(Ctx);
+  const [settings, setSettings] = useState<ISiteSettings | null>(cache);
+  const [loading,  setLoading]  = useState(!cache);
+  const [error,    setError]    = useState<string | null>(null);
+
+  useEffect(() => {
+    // Use cache if fresh
+    if (cache && Date.now() - cacheTime < CACHE_TTL) {
+      setSettings(cache);
+      setLoading(false);
+      return;
+    }
+
+    (async () => {
+      try {
+        const res = await fetch("/api/settings", { next: { revalidate: 300 } });
+        const json = await res.json();
+        if (json.success) {
+          cache = json.data;
+          cacheTime = Date.now();
+          setSettings(json.data);
+        } else {
+          setError("Failed to load settings");
+        }
+      } catch (e) {
+        setError("Network error");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  return { settings, loading, error };
 }

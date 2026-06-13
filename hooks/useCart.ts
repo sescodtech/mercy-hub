@@ -1,24 +1,29 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import type { IProduct, IVariant, ICartItem } from "@/types";
+import { persist } from "zustand/middleware";
+import type { IProduct, IVariant, IColorVariant } from "@/types";
+
+export interface CartItem {
+  product: IProduct;
+  variant?: IVariant;
+  colorVariant?: IColorVariant;
+  quantity: number;
+}
 
 interface CartStore {
-  items: ICartItem[];
+  items: CartItem[];
   isOpen: boolean;
-
-  // Actions
-  addItem: (product: IProduct, quantity?: number, variant?: IVariant) => void;
-  removeItem: (productId: string, variantValue?: string) => void;
-  updateQuantity: (productId: string, quantity: number, variantValue?: string) => void;
-  clearCart: () => void;
   openCart: () => void;
   closeCart: () => void;
-  toggleCart: () => void;
-
-  // Computed
+  addItem: (product: IProduct, quantity?: number, variant?: IVariant, colorVariant?: IColorVariant) => void;
+  removeItem: (productId: string, variantId?: string, colorVariantId?: string) => void;
+  updateQuantity: (productId: string, quantity: number, variantId?: string, colorVariantId?: string) => void;
+  clearCart: () => void;
   getItemCount: () => number;
   getSubtotal: () => number;
-  getItem: (productId: string, variantValue?: string) => ICartItem | undefined;
+}
+
+function itemKey(productId: string, variantId?: string, colorVariantId?: string) {
+  return `${productId}:${variantId ?? ""}:${colorVariantId ?? ""}`;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -27,81 +32,71 @@ export const useCartStore = create<CartStore>()(
       items: [],
       isOpen: false,
 
-      addItem: (product, quantity = 1, variant) => {
-        set((state) => {
-          const key = variant ? `${product._id}-${variant.value}` : product._id;
-          const existing = state.items.find((i) => {
-            const iKey = i.variant ? `${i.product._id}-${i.variant.value}` : i.product._id;
-            return iKey === key;
-          });
+      openCart:  () => set({ isOpen: true }),
+      closeCart: () => set({ isOpen: false }),
 
+      addItem: (product, quantity = 1, variant, colorVariant) => {
+        set((state) => {
+          const key = itemKey(product._id, variant?._id, colorVariant?._id);
+          const existing = state.items.find(
+            (i) =>
+              itemKey(i.product._id, i.variant?._id, i.colorVariant?._id) === key
+          );
           if (existing) {
             return {
-              items: state.items.map((i) => {
-                const iKey = i.variant ? `${i.product._id}-${i.variant.value}` : i.product._id;
-                if (iKey === key) {
-                  return { ...i, quantity: i.quantity + quantity };
-                }
-                return i;
-              }),
+              items: state.items.map((i) =>
+                itemKey(i.product._id, i.variant?._id, i.colorVariant?._id) === key
+                  ? { ...i, quantity: i.quantity + quantity }
+                  : i
+              ),
+              isOpen: true,
             };
           }
-
-          return { items: [...state.items, { product, variant, quantity }] };
+          return {
+            items: [...state.items, { product, variant, colorVariant, quantity }],
+            isOpen: true,
+          };
         });
       },
 
-      removeItem: (productId, variantValue) => {
+      removeItem: (productId, variantId, colorVariantId) => {
+        const key = itemKey(productId, variantId, colorVariantId);
         set((state) => ({
-          items: state.items.filter((i) => {
-            if (variantValue) {
-              return !(i.product._id === productId && i.variant?.value === variantValue);
-            }
-            return i.product._id !== productId;
-          }),
+          items: state.items.filter(
+            (i) => itemKey(i.product._id, i.variant?._id, i.colorVariant?._id) !== key
+          ),
         }));
       },
 
-      updateQuantity: (productId, quantity, variantValue) => {
+      updateQuantity: (productId, quantity, variantId, colorVariantId) => {
+        const key = itemKey(productId, variantId, colorVariantId);
         if (quantity <= 0) {
-          get().removeItem(productId, variantValue);
+          get().removeItem(productId, variantId, colorVariantId);
           return;
         }
         set((state) => ({
-          items: state.items.map((i) => {
-            const matches = variantValue
-              ? i.product._id === productId && i.variant?.value === variantValue
-              : i.product._id === productId;
-            return matches ? { ...i, quantity } : i;
-          }),
+          items: state.items.map((i) =>
+            itemKey(i.product._id, i.variant?._id, i.colorVariant?._id) === key
+              ? { ...i, quantity }
+              : i
+          ),
         }));
       },
 
       clearCart: () => set({ items: [] }),
-      openCart: () => set({ isOpen: true }),
-      closeCart: () => set({ isOpen: false }),
-      toggleCart: () => set((s) => ({ isOpen: !s.isOpen })),
 
-      getItemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
+      getItemCount: () =>
+        get().items.reduce((sum, item) => sum + item.quantity, 0),
 
       getSubtotal: () =>
-        get().items.reduce((sum, i) => {
-          const price = i.variant?.price ?? i.product.price;
-          return sum + price * i.quantity;
+        get().items.reduce((sum, item) => {
+          const price =
+            item.colorVariant?.priceOverride ??
+            item.variant?.price ??
+            item.product.price;
+          return sum + price * item.quantity;
         }, 0),
-
-      getItem: (productId, variantValue) =>
-        get().items.find((i) => {
-          if (variantValue) {
-            return i.product._id === productId && i.variant?.value === variantValue;
-          }
-          return i.product._id === productId;
-        }),
     }),
-    {
-      name: "mercy-hub-cart",
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ items: state.items }),
-    }
+    { name: "mercy-hub-cart" }
   )
 );

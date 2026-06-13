@@ -1,49 +1,70 @@
-"use client";
+import * as LucideIcons from "lucide-react";
 
-import { motion } from "framer-motion";
-import { ShieldCheck, RefreshCw, Truck, CreditCard } from "lucide-react";
-import { useSettings } from "@/hooks/useSettings";
+interface Badge {
+  _id?: string;
+  icon: string;
+  title: string;
+  text: string;
+  active: boolean;
+}
 
-export function TrustBadges() {
-  const { settings } = useSettings();
-  const shippingThreshold = settings?.shipping?.freeShippingThreshold ?? 50000;
-  const shippingEnabled   = settings?.shipping?.enabled !== false;
-  const freeEnabled       = settings?.shipping?.freeShippingEnabled !== false;
-  const freeDeliveryDesc  = !shippingEnabled
-    ? "Free delivery on all orders"
-    : freeEnabled
-    ? `On orders above ₦${shippingThreshold.toLocaleString()}`
-    : "Shipping calculated at checkout";
+interface Props {
+  badges?: Badge[];
+}
 
-  const badges = [
-    { Icon: Truck,       title: "Free Delivery",    desc: freeDeliveryDesc },
-    { Icon: RefreshCw,   title: "Easy Returns",     desc: "30-day return policy" },
-    { Icon: ShieldCheck, title: "Secure Payment",   desc: "100% protected checkout" },
-    { Icon: CreditCard,  title: "Flexible Payment", desc: "Paystack · Card · Transfer" },
-  ];
+const FALLBACK_BADGES: Badge[] = [
+  { icon: "Truck",       title: "Free Delivery",   text: "On orders over ₦50,000", active: true },
+  { icon: "ShieldCheck", title: "Secure Payment",  text: "100% protected payments", active: true },
+  { icon: "RotateCcw",   title: "Easy Returns",    text: "30-day return policy", active: true },
+  { icon: "Headphones",  title: "24/7 Support",    text: "Dedicated support team", active: true },
+];
+
+export function TrustBadges({ badges = [] }: Props) {
+  const active = (badges.length > 0 ? badges : FALLBACK_BADGES).filter((b) => b.active);
+  if (active.length === 0) return null;
 
   return (
-    <section className="border-y border-neutral-100 bg-white">
-      <div className="container-site py-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {badges.map(({ Icon, title, desc }, i) => (
-            <motion.div
-              key={title}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              className="flex items-center gap-3 py-2"
-            >
-              <div className="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
-                <Icon className="w-5 h-5 text-brand-600" />
+    <section
+      className="border-y"
+      style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-card-bg)" }}
+    >
+      <div className="container-site">
+        <div
+          className="grid"
+          style={{
+            gridTemplateColumns: `repeat(${Math.min(active.length, 4)}, 1fr)`,
+          }}
+        >
+          {active.map((badge, i) => {
+            const Icon = (LucideIcons as any)[badge.icon] ?? LucideIcons.Star;
+            return (
+              <div
+                key={badge._id ?? i}
+                className="flex items-center gap-4 px-6 py-5 trust-badge"
+              >
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: "color-mix(in srgb, var(--color-brand-primary) 12%, transparent)" }}
+                >
+                  <Icon className="w-5 h-5" style={{ color: "var(--color-brand-primary)" }} />
+                </div>
+                <div>
+                  <p
+                    className="text-sm font-semibold"
+                    style={{ color: "var(--color-text-primary)" }}
+                  >
+                    {badge.title}
+                  </p>
+                  <p
+                    className="text-xs mt-0.5"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
+                    {badge.text}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-neutral-900">{title}</p>
-                <p className="text-xs text-neutral-400">{desc}</p>
-              </div>
-            </motion.div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

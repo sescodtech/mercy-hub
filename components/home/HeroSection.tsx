@@ -1,206 +1,183 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import axios from "axios";
+import { motion } from "framer-motion";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { cn } from "@/utils";
 
-interface IBanner {
-  _id?: string;
-  id?: number;
-  title: string;
-  subtitle?: string;
-  image: string;
-  link?: string;
-  buttonText?: string;
-  position?: string;
-  tag?: string;
-  heading?: string;
-  subheading?: string;
-  cta?: string;
-  ctaHref?: string;
+interface HeroCMS {
+  headline?: string;
+  subheadline?: string;
+  ctaPrimaryText?: string;
+  ctaPrimaryUrl?: string;
+  ctaSecondaryText?: string;
+  ctaSecondaryUrl?: string;
+  image?: string;
+  bgImage?: string;
+  overlay?: boolean;
+  overlayOpacity?: number;
+  textPosition?: "left" | "center" | "right";
 }
 
-const HARDCODED_SLIDES: IBanner[] = [
-  {
-    id: 1,
-    tag: "New Collection 2025",
-    heading: "Elevate Every\nCorner of Home",
-    subheading: "Premium home essentials designed for those who appreciate the art of beautiful living.",
-    cta: "Shop New Arrivals",
-    ctaHref: "/shop?filter=new",
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1400&q=80",
-    position: "left",
-  },
-  {
-    id: 2,
-    tag: "Curated Bedding",
-    heading: "Sleep in\nPure Luxury",
-    subheading: "Egyptian cotton, temperature-regulating weaves and hand-finished details for your sanctuary.",
-    cta: "Explore Bedding",
-    ctaHref: "/shop?category=bedding",
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1400&q=80",
-    position: "right",
-  },
-  {
-    id: 3,
-    tag: "Kitchen & Dining",
-    heading: "Cook, Serve,\nEntertain",
-    subheading: "Timeless kitchenware that turns everyday cooking into an artful experience.",
-    cta: "Shop Kitchenware",
-    ctaHref: "/shop?category=kitchenware",
-    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1400&q=80",
-    position: "left",
-  },
-];
+interface Props {
+  hero?: HeroCMS;
+}
 
-export function HeroSection() {
-  const [slides, setSlides] = useState<IBanner[]>(HARDCODED_SLIDES);
-  const [current, setCurrent] = useState(0);
-  const [direction, setDirection] = useState(1);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [loading, setLoading] = useState(true);
+const DEFAULTS: Required<HeroCMS> = {
+  headline:         "Elevate Your Home",
+  subheadline:      "Discover premium home essentials crafted for modern Nigerian living.",
+  ctaPrimaryText:   "Shop Collection",
+  ctaPrimaryUrl:    "/shop",
+  ctaSecondaryText: "",
+  ctaSecondaryUrl:  "",
+  image:            "",
+  bgImage:          "",
+  overlay:          true,
+  overlayOpacity:   50,
+  textPosition:     "left",
+};
 
-  useEffect(() => {
-    const fetchBanners = async () => {
-      try {
-        const { data } = await axios.get("/api/banners");
-        if (data.success && data.data.length > 0) {
-          const apiHeroBanners = data.data.filter((b: any) => b.position === "hero" || !b.position);
-          // Combine API banners with hardcoded ones
-          setSlides([...apiHeroBanners, ...HARDCODED_SLIDES]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch hero banners:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBanners();
-  }, []);
+const ALIGN: Record<string, string> = {
+  left:   "items-start text-left",
+  center: "items-center text-center",
+  right:  "items-end text-right",
+};
 
-  useEffect(() => {
-    if (!isAutoPlaying || slides.length <= 1) return;
-    const interval = setInterval(() => {
-      setDirection(1);
-      setCurrent((c) => (c + 1) % slides.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, slides.length]);
-
-  const go = (idx: number) => {
-    setDirection(idx > current ? 1 : -1);
-    setCurrent(idx);
-    setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 8000);
-  };
-
-  if (loading) return <div className="h-[90vh] bg-neutral-900 animate-pulse" />;
-  if (slides.length === 0) return null;
-
-  const slide = slides[current];
-  const displayTitle = slide.title || slide.heading || "Premium Home Essentials";
-  const displaySubtitle = slide.subtitle || slide.subheading || "";
-  const displayCTA = slide.buttonText || slide.cta || "Shop Now";
-  const displayHref = slide.link || slide.ctaHref || "/shop";
-  const displayTag = slide.tag || "Featured Collection";
+export function HeroSection({ hero = {} }: Props) {
+  const d = { ...DEFAULTS, ...hero };
+  const hasImage = !!(d.image || d.bgImage);
+  const pos       = d.textPosition ?? "left";
 
   return (
-    <section className="relative h-[90vh] min-h-[600px] max-h-[900px] overflow-hidden bg-neutral-900">
-      <AnimatePresence initial={false} custom={direction} mode="wait">
-        <motion.div
-          key={slide._id || slide.id}
-          custom={direction}
-          initial={{ opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="absolute inset-0"
-        >
+    <section
+      className={cn(
+        "relative w-full overflow-hidden flex items-center",
+        hasImage ? "min-h-[70vh] sm:min-h-[80vh]" : "min-h-[60vh]"
+      )}
+      style={{
+        backgroundColor: hasImage ? "#1a1208" : "var(--color-brand-secondary)",
+      }}
+    >
+      {/* Background image */}
+      {(d.bgImage || d.image) && (
+        <div className="absolute inset-0">
           <Image
-            src={slide.image}
-            alt={displayTitle}
-            fill
-            priority
+            src={d.bgImage || d.image}
+            alt="Hero background"
+            fill priority
             className="object-cover"
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-        </motion.div>
-      </AnimatePresence>
-
-      <div className="relative h-full container-site flex items-center">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={slide._id || slide.id}
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className={`max-w-lg ${slide.position === "right" ? "ml-auto text-right" : ""}`}
-          >
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex items-center gap-2 mb-5"
-            >
-              <div className="h-px w-10 bg-brand-400" />
-              <span className="text-xs tracking-[0.25em] uppercase text-brand-300 font-medium">
-                {displayTag}
-              </span>
-            </motion.div>
-
-            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-white leading-[1.1] mb-5 whitespace-pre-line">
-              {displayTitle}
-            </h1>
-
-            <p className="text-base text-white/70 leading-relaxed mb-8 max-w-md">
-              {displaySubtitle}
-            </p>
-
-            <div className="flex flex-wrap items-center gap-4">
-              <Link href={displayHref} className="btn-primary group">
-                {displayCTA}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6">
-        <div className="flex gap-2">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => go(i)}
-              className={`h-0.5 rounded-full transition-all duration-300 ${
-                i === current ? "w-8 bg-brand-400" : "w-4 bg-white/30 hover:bg-white/50"
-              }`}
-              aria-label={`Slide ${i + 1}`}
+          {d.overlay && (
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundColor: `rgba(26, 18, 8, ${(d.overlayOpacity ?? 50) / 100})`,
+              }}
             />
-          ))}
+          )}
         </div>
-      </div>
+      )}
 
-      <button
-        onClick={() => go((current - 1 + slides.length) % slides.length)}
-        className="absolute left-6 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all"
-        aria-label="Previous"
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </button>
-      <button
-        onClick={() => go((current + 1) % slides.length)}
-        className="absolute right-6 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all"
-        aria-label="Next"
-      >
-        <ChevronRight className="w-5 h-5" />
-      </button>
+      {/* Right-side foreground image (when no bgImage) */}
+      {d.image && !d.bgImage && (
+        <div className="absolute right-0 top-0 bottom-0 w-1/2 hidden lg:block">
+          <Image
+            src={d.image}
+            alt="Hero product"
+            fill priority
+            className="object-cover object-center"
+            sizes="50vw"
+          />
+          {/* Gradient blend */}
+          <div
+            className="absolute inset-y-0 left-0 w-32"
+            style={{
+              background: "linear-gradient(to right, var(--color-brand-secondary), transparent)",
+            }}
+          />
+        </div>
+      )}
+
+      {/* Content */}
+      <div className={cn(
+        "container-site relative z-10 py-20 sm:py-28 flex flex-col",
+        ALIGN[pos]
+      )}>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className={cn("max-w-2xl space-y-6", pos === "center" && "mx-auto")}
+        >
+          {/* Eyebrow */}
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="section-subheading"
+          >
+            Premium Home Goods
+          </motion.p>
+
+          {/* Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className={cn(
+              "font-display font-semibold leading-tight",
+              "text-4xl sm:text-5xl lg:text-6xl xl:text-7xl",
+              hasImage ? "text-white" : ""
+            )}
+            style={{ color: hasImage ? "#ffffff" : "var(--color-text-primary)" }}
+          >
+            {d.headline}
+          </motion.h1>
+
+          {/* Subheadline */}
+          {d.subheadline && (
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
+              className={cn("text-lg sm:text-xl leading-relaxed", hasImage ? "text-white/80" : "")}
+              style={{ color: hasImage ? "rgba(255,255,255,0.75)" : "var(--color-text-secondary)" }}
+            >
+              {d.subheadline}
+            </motion.p>
+          )}
+
+          {/* CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className={cn("flex flex-wrap gap-4", pos === "center" && "justify-center")}
+          >
+            {d.ctaPrimaryText && d.ctaPrimaryUrl && (
+              <Link href={d.ctaPrimaryUrl} className="btn-primary gap-2 px-8 py-4 text-base">
+                {d.ctaPrimaryText}
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            )}
+            {d.ctaSecondaryText && d.ctaSecondaryUrl && (
+              <Link
+                href={d.ctaSecondaryUrl}
+                className={cn(
+                  "btn-secondary gap-2 px-8 py-4 text-base",
+                  hasImage && "border-white/40 text-white hover:border-white"
+                )}
+              >
+                {d.ctaSecondaryText}
+                <ChevronRight className="w-5 h-5" />
+              </Link>
+            )}
+          </motion.div>
+        </motion.div>
+      </div>
     </section>
   );
 }

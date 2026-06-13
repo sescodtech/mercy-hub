@@ -32,6 +32,19 @@ export interface IAddress {
   isDefault: boolean;
 }
 
+// ─── Color Variant ───────────────────────────────────────────
+export interface IColorVariant {
+  _id?: string;
+  label: string;        // "Midnight Black"
+  colorHex: string;     // "#1a1a1a"
+  images: string[];     // Cloudinary URLs
+  sku?: string;
+  priceOverride?: number | null;  // null = use base product price
+  stock: number;
+  enabled: boolean;
+  sortOrder: number;
+}
+
 // ─── Product ─────────────────────────────────────────────────
 export interface IProduct {
   _id: string;
@@ -50,6 +63,8 @@ export interface IProduct {
   stock: number;
   lowStockThreshold: number;
   trackInventory: boolean;
+  colorVariants: IColorVariant[];
+  hasColorVariants: boolean;
   variants: IVariant[];
   attributes: IAttribute[];
   tags: string[];
@@ -171,6 +186,12 @@ export interface IOrder {
 export interface IOrderItem {
   product: Pick<IProduct, "_id" | "name" | "slug" | "images">;
   variant?: Pick<IVariant, "name" | "value">;
+  colorVariant?: {
+    variantId: string;
+    label: string;
+    colorHex: string;
+    image?: string;
+  };
   quantity: number;
   price: number;
   total: number;
@@ -205,6 +226,7 @@ export interface ICoupon {
 export interface ICartItem {
   product: IProduct;
   variant?: IVariant;
+  colorVariant?: IColorVariant;
   quantity: number;
 }
 
@@ -230,45 +252,85 @@ export interface IBanner {
   endDate?: Date;
 }
 
+// ─── Settings / Appearance ───────────────────────────────────
+export interface IBrandColors {
+  primary: string; secondary: string; accent: string;
+  success: string; warning: string; error: string;
+}
+
+export interface IUIColors {
+  headerBg: string; footerBg: string; navText: string; navTextHover: string;
+  buttonPrimary: string; buttonText: string; linkColor: string;
+  cardBg: string; pageBg: string; sectionAltBg: string;
+  borderColor: string; textPrimary: string; textSecondary: string;
+}
+
+export interface ILogos {
+  desktop: string; mobile: string; footer: string;
+  admin: string; email: string; favicon: string;
+}
+
+export interface ISiteSettings {
+  // Existing fields
+  businessName: string; tagline: string; logo: string; favicon: string;
+  email: string; supportEmail: string; phone: string[]; whatsapp: string;
+  website: string;
+  address: { street: string; city: string; state: string; country: string; postalCode: string };
+  social: { instagram: string; facebook: string; twitter: string; tiktok: string; youtube: string; linkedin: string };
+  footer: { description: string; copyright: string; links: { label: string; href: string }[] };
+  about: string;
+  meta: { title: string; description: string; keywords: string[] };
+  shipping: { enabled: boolean; freeShippingEnabled: boolean; freeShippingThreshold: number; defaultShippingCost: number; currency: string };
+  payments: { paystackEnabled: boolean; flutterwaveEnabled: boolean; codEnabled: boolean };
+  notifications: { orderEmail: boolean; orderWhatsapp: boolean; adminEmail: string; adminPhone: string };
+  announcement: { enabled: boolean; text: string; bgColor: string; textColor: string };
+  homepage: { heroTitle: string; heroSubtitle: string; heroCta: string; heroCtaLink: string; heroImage: string; showFeaturedProducts: boolean; showBestSellers: boolean; showTestimonials: boolean; showNewsletter: boolean };
+  maintenance: boolean;
+  // New fields
+  brandColors: IBrandColors;
+  uiColors: IUIColors;
+  logos: ILogos;
+  seo: { metaTitle: string; metaDescription: string; ogImage: string; twitterCard: string; keywords: string };
+  homepageCMS: {
+    hero: {
+      headline: string; subheadline: string;
+      ctaPrimaryText: string; ctaPrimaryUrl: string;
+      ctaSecondaryText: string; ctaSecondaryUrl: string;
+      image: string; bgImage: string; overlay: boolean;
+      overlayOpacity: number; textPosition: "left" | "center" | "right";
+    };
+    showFeatured: boolean; showBestSellers: boolean; showNewArrivals: boolean;
+    showBanners: boolean; showTestimonials: boolean; showNewsletter: boolean;
+    showWhyChooseUs: boolean; showTrustBadges: boolean;
+    aboutTitle: string; aboutText: string; aboutImage: string;
+    testimonials: Array<{ _id?: string; name: string; role: string; text: string; rating: number; avatar: string; active: boolean }>;
+    trustBadges: Array<{ _id?: string; icon: string; title: string; text: string; active: boolean }>;
+    whyChooseUs: Array<{ _id?: string; icon: string; title: string; text: string; active: boolean }>;
+    newsletterTitle: string; newsletterSubtext: string;
+  };
+}
+
 // ─── Analytics ───────────────────────────────────────────────
 export interface IAnalyticsSummary {
-  totalRevenue: number;
-  totalOrders: number;
-  totalCustomers: number;
-  averageOrderValue: number;
-  revenueGrowth: number;
-  ordersGrowth: number;
-  customersGrowth: number;
+  totalRevenue: number; totalOrders: number;
+  totalCustomers: number; averageOrderValue: number;
+  revenueGrowth: number; ordersGrowth: number; customersGrowth: number;
 }
 
 // ─── API Responses ───────────────────────────────────────────
 export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-  pagination?: IPagination;
+  success: boolean; data?: T; message?: string; error?: string; pagination?: IPagination;
 }
 
 export interface IPagination {
-  page: number;
-  limit: number;
-  total: number;
-  pages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
+  page: number; limit: number; total: number; pages: number;
+  hasNext: boolean; hasPrev: boolean;
 }
 
 // ─── Filters ─────────────────────────────────────────────────
 export interface IProductFilters {
-  category?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  rating?: number;
-  inStock?: boolean;
-  tags?: string[];
+  category?: string; minPrice?: number; maxPrice?: number; rating?: number;
+  inStock?: boolean; tags?: string[]; colorHex?: string;
   sort?: "newest" | "price_asc" | "price_desc" | "popular" | "rating";
-  search?: string;
-  page?: number;
-  limit?: number;
+  search?: string; page?: number; limit?: number;
 }

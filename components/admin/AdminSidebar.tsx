@@ -5,23 +5,31 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Package, ShoppingCart, Users,
   BarChart3, Tag, Image as ImageIcon, Settings, X,
-  FileText, Briefcase, Megaphone,
+  FileText, Briefcase, Megaphone, Palette, Brush, Home,
 } from "lucide-react";
 import { cn } from "@/utils";
 
 export const NAV = [
-  { icon: LayoutDashboard, label: "Overview",   href: "/admin" },
-  { icon: Package,         label: "Products",   href: "/admin/products" },
-  { icon: ShoppingCart,    label: "Orders",     href: "/admin/orders" },
-  { icon: Users,           label: "Customers",  href: "/admin/customers" },
-  { icon: BarChart3,       label: "Analytics",  href: "/admin/analytics" },
-  { icon: Tag,             label: "Coupons",    href: "/admin/coupons" },
-  { icon: ImageIcon,       label: "Banners",    href: "/admin/banners" },
-  { icon: FileText,        label: "Blog",           href: "/admin/blog" },
-  { icon: Briefcase,       label: "Careers",         href: "/admin/careers" },
-  { icon: Megaphone,       label: "Announcements",   href: "/admin/announcements" },
-  { icon: Settings,        label: "Settings",   href: "/admin/settings" },
+  { icon: LayoutDashboard, label: "Overview",      href: "/admin" },
+  { icon: Package,         label: "Products",      href: "/admin/products" },
+  { icon: ShoppingCart,    label: "Orders",        href: "/admin/orders" },
+  { icon: Users,           label: "Customers",     href: "/admin/customers" },
+  { icon: BarChart3,       label: "Analytics",     href: "/admin/analytics" },
+  { icon: Tag,             label: "Coupons",       href: "/admin/coupons" },
+  { icon: ImageIcon,       label: "Banners",       href: "/admin/banners" },
+  { icon: FileText,        label: "Blog",          href: "/admin/blog" },
+  { icon: Briefcase,       label: "Careers",       href: "/admin/careers" },
+  { icon: Megaphone,       label: "Announcements", href: "/admin/announcements" },
+  // ── NEW ──
+  { icon: Home,            label: "Homepage CMS",  href: "/admin/homepage" },
+  { icon: Palette,         label: "Appearance",    href: "/admin/appearance" },
+  { icon: Brush,           label: "Branding",      href: "/admin/branding" },
+  // ─────────
+  { icon: Settings,        label: "Settings",      href: "/admin/settings" },
 ];
+
+// Visual group separators (shown before these hrefs)
+const SEPARATORS_BEFORE = new Set(["/admin/homepage", "/admin/settings"]);
 
 interface SidebarProps {
   mobile?: boolean;
@@ -62,22 +70,27 @@ export function AdminSidebar({ mobile = false, onClose }: SidebarProps) {
       {/* Nav links */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {NAV.map(({ icon: Icon, label, href }) => {
-          // Exact match for overview, prefix match for others
           const isActive = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+          const showSep = SEPARATORS_BEFORE.has(href);
+
           return (
-            <Link
-              key={href}
-              href={href}
-              onClick={onClose}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all",
-                isActive ? "text-[#d98c2a]" : "hover:text-white"
+            <div key={href}>
+              {showSep && (
+                <div className="mx-3 my-2 border-t border-white/10" />
               )}
-              style={isActive ? { backgroundColor: "rgba(217,140,42,0.2)" } : {}}
-            >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              {label}
-            </Link>
+              <Link
+                href={href}
+                onClick={onClose}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all",
+                  isActive ? "text-[#d98c2a]" : "hover:text-white"
+                )}
+                style={isActive ? { backgroundColor: "rgba(217,140,42,0.2)" } : {}}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                {label}
+              </Link>
+            </div>
           );
         })}
       </nav>

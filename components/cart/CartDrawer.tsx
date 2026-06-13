@@ -10,7 +10,6 @@ import { formatPrice } from "@/utils";
 export function CartDrawer() {
   const { isOpen, closeCart, items, updateQuantity, removeItem, getSubtotal } = useCartStore();
   const subtotal = getSubtotal();
-  const shipping = 0;
   const freeShippingThreshold = 50000;
   const remaining = freeShippingThreshold - subtotal;
 
@@ -39,11 +38,14 @@ export function CartDrawer() {
             <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
               <div className="flex items-center gap-3">
                 <ShoppingBag className="w-5 h-5 text-brand-600" />
+                {/* Drawer title stays Cormorant — it is a heading */}
                 <h2 className="font-display text-xl font-semibold text-neutral-900">
                   Your Cart
                 </h2>
                 {items.length > 0 && (
-                  <span className="badge badge-trending">{items.length} item{items.length !== 1 && "s"}</span>
+                  <span className="badge badge-trending">
+                    {items.length} item{items.length !== 1 && "s"}
+                  </span>
                 )}
               </div>
               <button onClick={closeCart} className="btn-icon" aria-label="Close cart">
@@ -54,8 +56,13 @@ export function CartDrawer() {
             {/* Free shipping progress */}
             {subtotal < freeShippingThreshold && subtotal > 0 && (
               <div className="px-6 py-3 bg-brand-50 border-b border-brand-100">
-                <p className="text-xs text-brand-700 mb-1.5">
-                  Add <strong>{formatPrice(remaining)}</strong> more for free shipping!
+                <p
+                  className="mb-1.5 text-brand-700"
+                  style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem" }}
+                >
+                  Add{" "}
+                  <strong style={{ fontWeight: "700" }}>{formatPrice(remaining)}</strong>{" "}
+                  more for free shipping!
                 </p>
                 <div className="h-1 bg-brand-100 rounded-full overflow-hidden">
                   <motion.div
@@ -75,8 +82,15 @@ export function CartDrawer() {
                     <ShoppingBag className="w-8 h-8 text-neutral-300" />
                   </div>
                   <div>
-                    <p className="font-display text-lg font-semibold text-neutral-700 mb-1">Your cart is empty</p>
-                    <p className="text-sm text-neutral-400">Add some beautiful pieces to get started</p>
+                    <p className="font-display text-lg font-semibold text-neutral-700 mb-1">
+                      Your cart is empty
+                    </p>
+                    <p
+                      className="text-neutral-400"
+                      style={{ fontFamily: "var(--font-body)", fontSize: "0.875rem" }}
+                    >
+                      Add some beautiful pieces to get started
+                    </p>
                   </div>
                   <button onClick={closeCart} className="btn-primary mt-2">
                     Browse Products
@@ -87,7 +101,7 @@ export function CartDrawer() {
                   {items.map((item) => {
                     const price = item.variant?.price ?? item.product.price;
                     const image = item.product.images?.[0]?.url;
-                    const key = item.variant
+                    const key   = item.variant
                       ? `${item.product._id}-${item.variant.value}`
                       : item.product._id;
 
@@ -115,20 +129,27 @@ export function CartDrawer() {
 
                         {/* Details */}
                         <div className="flex-1 min-w-0">
+
+                          {/* ── Product name — Inter, semibold ── */}
                           <Link
                             href={`/product/${item.product.slug}`}
                             onClick={closeCart}
-                            className="text-sm font-medium text-neutral-900 hover:text-brand-600 line-clamp-2 leading-snug"
+                            className="product-name-sm line-clamp-2 block hover:text-brand-600 transition-colors"
                           >
                             {item.product.name}
                           </Link>
+
                           {item.variant && (
-                            <p className="text-xs text-neutral-400 mt-0.5">
+                            <p
+                              className="mt-0.5 text-neutral-400"
+                              style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem" }}
+                            >
                               {item.variant.name}: {item.variant.value}
                             </p>
                           )}
+
                           <div className="flex items-center justify-between mt-3">
-                            {/* Quantity */}
+                            {/* Qty stepper */}
                             <div className="flex items-center gap-1 border border-neutral-200 rounded-sm">
                               <button
                                 onClick={() => updateQuantity(item.product._id, item.quantity - 1, item.variant?.value)}
@@ -136,7 +157,12 @@ export function CartDrawer() {
                               >
                                 <Minus className="w-3 h-3" />
                               </button>
-                              <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                              <span
+                                className="w-8 text-center"
+                                style={{ fontFamily: "var(--font-body)", fontSize: "0.875rem", fontWeight: "600" }}
+                              >
+                                {item.quantity}
+                              </span>
                               <button
                                 onClick={() => updateQuantity(item.product._id, item.quantity + 1, item.variant?.value)}
                                 className="p-1.5 text-neutral-500 hover:text-neutral-900 transition-colors"
@@ -144,8 +170,12 @@ export function CartDrawer() {
                                 <Plus className="w-3 h-3" />
                               </button>
                             </div>
+
                             <div className="flex items-center gap-2">
-                              <span className="price-current text-base">{formatPrice(price * item.quantity)}</span>
+                              {/* ── Price — Inter, bold ── */}
+                              <span className="price-current-md">
+                                {formatPrice(price * item.quantity)}
+                              </span>
                               <button
                                 onClick={() => removeItem(item.product._id, item.variant?.value)}
                                 className="text-neutral-300 hover:text-red-500 transition-colors"
@@ -162,30 +192,58 @@ export function CartDrawer() {
               )}
             </div>
 
-            {/* Footer */}
+            {/* Footer summary */}
             {items.length > 0 && (
               <div className="border-t border-neutral-100 px-6 py-5 space-y-4 bg-neutral-50">
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between text-neutral-600">
+                <div className="space-y-2">
+                  <div
+                    className="flex justify-between text-neutral-500"
+                    style={{ fontFamily: "var(--font-body)", fontSize: "0.875rem" }}
+                  >
                     <span>Subtotal</span>
-                    <span className="font-medium text-neutral-900">{formatPrice(subtotal)}</span>
+                    <span style={{ fontWeight: "600", color: "#171717" }}>{formatPrice(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-neutral-600">
+                  <div
+                    className="flex justify-between text-neutral-500"
+                    style={{ fontFamily: "var(--font-body)", fontSize: "0.875rem" }}
+                  >
                     <span>Shipping</span>
-                    <span className="font-medium text-neutral-900">
-                      Calculated at checkout
+                    <span style={{ fontWeight: "500", color: "#404040" }}>Calculated at checkout</span>
+                  </div>
+
+                  {/* Total row — bold Inter price */}
+                  <div
+                    className="flex justify-between pt-3 border-t border-neutral-200"
+                  >
+                    <span
+                      style={{
+                        fontFamily: "var(--font-body)",
+                        fontSize:   "1rem",
+                        fontWeight: "700",
+                        color:      "#171717",
+                      }}
+                    >
+                      Total
+                    </span>
+                    <span className="price-total">
+                      {formatPrice(subtotal)}
                     </span>
                   </div>
-                  <div className="flex justify-between text-base font-semibold text-neutral-900 pt-2 border-t border-neutral-200">
-                    <span>Total</span>
-                    <span className="font-display text-lg">{formatPrice(subtotal)}</span>
-                  </div>
                 </div>
-                <Link href="/checkout" onClick={closeCart} className="btn-primary w-full justify-center group">
+
+                <Link
+                  href="/checkout"
+                  onClick={closeCart}
+                  className="btn-primary w-full justify-center group"
+                >
                   Checkout
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <Link href="/cart" onClick={closeCart} className="btn-secondary w-full justify-center text-xs">
+                <Link
+                  href="/cart"
+                  onClick={closeCart}
+                  className="btn-secondary w-full justify-center text-xs"
+                >
                   View Full Cart
                 </Link>
               </div>
