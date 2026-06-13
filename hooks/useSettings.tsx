@@ -1,41 +1,70 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import type { ISiteSettings } from "@/types";
 
+// ── Cache ─────────────────────────────────────────────────────
 let cache: ISiteSettings | null = null;
 let cacheTime = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 min client-side cache
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-export function useSettings() {
+// ── Context ───────────────────────────────────────────────────
+interface SettingsContextValue {
+  settings: ISiteSettings | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+const SettingsContext = createContext<SettingsContextValue>({
+  settings: null,
+  loading: true,
+  error: null,
+  refetch: () => {},
+});
+
+// ── Provider ──────────────────────────────────────────────────
+export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<ISiteSettings | null>(cache);
   const [loading,  setLoading]  = useState(!cache);
   const [error,    setError]    = useState<string | null>(null);
 
-  useEffect(() => {
-    // Use cache if fresh
+  const fetchSettings = async () => {
+    // Use cache if still fresh
     if (cache && Date.now() - cacheTime < CACHE_TTL) {
       setSettings(cache);
       setLoading(false);
       return;
     }
-
-    (async () => {
-      try {
-        const res = await fetch("/api/settings", { next: { revalidate: 300 } });
-        const json = await res.json();
-        if (json.success) {
-          cache = json.data;
-          cacheTime = Date.now();
-          setSettings(json.data);
-        } else {
-          setError("Failed to load settings");
-        }
-      } catch (e) {
-        setError("Network error");
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    try {
+      const res  = await fetch("/api/settings");
+      const json = await res.json();
+      if (json.success) {
+        cache     = json.data;
+        cacheTime = Date.now();
+        setSettings(json.data);
+        setError(null);
+      } else {
+        setError("Failed to load settings");
       }
-    })();
-  }, []);
+    } catch {
+      setError("Network error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  return { settings, loading, error };
+  useEffect(() => { fetchSettings(); }, []);
+
+  return (
+    <SettingsContext.Provider value={{ settings, loading, error, refetch: fetchSettings }}>
+      {children}
+    </SettingsContext.Provider>
+  );
+}
+
+// ── Hook ──────────────────────────────────────────────────────
+export function useSettings() {
+  return useContext(SettingsContext);
 }
