@@ -1,246 +1,147 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import {
-  Instagram, Facebook, Twitter, Linkedin, Youtube,
-  Mail, Phone, MapPin, ArrowRight,
-} from "lucide-react";
+import { Instagram, Twitter, Facebook, Youtube, Linkedin, Mail, Phone, MapPin } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 
-const SOCIAL_ICONS: Record<string, React.ElementType> = {
-  instagram: Instagram,
-  facebook:  Facebook,
-  twitter:   Twitter,
-  linkedin:  Linkedin,
-  youtube:   Youtube,
+const footerLinks = {
+  Shop: [
+    { label: "All Products",  href: "/shop" },
+    { label: "Bedding",       href: "/shop?category=bedding" },
+    { label: "Kitchenware",   href: "/shop?category=kitchenware" },
+    { label: "Home Decor",    href: "/shop?category=home-decor" },
+    { label: "New Arrivals",  href: "/shop?filter=new" },
+    { label: "Sale",          href: "/shop?filter=sale" },
+  ],
+  Account: [
+    { label: "My Account",    href: "/dashboard" },
+    { label: "Orders",        href: "/dashboard/orders" },
+    { label: "Wishlist",      href: "/dashboard/wishlist" },
+    { label: "Track Order",   href: "/dashboard/orders" },
+  ],
+  Company: [
+    { label: "About Us",      href: "/about" },
+    { label: "Contact",       href: "/contact" },
+    { label: "Blog",          href: "/blog" },
+    { label: "Careers",       href: "/careers" },
+  ],
+  Support: [
+    { label: "FAQ",            href: "/faq" },
+    { label: "Returns",        href: "/returns" },
+    { label: "Shipping Info",  href: "/shipping" },
+    { label: "Privacy Policy", href: "/privacy" },
+  ],
 };
 
-// TikTok SVG (not in lucide)
-function TikTokIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.28 8.28 0 0 0 4.83 1.53V6.77a4.85 4.85 0 0 1-1.06-.08z" />
-    </svg>
-  );
-}
+const SOCIAL_ICONS: Record<string, any> = {
+  instagram: Instagram, twitter: Twitter, facebook: Facebook,
+  youtube: Youtube, linkedin: Linkedin,
+};
 
 export function Footer() {
   const { settings } = useSettings();
 
-  const footerLogo  = settings?.logos?.footer || settings?.logos?.desktop || settings?.logo || "";
-  const brandName   = settings?.businessName || "MercyHome Essentials";
-  const description = settings?.footer?.description || settings?.about || "";
-  const copyright   = settings?.footer?.copyright || `© ${new Date().getFullYear()} ${brandName}. All rights reserved.`;
-  const footerLinks = settings?.footer?.links ?? [];
-  const social      = settings?.social ?? {};
-  const whatsapp    = settings?.whatsapp || "";
-  const email       = settings?.email || "";
-  const phone       = settings?.phone?.[0] || "";
-  const address     = settings?.address;
+  const businessName  = settings?.businessName || "Mercy Home Essentials";
+  const description   = settings?.footer?.description || "Premium home essentials for discerning tastes. Curated quality, delivered to your door.";
+  const copyright     = settings?.footer?.copyright || `© ${new Date().getFullYear()} ${businessName}. All rights reserved.`;
+  const email         = settings?.email || "hello@mercyhomeessentials.com";
+  const phone         = settings?.phone?.[0] || "+234 903 424 0648";
+  const address       = settings?.address ? `${settings.address.city || "Lagos"}, ${settings.address.country || "Nigeria"}` : "Lagos, Nigeria";
+  const social        = settings?.social || {};
 
-  const socialLinks: { key: string; url: string; Icon: React.ElementType }[] = [
-    ...Object.entries(SOCIAL_ICONS)
-      .filter(([key]) => social[key as keyof typeof social])
-      .map(([key, Icon]) => ({ key, url: social[key as keyof typeof social] as string, Icon })),
-    ...(social.tiktok ? [{ key: "tiktok", url: social.tiktok, Icon: TikTokIcon }] : []),
-  ];
+  const activeSocial = Object.entries(social).filter(([, url]) => url).map(([key, url]) => ({
+    key, url: url as string, Icon: SOCIAL_ICONS[key],
+  })).filter(({ Icon }) => Icon);
 
   return (
-    <footer style={{ backgroundColor: "var(--color-footer-bg)", color: "rgba(255,255,255,0.6)" }}>
-      <div className="container-site py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
-
-        {/* Brand column */}
-        <div className="lg:col-span-2 space-y-5">
-          <Link href="/">
-            {footerLogo ? (
-              <Image
-                src={footerLogo}
-                alt={brandName}
-                height={48}
-                width={180}
-                className="h-12 w-auto object-contain brightness-200"
-              />
-            ) : (
-              <span className="font-display text-2xl font-semibold text-white">
-                {brandName.split(" ").slice(0, -1).join(" ")}{" "}
-                <span style={{ color: "var(--color-brand-primary)" }}>
-                  {brandName.split(" ").slice(-1)[0]}
-                </span>
-              </span>
-            )}
-          </Link>
-
-          {description && (
-            <p className="text-sm leading-relaxed max-w-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
-              {description}
-            </p>
-          )}
-
-          {/* Social icons */}
-          {socialLinks.length > 0 && (
-            <div className="flex items-center gap-3">
-              {socialLinks.map(({ key, url, Icon }) => (
-                <a
-                  key={key}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={key}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-all"
-                  style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-brand-primary)";
-                    (e.currentTarget as HTMLElement).style.color = "#fff";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255,255,255,0.06)";
-                    (e.currentTarget as HTMLElement).style.color = "";
-                  }}
-                >
-                  <Icon className="w-4 h-4" />
-                </a>
-              ))}
+    <footer className="bg-ebony text-cream/80">
+      {/* Newsletter */}
+      <div className="border-b border-white/10">
+        <div className="container-site py-14">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div>
+              <h3 className="font-display text-2xl font-semibold text-cream mb-2">Join the {businessName.split(" ")[0]} Family</h3>
+              <p className="text-sm text-cream/60">Get 10% off your first order and early access to new arrivals.</p>
             </div>
-          )}
-        </div>
-
-        {/* Quick links */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-white uppercase tracking-widest">Quick Links</h3>
-          <ul className="space-y-2.5">
-            {[
-              { label: "Shop All",    href: "/shop" },
-              { label: "New Arrivals",href: "/shop?filter=new" },
-              { label: "Sale",        href: "/shop?filter=sale" },
-              { label: "About Us",    href: "/about" },
-              { label: "Blog",        href: "/blog" },
-              { label: "Contact",     href: "/contact" },
-              { label: "Careers",     href: "/careers" },
-              ...footerLinks.map(({ label, href }: { label: string; href: string }) => ({ label, href })),
-            ].map(({ label, href }) => (
-              <li key={href}>
-                <Link href={href}
-                  className="text-sm flex items-center gap-1.5 group transition-colors"
-                  style={{ color: "rgba(255,255,255,0.5)" }}
-                  onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "var(--color-brand-primary)"}
-                  onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.5)"}
-                >
-                  <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all" />
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Contact */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-white uppercase tracking-widest">Contact</h3>
-          <ul className="space-y-3">
-            {email && (
-              <li>
-                <a href={`mailto:${email}`}
-                  className="text-sm flex items-start gap-2.5 transition-colors"
-                  style={{ color: "rgba(255,255,255,0.5)" }}
-                  onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "var(--color-brand-primary)"}
-                  onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.5)"}
-                >
-                  <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  {email}
-                </a>
-              </li>
-            )}
-            {phone && (
-              <li>
-                <a href={`tel:${phone}`}
-                  className="text-sm flex items-start gap-2.5 transition-colors"
-                  style={{ color: "rgba(255,255,255,0.5)" }}
-                  onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "var(--color-brand-primary)"}
-                  onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.5)"}
-                >
-                  <Phone className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  {phone}
-                </a>
-              </li>
-            )}
-            {whatsapp && (
-              <li>
-                <a
-                  href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm flex items-start gap-2.5 transition-colors"
-                  style={{ color: "rgba(255,255,255,0.5)" }}
-                  onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "#25D366"}
-                  onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.5)"}
-                >
-                  {/* WhatsApp icon */}
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                  </svg>
-                  WhatsApp Us
-                </a>
-              </li>
-            )}
-            {address?.city && (
-              <li className="text-sm flex items-start gap-2.5" style={{ color: "rgba(255,255,255,0.4)" }}>
-                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>
-                  {[address.street, address.city, address.state, address.country]
-                    .filter(Boolean)
-                    .join(", ")}
-                </span>
-              </li>
-            )}
-          </ul>
-
-          {/* Newsletter mini */}
-          <div className="pt-2">
-            <p className="text-xs font-semibold text-white uppercase tracking-widest mb-2">Newsletter</p>
-            <form onSubmit={(e) => e.preventDefault()} className="flex gap-2">
-              <input
-                type="email"
-                placeholder="your@email.com"
-                className="flex-1 px-3 py-2 text-sm rounded-lg outline-none text-neutral-900 placeholder:text-neutral-400"
-                style={{ minWidth: 0 }}
-              />
-              <button type="submit" className="px-3 py-2 rounded-lg text-white text-sm transition-colors"
-                style={{ backgroundColor: "var(--color-brand-primary)" }}
-                onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-brand-accent)"}
-                onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-brand-primary)"}
-              >
-                <ArrowRight className="w-4 h-4" />
-              </button>
+            <form className="flex w-full max-w-md gap-2" onSubmit={(e) => e.preventDefault()}>
+              <input type="email" placeholder="Enter your email"
+                className="flex-1 rounded-sm bg-white/10 border border-white/20 px-4 py-3 text-sm text-cream placeholder-cream/40 outline-none focus:border-brand-400 transition-colors" />
+              <button type="submit" className="btn-primary flex-shrink-0 py-3">Subscribe</button>
             </form>
           </div>
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div
-        className="border-t"
-        style={{ borderColor: "rgba(255,255,255,0.08)" }}
-      >
-        <div className="container-site py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
-            {copyright}
-          </p>
-          <div className="flex items-center gap-5">
-            {[
-              { label: "Privacy Policy",    href: "/privacy" },
-              { label: "Terms of Service",  href: "/terms" },
-              { label: "Returns Policy",    href: "/returns" },
-            ].map(({ label, href }) => (
-              <Link key={href} href={href}
-                className="text-xs transition-colors"
-                style={{ color: "rgba(255,255,255,0.35)" }}
-                onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "var(--color-brand-primary)"}
-                onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.35)"}
-              >
-                {label}
-              </Link>
-            ))}
+      {/* Main grid */}
+      <div className="container-site py-16">
+        <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10">
+          {/* Brand column */}
+          <div className="col-span-2 lg:col-span-1">
+            <Link href="/" className="group block mb-6">
+              {settings?.logo ? (
+                <img src={settings.logo} alt={businessName} className="h-10 w-auto object-contain brightness-0 invert" />
+              ) : (
+                <>
+                  <span className="font-display text-2xl font-semibold text-cream tracking-tight">
+                    {businessName.split(" ")[0]}<span className="text-brand-500">{businessName.split(" ").slice(1, 2).join(" ")}</span>
+                  </span>
+                  <span className="block text-[9px] tracking-[0.3em] uppercase text-cream/40 -mt-1">
+                    {businessName.split(" ").slice(2).join(" ") || "Essentials"}
+                  </span>
+                </>
+              )}
+            </Link>
+            <p className="text-sm text-cream/50 leading-relaxed mb-6">{description}</p>
+            {activeSocial.length > 0 && (
+              <div className="flex gap-3">
+                {activeSocial.map(({ key, url, Icon }) => (
+                  <a key={key} href={url} target="_blank" rel="noopener noreferrer" aria-label={key}
+                    className="w-9 h-9 rounded-sm border border-white/15 flex items-center justify-center text-cream/50 hover:bg-brand-600 hover:border-brand-600 hover:text-white transition-all duration-200">
+                    <Icon className="w-4 h-4" />
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Link columns */}
+          {Object.entries(footerLinks).map(([title, links]) => (
+            <div key={title}>
+              <h4 className="text-xs font-semibold tracking-[0.2em] uppercase text-cream/90 mb-5">{title}</h4>
+              <ul className="space-y-3">
+                {links.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href} className="text-sm text-cream/50 hover:text-brand-400 transition-colors">{link.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Contact info */}
+        <div className="mt-14 pt-10 border-t border-white/10 grid sm:grid-cols-3 gap-6">
+          {[
+            { Icon: MapPin, text: address },
+            { Icon: Phone,  text: phone },
+            { Icon: Mail,   text: email },
+          ].map(({ Icon, text }) => (
+            <div key={text} className="flex items-center gap-3 text-sm text-cream/50">
+              <Icon className="w-4 h-4 text-brand-500 flex-shrink-0" />
+              {text}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom */}
+      <div className="border-t border-white/10">
+        <div className="container-site py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-cream/30">
+          <p>{copyright}</p>
+          <div className="flex gap-4">
+            <Link href="/privacy" className="hover:text-cream/60 transition-colors">Privacy</Link>
+            <Link href="/terms"   className="hover:text-cream/60 transition-colors">Terms</Link>
+            <Link href="/cookies" className="hover:text-cream/60 transition-colors">Cookies</Link>
           </div>
         </div>
       </div>
