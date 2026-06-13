@@ -58,6 +58,10 @@ export function Navbar() {
     }
   };
 
+  const isActive = (href: string) => {
+    return href === "/" ? pathname === "/" : pathname.startsWith(href.split("?")[0]);
+  };
+
   return (
     <>
       <header
@@ -72,7 +76,7 @@ export function Navbar() {
           <div className="flex items-center justify-between h-16 sm:h-18">
 
             {/* Logo */}
-            <Link href="/" className="flex items-center flex-shrink-0">
+            <Link href="/" className="flex items-center flex-shrink-0 hover:opacity-80 transition-opacity">
               {!settingsLoading && desktopLogo ? (
                 <>
                   {/* Desktop logo */}
@@ -114,59 +118,68 @@ export function Navbar() {
             </Link>
 
             {/* Desktop nav links */}
-            <nav className="hidden lg:flex items-center gap-7">
+            <nav className="hidden lg:flex items-center gap-1">
               {NAV_LINKS.map(({ label, href }) => {
-                const active = href === "/" ? pathname === "/" : pathname.startsWith(href.split("?")[0]);
+                const active = isActive(href);
                 return (
                   <Link
                     key={href}
                     href={href}
                     className={cn(
-                      "text-sm tracking-wide transition-colors font-medium",
-                      active ? "text-brand" : ""
+                      "relative px-4 py-2 text-sm font-medium tracking-wide transition-all duration-200 group",
+                      active
+                        ? "text-brand-primary"
+                        : "text-text-secondary hover:text-text-primary"
                     )}
                     style={{
                       color: active
                         ? "var(--color-brand-primary)"
-                        : "var(--color-nav-text, var(--color-text-primary))",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!active) (e.currentTarget as HTMLElement).style.color = "var(--color-brand-primary)";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!active) (e.currentTarget as HTMLElement).style.color =
-                        "var(--color-nav-text, var(--color-text-primary))";
+                        : "var(--color-nav-text, var(--color-text-secondary))",
                     }}
                   >
                     {label}
+                    {/* Active indicator line */}
+                    {active && (
+                      <span
+                        className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full transition-all duration-200"
+                        style={{ backgroundColor: "var(--color-brand-primary)" }}
+                      />
+                    )}
+                    {/* Hover line for inactive items */}
+                    {!active && (
+                      <span
+                        className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full transition-all duration-200 scale-x-0 group-hover:scale-x-100 origin-left"
+                        style={{ backgroundColor: "var(--color-brand-primary)" }}
+                      />
+                    )}
                   </Link>
                 );
               })}
             </nav>
 
             {/* Right actions */}
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-0.5 sm:gap-1">
               {/* Search */}
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
-                className="p-2 rounded-lg hover:bg-black/5 transition-colors"
+                className="p-2.5 rounded-lg hover:bg-neutral-100/80 transition-colors duration-200 group"
                 style={{ color: "var(--color-text-secondary)" }}
                 aria-label="Search"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
               </button>
 
               {/* Wishlist */}
               <Link
                 href="/wishlist"
-                className="relative p-2 rounded-lg hover:bg-black/5 transition-colors hidden sm:flex"
+                className="relative p-2.5 rounded-lg hover:bg-neutral-100/80 transition-colors duration-200 hidden sm:flex group"
                 style={{ color: "var(--color-text-secondary)" }}
                 aria-label="Wishlist"
               >
-                <Heart className="w-5 h-5" />
+                <Heart className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
                 {wishlistN > 0 && (
                   <span
-                    className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
+                    className="absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full text-[9px] font-bold flex items-center justify-center text-white shadow-md"
                     style={{ backgroundColor: "var(--color-brand-primary)" }}
                   >
                     {wishlistN > 9 ? "9+" : wishlistN}
@@ -177,7 +190,7 @@ export function Navbar() {
               {/* Account */}
               <Link
                 href={session ? "/dashboard" : "/auth/login"}
-                className="relative p-2 rounded-lg hover:bg-black/5 transition-colors hidden sm:flex"
+                className="relative p-2.5 rounded-lg hover:bg-neutral-100/80 transition-colors duration-200 hidden sm:flex group"
                 style={{ color: "var(--color-text-secondary)" }}
                 aria-label="Account"
               >
@@ -186,24 +199,24 @@ export function Navbar() {
                     src={session.user.image}
                     alt={session.user.name ?? ""}
                     width={20} height={20}
-                    className="rounded-full w-5 h-5 object-cover"
+                    className="rounded-full w-5 h-5 object-cover group-hover:ring-2 ring-brand-primary/30 transition-all duration-200"
                   />
                 ) : (
-                  <User className="w-5 h-5" />
+                  <User className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
                 )}
               </Link>
 
               {/* Cart */}
               <button
                 onClick={openCart}
-                className="relative p-2 rounded-lg hover:bg-black/5 transition-colors flex items-center gap-1.5"
+                className="relative p-2.5 rounded-lg hover:bg-neutral-100/80 transition-colors duration-200 flex items-center gap-1.5 group"
                 style={{ color: "var(--color-text-secondary)" }}
                 aria-label="Open cart"
               >
-                <ShoppingBag className="w-5 h-5" />
+                <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
                 {itemCount > 0 && (
                   <span
-                    className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
+                    className="absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full text-[9px] font-bold flex items-center justify-center text-white shadow-md"
                     style={{ backgroundColor: "var(--color-brand-primary)" }}
                   >
                     {itemCount > 9 ? "9+" : itemCount}
@@ -214,7 +227,7 @@ export function Navbar() {
               {/* Mobile menu toggle */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-black/5 transition-colors ml-1"
+                className="lg:hidden p-2.5 rounded-lg hover:bg-neutral-100/80 transition-colors duration-200 ml-0.5"
                 style={{ color: "var(--color-text-secondary)" }}
                 aria-label="Menu"
               >
@@ -225,7 +238,7 @@ export function Navbar() {
 
           {/* Search bar */}
           {searchOpen && (
-            <div className="pb-3 border-t border-neutral-100 pt-3">
+            <div className="pb-4 border-t border-neutral-100 pt-4">
               <form onSubmit={handleSearch} className="flex gap-2">
                 <input
                   autoFocus
@@ -239,7 +252,7 @@ export function Navbar() {
                   Search
                 </button>
                 <button type="button" onClick={() => setSearchOpen(false)}
-                  className="p-2.5 border border-neutral-200 rounded-lg text-neutral-400 hover:text-neutral-700">
+                  className="p-2.5 border border-neutral-200 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50 transition-colors duration-200">
                   <X className="w-4 h-4" />
                 </button>
               </form>
@@ -251,16 +264,16 @@ export function Navbar() {
       {/* ── Mobile drawer ── */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-40">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-300" onClick={() => setMobileOpen(false)} />
           <div
-            className="absolute left-0 top-0 bottom-0 w-72 flex flex-col shadow-xl"
+            className="absolute left-0 top-0 bottom-0 w-72 flex flex-col shadow-2xl"
             style={{ backgroundColor: "var(--color-header-bg)" }}
           >
             <div
-              className="flex items-center justify-between px-5 py-4 border-b"
+              className="flex items-center justify-between px-5 py-5 border-b"
               style={{ borderColor: "var(--color-border)" }}
             >
-              <Link href="/" onClick={() => setMobileOpen(false)}>
+              <Link href="/" onClick={() => setMobileOpen(false)} className="hover:opacity-80 transition-opacity">
                 {desktopLogo ? (
                   <Image src={desktopLogo} alt={brandName} height={32} width={120} className="h-8 w-auto object-contain" />
                 ) : (
@@ -269,39 +282,51 @@ export function Navbar() {
                   </span>
                 )}
               </Link>
-              <button onClick={() => setMobileOpen(false)} style={{ color: "var(--color-text-secondary)" }}>
+              <button 
+                onClick={() => setMobileOpen(false)} 
+                style={{ color: "var(--color-text-secondary)" }}
+                className="p-2 hover:bg-neutral-100/50 rounded-lg transition-colors duration-200"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <nav className="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
-              {NAV_LINKS.map(({ label, href }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors"
-                  style={{
-                    color: pathname.startsWith(href.split("?")[0])
-                      ? "var(--color-brand-primary)"
-                      : "var(--color-text-primary)",
-                    backgroundColor: pathname.startsWith(href.split("?")[0])
-                      ? "color-mix(in srgb, var(--color-brand-primary) 8%, transparent)"
-                      : "transparent",
-                  }}
-                >
-                  {label}
-                  <ChevronDown className="w-3.5 h-3.5 -rotate-90 opacity-40" />
-                </Link>
-              ))}
+            <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto scrollbar-thin">
+              {NAV_LINKS.map(({ label, href }) => {
+                const active = isActive(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      "flex items-center justify-between px-4 py-3.5 rounded-lg text-sm font-medium transition-all duration-200",
+                      active
+                        ? "text-brand-primary"
+                        : "text-text-primary hover:bg-neutral-100/50"
+                    )}
+                    style={{
+                      color: active
+                        ? "var(--color-brand-primary)"
+                        : "var(--color-text-primary)",
+                      backgroundColor: active
+                        ? "color-mix(in srgb, var(--color-brand-primary) 10%, transparent)"
+                        : "transparent",
+                    }}
+                  >
+                    <span>{label}</span>
+                    {active && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--color-brand-primary)" }} />}
+                  </Link>
+                );
+              })}
             </nav>
 
-            <div className="px-5 py-5 space-y-3 border-t" style={{ borderColor: "var(--color-border)" }}>
+            <div className="px-4 py-5 space-y-3 border-t" style={{ borderColor: "var(--color-border)" }}>
               <Link href={session ? "/dashboard" : "/auth/login"} onClick={() => setMobileOpen(false)}
-                className="btn-secondary w-full justify-center text-sm">
+                className="btn-secondary w-full justify-center text-sm hover:shadow-sm transition-all duration-200">
                 {session ? "My Account" : "Sign In"}
               </Link>
-              <Link href="/shop" onClick={() => setMobileOpen(false)} className="btn-primary w-full justify-center text-sm">
+              <Link href="/shop" onClick={() => setMobileOpen(false)} className="btn-primary w-full justify-center text-sm hover:shadow-md transition-all duration-200">
                 Shop Now
               </Link>
             </div>
