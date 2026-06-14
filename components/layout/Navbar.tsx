@@ -110,8 +110,13 @@ export function Navbar() {
           "sticky top-0 z-50 w-full transition-all duration-200",
           scrolled
             ? "bg-white/98 backdrop-blur-md shadow-sm border-b border-neutral-100"
-            : "bg-[#fdf8f0]/98 backdrop-blur-sm"
+            : "backdrop-blur-sm"
         )}
+        style={
+          !scrolled
+            ? { backgroundColor: "var(--color-header-bg, #fdf8f0)" }
+            : undefined
+        }
       >
         <div className="container-site">
           <div className="flex h-14 items-center justify-between gap-4">
@@ -127,7 +132,7 @@ export function Navbar() {
               ) : (
                 <div>
                   <span className="font-display text-xl font-semibold text-neutral-900 tracking-tight">
-                    Mercy<span className="text-[#d98c2a]">Home</span>
+                    Mercy<span style={{ color: "var(--color-brand-primary, #d98c2a)" }}>Home</span>
                   </span>
                 </div>
               )}
@@ -146,12 +151,12 @@ export function Navbar() {
                   >
                     <Link
                       href={link.href}
-                      className={cn(
-                        "flex items-center gap-1 px-3.5 py-2 text-sm font-medium transition-colors duration-150 rounded-md",
-                        isActive
-                          ? "text-[#d98c2a]"
-                          : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/60"
-                      )}
+                      className="flex items-center gap-1 px-3.5 py-2 text-sm font-medium transition-colors duration-150 rounded-md hover:bg-neutral-100/60"
+                      style={{
+                        color: isActive
+                          ? "var(--color-nav-text-hover, #d98c2a)"
+                          : "var(--color-nav-text, #404040)",
+                      }}
                     >
                       {link.label}
                       {link.children && (
@@ -178,7 +183,18 @@ export function Navbar() {
                             <Link
                               key={child.href}
                               href={child.href}
-                              className="flex items-center px-4 py-2.5 text-sm text-neutral-600 hover:bg-[#fdf8f0] hover:text-[#d98c2a] transition-colors"
+                              className="flex items-center px-4 py-2.5 text-sm text-neutral-600 transition-colors"
+                              style={{
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              } as any}
+                              onMouseEnter={(e) => {
+                                (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-nav-text-hover, #d98c2a)";
+                                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "var(--color-header-bg, #fdf8f0)";
+                              }}
+                              onMouseLeave={(e) => {
+                                (e.currentTarget as HTMLAnchorElement).style.color = "";
+                                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "";
+                              }}
                             >
                               {child.label}
                             </Link>
@@ -211,7 +227,10 @@ export function Navbar() {
               >
                 <Heart style={{ width: 18, height: 18 }} />
                 {wishlistCount > 0 && (
-                  <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#d98c2a] text-white text-[9px] flex items-center justify-center font-bold">
+                  <span
+                    className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full text-white text-[9px] flex items-center justify-center font-bold"
+                    style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                  >
                     {wishlistCount > 9 ? "9+" : wishlistCount}
                   </span>
                 )}
@@ -232,7 +251,8 @@ export function Navbar() {
                     key={cartCount}
                     initial={{ scale: 1.4 }}
                     animate={{ scale: 1 }}
-                    className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#d98c2a] text-white text-[9px] flex items-center justify-center font-bold"
+                    className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full text-white text-[9px] flex items-center justify-center font-bold"
+                    style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
                   >
                     {cartCount > 9 ? "9+" : cartCount}
                   </motion.span>
@@ -243,7 +263,10 @@ export function Navbar() {
               {session ? (
                 <div className="relative group hidden lg:block ml-1">
                   <button className="flex items-center gap-1.5 pl-2 pr-3 h-8 rounded-full border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:text-neutral-900 transition-colors text-sm">
-                    <div className="w-5 h-5 rounded-full bg-[#d98c2a] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                    <div
+                      className="w-5 h-5 rounded-full text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                      style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                    >
                       {session.user?.name?.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-xs font-medium max-w-[80px] truncate">
@@ -265,7 +288,11 @@ export function Navbar() {
                       <Package className="w-4 h-4" /> My Orders
                     </Link>
                     {(session.user as any)?.role === "admin" && (
-                      <Link href="/admin" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#d98c2a] hover:bg-[#fdf3e7] transition-colors border-t border-neutral-100">
+                      <Link
+                        href="/admin"
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-opacity-80 transition-colors border-t border-neutral-100"
+                        style={{ color: "var(--color-brand-primary, #d98c2a)" }}
+                      >
                         <Settings className="w-4 h-4" /> Admin Panel
                       </Link>
                     )}
@@ -280,7 +307,11 @@ export function Navbar() {
               ) : (
                 <Link
                   href="/auth/login"
-                  className="hidden lg:flex items-center gap-1.5 ml-1 px-3.5 h-8 text-xs font-semibold rounded-full bg-[#d98c2a] text-white hover:bg-[#c47020] transition-colors"
+                  className="hidden lg:flex items-center gap-1.5 ml-1 px-3.5 h-8 text-xs font-semibold rounded-full transition-colors"
+                  style={{
+                    backgroundColor: "var(--color-button-primary, #d98c2a)",
+                    color: "var(--color-button-text, #ffffff)",
+                  }}
                 >
                   Sign In
                 </Link>
@@ -324,7 +355,7 @@ export function Navbar() {
                     <img src={logo} alt={bizName} className="h-7 w-auto" />
                   ) : (
                     <span className="font-display text-lg font-semibold">
-                      Mercy<span className="text-[#d98c2a]">Home</span>
+                      Mercy<span style={{ color: "var(--color-brand-primary, #d98c2a)" }}>Home</span>
                     </span>
                   )}
                 </Link>
@@ -357,7 +388,10 @@ export function Navbar() {
                             key={child.href}
                             href={child.href}
                             onClick={() => setMobileOpen(false)}
-                            className="block px-2 py-2 text-sm text-neutral-500 hover:text-[#d98c2a] rounded-md"
+                            className="block px-2 py-2 text-sm text-neutral-500 rounded-md transition-colors"
+                            style={{ color: "var(--color-nav-text, #404040)" }}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-nav-text-hover, #d98c2a)"; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-nav-text, #404040)"; }}
                           >
                             {child.label}
                           </Link>
@@ -367,21 +401,25 @@ export function Navbar() {
                   </AnimatePresence>
                 </div>
 
-                {NAV_LINKS.slice(1).map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors mt-0.5",
-                      pathname.startsWith(link.href.split("?")[0])
-                        ? "bg-[#fdf3e7] text-[#d98c2a]"
-                        : "text-neutral-700 hover:bg-neutral-50"
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                {NAV_LINKS.slice(1).map((link) => {
+                  const isActive = pathname.startsWith(link.href.split("?")[0]);
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors mt-0.5"
+                      style={{
+                        backgroundColor: isActive ? "rgba(217,140,42,0.08)" : undefined,
+                        color: isActive
+                          ? "var(--color-nav-text-hover, #d98c2a)"
+                          : "var(--color-nav-text, #404040)",
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
               </nav>
 
               {/* Mobile footer */}
@@ -398,7 +436,8 @@ export function Navbar() {
                     </Link>
                     {(session.user as any)?.role === "admin" && (
                       <Link href="/admin" onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2.5 text-sm text-[#d98c2a] rounded-lg hover:bg-[#fdf3e7]">
+                        className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-lg"
+                        style={{ color: "var(--color-brand-primary, #d98c2a)" }}>
                         <Settings className="w-4 h-4" /> Admin Panel
                       </Link>
                     )}
@@ -410,11 +449,16 @@ export function Navbar() {
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
                     <Link href="/auth/login" onClick={() => setMobileOpen(false)}
-                      className="flex items-center justify-center py-2.5 text-sm font-medium border border-neutral-200 rounded-lg text-neutral-700 hover:border-[#d98c2a] hover:text-[#d98c2a]">
+                      className="flex items-center justify-center py-2.5 text-sm font-medium border border-neutral-200 rounded-lg text-neutral-700"
+                      style={{ borderColor: "var(--color-border, #e5e5e5)" }}>
                       Sign In
                     </Link>
                     <Link href="/auth/register" onClick={() => setMobileOpen(false)}
-                      className="flex items-center justify-center py-2.5 text-sm font-medium rounded-lg bg-[#d98c2a] text-white hover:bg-[#c47020]">
+                      className="flex items-center justify-center py-2.5 text-sm font-medium rounded-lg"
+                      style={{
+                        backgroundColor: "var(--color-button-primary, #d98c2a)",
+                        color: "var(--color-button-text, #ffffff)",
+                      }}>
                       Register
                     </Link>
                   </div>

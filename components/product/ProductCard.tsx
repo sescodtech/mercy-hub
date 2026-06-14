@@ -50,6 +50,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
       className="group"
+      style={{ touchAction: "manipulation" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -66,7 +67,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               </span>
             )}
             {product.isNewArrival && !discount && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#d98c2a] text-white leading-tight">
+              <span
+                className="text-[10px] font-bold px-1.5 py-0.5 rounded text-white leading-tight"
+                style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+              >
                 NEW
               </span>
             )}
@@ -83,9 +87,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             className={cn(
               "absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-sm",
               wishlisted
-                ? "bg-red-500 text-white opacity-100"
+                ? "text-white opacity-100"
                 : "bg-white text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
             )}
+            style={wishlisted ? { backgroundColor: "var(--color-brand-error, #ef4444)" } : undefined}
             aria-label="Wishlist"
           >
             <Heart className={cn("w-3.5 h-3.5", wishlisted && "fill-current")} />
@@ -132,7 +137,18 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             >
               <button
                 onClick={handleAddToCart}
-                className="w-full flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold tracking-wider uppercase text-white bg-[#1a1208]/90 backdrop-blur-sm hover:bg-[#1a1208] transition-colors"
+                className="w-full flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold tracking-wider uppercase transition-colors"
+                style={{
+                  backgroundColor: "var(--color-footer-bg, #1a1208)",
+                  color: "var(--color-button-text, #ffffff)",
+                  backdropFilter: "blur(4px)",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = "var(--color-button-primary, #c47020)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = "var(--color-footer-bg, #1a1208)";
+                }}
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
                 Add to Cart
@@ -152,8 +168,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           )}
 
           {/* Name */}
-          <h3 className="text-sm font-medium text-neutral-800 line-clamp-2 leading-snug group-hover:text-[#d98c2a] transition-colors mb-1.5"
-            style={{ fontFamily: "var(--font-body)" }}>
+          <h3
+            className="text-sm font-medium text-neutral-800 line-clamp-2 leading-snug transition-colors mb-1.5"
+            style={{ fontFamily: "var(--font-body)" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLHeadingElement).style.color = "var(--color-brand-primary, #d98c2a)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLHeadingElement).style.color = ""; }}
+          >
             {product.name}
           </h3>
 
@@ -167,9 +187,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     className={cn(
                       "w-2.5 h-2.5",
                       i <= Math.round(product.rating)
-                        ? "text-[#d98c2a] fill-[#d98c2a]"
+                        ? "fill-current"
                         : "text-neutral-200 fill-neutral-200"
                     )}
+                    style={i <= Math.round(product.rating) ? { color: "var(--color-brand-primary, #d98c2a)" } : undefined}
                   />
                 ))}
               </div>
@@ -180,8 +201,13 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           {/* Price */}
           <div className="flex items-center gap-2 flex-wrap">
             <span
-              className={cn("text-sm font-bold leading-none", isOnSale ? "text-[#c47020]" : "text-neutral-900")}
-              style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}
+              className="text-sm font-bold leading-none"
+              style={{
+                fontFamily: "var(--font-body)",
+                letterSpacing: "-0.02em",
+                fontVariantNumeric: "tabular-nums",
+                color: isOnSale ? "var(--color-brand-accent, #c47020)" : "#171717",
+              }}
             >
               {formatPrice(product.price)}
             </span>

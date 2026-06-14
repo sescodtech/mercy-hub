@@ -24,42 +24,46 @@ const SettingsContext = createContext<SettingsContextValue>({
 });
 
 // ── Theme Application ──────────────────────────────────────────
+// Reads from settings.brandColors and settings.uiColors (current schema)
+// and writes them as CSS custom properties so the entire frontend reflects
+// whatever the admin saved in /admin/appearance.
 function applyThemeToDOM(settings: ISiteSettings | null) {
-  if (!settings) return;
+  if (typeof document === "undefined" || !settings) return;
 
   const root = document.documentElement;
-  
-  // Primary brand color
-  if (settings.brandColor) {
-    root.style.setProperty("--color-brand-primary", settings.brandColor);
+
+  // ── Brand colors ─────────────────────────────────────────
+  const brand = settings.brandColors;
+  if (brand) {
+    if (brand.primary)   root.style.setProperty("--color-brand-primary",   brand.primary);
+    if (brand.secondary) root.style.setProperty("--color-brand-secondary",  brand.secondary);
+    if (brand.accent)    root.style.setProperty("--color-brand-accent",     brand.accent);
+    if (brand.success)   root.style.setProperty("--color-brand-success",    brand.success);
+    if (brand.warning)   root.style.setProperty("--color-brand-warning",    brand.warning);
+    if (brand.error)     root.style.setProperty("--color-brand-error",      brand.error);
   }
 
-  // Secondary/muted colors
-  if (settings.colors?.secondary) {
-    root.style.setProperty("--color-secondary", settings.colors.secondary);
-  }
+  // ── UI / surface colors ───────────────────────────────────
+  const ui = settings.uiColors;
+  if (ui) {
+    if (ui.headerBg)      root.style.setProperty("--color-header-bg",       ui.headerBg);
+    if (ui.footerBg)      root.style.setProperty("--color-footer-bg",       ui.footerBg);
+    if (ui.navText)       root.style.setProperty("--color-nav-text",        ui.navText);
+    if (ui.navTextHover)  root.style.setProperty("--color-nav-text-hover",  ui.navTextHover);
+    if (ui.buttonPrimary) root.style.setProperty("--color-button-primary",  ui.buttonPrimary);
+    if (ui.buttonText)    root.style.setProperty("--color-button-text",     ui.buttonText);
+    if (ui.linkColor)     root.style.setProperty("--color-link",            ui.linkColor);
+    if (ui.cardBg)        root.style.setProperty("--color-card-bg",         ui.cardBg);
+    if (ui.pageBg)        root.style.setProperty("--color-page-bg",         ui.pageBg);
+    if (ui.sectionAltBg)  root.style.setProperty("--color-section-alt-bg",  ui.sectionAltBg);
+    if (ui.borderColor)   root.style.setProperty("--color-border",          ui.borderColor);
+    if (ui.textPrimary)   root.style.setProperty("--color-text-primary",    ui.textPrimary);
+    if (ui.textSecondary) root.style.setProperty("--color-text-secondary",  ui.textSecondary);
 
-  // Text colors
-  if (settings.colors?.textPrimary) {
-    root.style.setProperty("--color-text-primary", settings.colors.textPrimary);
-  }
-  if (settings.colors?.textSecondary) {
-    root.style.setProperty("--color-text-secondary", settings.colors.textSecondary);
-  }
-
-  // Header background
-  if (settings.colors?.headerBg) {
-    root.style.setProperty("--color-header-bg", settings.colors.headerBg);
-  }
-
-  // Border color
-  if (settings.colors?.border) {
-    root.style.setProperty("--color-border", settings.colors.border);
-  }
-
-  // Nav text color
-  if (settings.colors?.navText) {
-    root.style.setProperty("--color-nav-text", settings.colors.navText);
+    // Apply page background to body so the whole page reflects the setting
+    if (ui.pageBg) {
+      document.body.style.backgroundColor = ui.pageBg;
+    }
   }
 }
 
@@ -87,7 +91,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         cacheTime = Date.now();
         setSettings(json.data);
         setError(null);
-        // Apply theme to DOM immediately
         if (mounted) applyThemeToDOM(json.data);
       } else {
         setError("Failed to load settings");
@@ -99,13 +102,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Fetch on mount
   useEffect(() => {
     setMounted(true);
     fetchSettings();
   }, []);
 
-  // Apply theme whenever settings change
+  // Re-apply theme whenever settings change after mount
   useEffect(() => {
     if (settings && mounted) {
       applyThemeToDOM(settings);

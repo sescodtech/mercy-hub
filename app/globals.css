@@ -4,6 +4,37 @@
 
 @layer base {
   :root {
+    /* ── Admin-controlled theme variables ──────────────────────
+       Set by applyThemeToDOM() in hooks/useSettings.tsx after
+       the admin saves colors in /admin/appearance.
+       Fallbacks below match current Mercy Hub brand defaults so
+       the site looks correct on first load before JS runs.
+    ─────────────────────────────────────────────────────────── */
+
+    /* Brand */
+    --color-brand-primary:    #d98c2a;
+    --color-brand-secondary:  #fdf8f0;
+    --color-brand-accent:     #c47020;
+    --color-brand-success:    #10b981;
+    --color-brand-warning:    #f59e0b;
+    --color-brand-error:      #ef4444;
+
+    /* UI surfaces */
+    --color-header-bg:        #fdf8f0;
+    --color-footer-bg:        #1a1208;
+    --color-nav-text:         #404040;
+    --color-nav-text-hover:   #d98c2a;
+    --color-button-primary:   #c47020;
+    --color-button-text:      #ffffff;
+    --color-link:             #d98c2a;
+    --color-card-bg:          #ffffff;
+    --color-page-bg:          #fdf8f0;
+    --color-section-alt-bg:   #ffffff;
+    --color-border:           #e5e5e5;
+    --color-text-primary:     #1a1208;
+    --color-text-secondary:   #737373;
+
+    /* shadcn/radix tokens — keep unchanged */
     --radius: 0.5rem;
     --background: 0 0% 99%;
     --foreground: 30 40% 8%;
@@ -38,8 +69,8 @@
   }
 
   body {
-    background-color: #fdf8f0;
-    color: #1a1208;
+    background-color: var(--color-page-bg, #fdf8f0);
+    color: var(--color-text-primary, #1a1208);
     /* Inter as body font — replaces DM Sans */
     font-family: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
     font-size: 15px;
@@ -167,7 +198,7 @@
     font-size: 1rem;
     font-weight: 700;
     letter-spacing: -0.02em;
-    color: #c47020;
+    color: var(--color-brand-accent, #c47020);
     font-variant-numeric: tabular-nums;
   }
 
@@ -202,12 +233,12 @@
     justify-content: center;
     gap: 0.5rem;
     border-radius: 2px;
-    background-color: #c47020;
+    background-color: var(--color-button-primary, #c47020);
     padding: 0.75rem 1.5rem;
     font-family: var(--font-body), system-ui, sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
-    color: white;
+    color: var(--color-button-text, white);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     transition: all 0.3s;
@@ -236,7 +267,7 @@
     justify-content: center;
     gap: 0.5rem;
     border-radius: 2px;
-    border: 1px solid #c47020;
+    border: 1px solid var(--color-button-primary, #c47020);
     padding: 0.75rem 1.5rem;
     font-family: var(--font-body), system-ui, sans-serif;
     font-size: 0.875rem;
@@ -273,7 +304,7 @@
     line-height: 1.4;
   }
 
-  .badge-new      { background-color: #d98c2a; color: #fff; }
+  .badge-new      { background-color: var(--color-brand-primary, #d98c2a); color: #fff; }
   .badge-sale     { background-color: #ef4444; color: #fff; }
   .badge-trending { background-color: #171717; color: #fff; }
   .badge-oos      { background-color: #e5e5e5; color: #737373; }
@@ -301,14 +332,14 @@
     font-weight: 400;
     color: #171717;
     background-color: #fff;
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--color-border, #e5e5e5);
     border-radius: 8px;
     outline: none;
     transition: border-color 150ms, box-shadow 150ms;
   }
 
   .form-input:focus {
-    border-color: #d98c2a;
+    border-color: var(--color-brand-primary, #d98c2a);
     box-shadow: 0 0 0 3px rgba(217,140,42,0.12);
   }
 
@@ -338,7 +369,7 @@
   .divider-brand {
     width: 3rem;
     height: 2px;
-    background-color: #d98c2a;
+    background-color: var(--color-brand-primary, #d98c2a);
     border-radius: 9999px;
   }
 }
