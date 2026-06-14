@@ -5,6 +5,9 @@ import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { cn } from "@/utils";
 import Link from "next/link";
 
+// Returns & Refunds section removed — Mercy Hub does not offer returns.
+// "What happens if item arrives damaged" kept under Shipping as it covers
+// damage-on-arrival replacement which is a delivery issue, not a return policy.
 const FAQS = [
   {
     category: "Orders",
@@ -35,8 +38,8 @@ const FAQS = [
         a: "Lagos: 1–2 business days. Southwest Nigeria: 2–4 days. South-South & Southeast: 3–5 days. Northern Nigeria: 5–7 business days. These are estimates and may vary.",
       },
       {
-        q: "Do you offer free shipping?",
-        a: "Yes! Orders above ₦100,000 qualify for free shipping anywhere in Nigeria.",
+        q: "Do you offer free delivery?",
+        a: "Yes! Orders above ₦100,000 qualify for free delivery anywhere in Nigeria.",
       },
       {
         q: "Do you ship outside Nigeria?",
@@ -44,24 +47,7 @@ const FAQS = [
       },
       {
         q: "What happens if my item arrives damaged?",
-        a: "Please take photos immediately and contact us within 48 hours of delivery via WhatsApp or email. We will arrange a replacement or full refund.",
-      },
-    ],
-  },
-  {
-    category: "Returns & Refunds",
-    items: [
-      {
-        q: "Do you offer refunds?",
-        a: "We accept returns within 7 days of delivery for items in their original condition and packaging. Items that have been used or damaged by the customer cannot be returned.",
-      },
-      {
-        q: "How do I initiate a return?",
-        a: "Contact us via WhatsApp or email with your order number and reason for return. We will provide a return address and instructions.",
-      },
-      {
-        q: "How long do refunds take?",
-        a: "Refunds are processed within 3–5 business days of receiving the returned item. The amount will be credited back to your original payment method.",
+        a: "Please take photos immediately and contact us within 48 hours of delivery via WhatsApp or email. We will arrange a replacement or full refund for items damaged during transit.",
       },
     ],
   },
@@ -85,8 +71,8 @@ const FAQS = [
 ];
 
 export default function FAQPage() {
-  const [openItem,  setOpenItem]  = useState<string | null>(null);
-  const [search,    setSearch]    = useState("");
+  const [openItem, setOpenItem] = useState<string | null>(null);
+  const [search,   setSearch]   = useState("");
 
   const filtered = FAQS.map((cat) => ({
     ...cat,
@@ -98,14 +84,15 @@ export default function FAQPage() {
   })).filter((cat) => cat.items.length > 0);
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-[#fdf8f0]">
+
       {/* Hero */}
-      <div className="bg-white border-b border-neutral-100 py-16 text-center px-4">
-        <h1 className="font-display text-4xl font-semibold text-neutral-900 mb-3">
+      <div className="bg-white border-b border-neutral-100 py-12 sm:py-16 text-center px-4">
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold text-neutral-900 mb-3">
           Frequently Asked Questions
         </h1>
-        <p className="text-neutral-500 max-w-md mx-auto mb-8">
-          Find answers to common questions about orders, shipping, returns and more.
+        <p className="text-neutral-500 max-w-md mx-auto mb-8 text-sm sm:text-base">
+          Find answers to common questions about orders, shipping, and more.
         </p>
         {/* Search */}
         <div className="relative max-w-md mx-auto">
@@ -120,11 +107,14 @@ export default function FAQPage() {
         </div>
       </div>
 
-      <div className="container-site py-16 max-w-3xl">
+      <div className="container-site py-12 sm:py-16 max-w-3xl">
         {filtered.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-neutral-400 mb-3">No results for "{search}"</p>
-            <button onClick={() => setSearch("")} className="text-sm text-[#d98c2a] hover:underline">
+            <button
+              onClick={() => setSearch("")}
+              className="text-sm text-[#d98c2a] hover:underline"
+            >
               Clear search
             </button>
           </div>
@@ -132,10 +122,12 @@ export default function FAQPage() {
           <div className="space-y-10">
             {filtered.map((cat) => (
               <div key={cat.category}>
-                <h2 className="font-display text-xl font-semibold text-neutral-900 mb-4">{cat.category}</h2>
+                <h2 className="font-display text-xl font-semibold text-neutral-900 mb-4">
+                  {cat.category}
+                </h2>
                 <div className="space-y-2">
                   {cat.items.map((item, i) => {
-                    const key = `${cat.category}-${i}`;
+                    const key    = `${cat.category}-${i}`;
                     const isOpen = openItem === key;
                     return (
                       <div key={key} className="bg-white rounded-xl border border-neutral-100 overflow-hidden">
@@ -143,7 +135,9 @@ export default function FAQPage() {
                           onClick={() => setOpenItem(isOpen ? null : key)}
                           className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-neutral-50 transition-colors"
                         >
-                          <span className="text-sm font-medium text-neutral-900 pr-4">{item.q}</span>
+                          <span className="text-sm font-medium text-neutral-900 pr-4">
+                            {item.q}
+                          </span>
                           {isOpen
                             ? <ChevronUp className="w-4 h-4 text-[#d98c2a] flex-shrink-0" />
                             : <ChevronDown className="w-4 h-4 text-neutral-400 flex-shrink-0" />}
@@ -164,8 +158,12 @@ export default function FAQPage() {
 
         {/* CTA */}
         <div className="mt-16 bg-white rounded-2xl border border-neutral-100 p-8 text-center">
-          <h3 className="font-display text-xl font-semibold text-neutral-900 mb-2">Still have questions?</h3>
-          <p className="text-neutral-500 text-sm mb-5">Our team is happy to help. Reach out to us directly.</p>
+          <h3 className="font-display text-xl font-semibold text-neutral-900 mb-2">
+            Still have questions?
+          </h3>
+          <p className="text-neutral-500 text-sm mb-5">
+            Our team is happy to help. Reach out to us directly.
+          </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/contact"
               className="px-6 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors">

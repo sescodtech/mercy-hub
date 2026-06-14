@@ -1,341 +1,221 @@
-"use client";
-
-import { useState, useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { connectDB } from "@/lib/db";
+import { Order } from "@/lib/models";
+import Link from "next/link";
 import {
-  User, Mail, Phone, MapPin, Lock, Camera,
-  Loader2, CheckCircle, Eye, EyeOff, Save,
+  ShoppingBag, Package, Heart, User,
+  ArrowRight, TrendingUp, Clock,
 } from "lucide-react";
-import axios from "axios";
-import toast from "react-hot-toast";
-import { cn } from "@/utils";
 
-interface UserProfile {
-  _id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  avatar?: string;
-  isVerified: boolean;
-  createdAt: string;
-  addresses?: {
-    _id: string;
-    label: string;
-    firstName: string;
-    lastName: string;
-    phone: string;
-    addressLine1: string;
-    city: string;
-    state: string;
-    country: string;
-    isDefault: boolean;
-  }[];
+async function getDashboardData(userId: string) {
+  try {
+    await connectDB();
+    const [orders, recentOrders] = await Promise.all([
+      Order.countDocuments({ user: userId }),
+      Order.find({ user: userId })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select("orderNumber orderStatus total createdAt items")
+        .lean(),
+    ]);
+    const totalSpent = await Order.aggregate([
+      { $match: { user: userId, paymentStatus: "paid" } },
+      { $group: { _id: null, total: { $sum: "$total" } } },
+    ]);
+    return {
+      totalOrders: orders,
+      totalSpent:  totalSpent[0]?.total ?? 0,
+      recentOrders: JSON.parse(JSON.stringify(recentOrders)),
+    };
+  } catch {
+    return { totalOrders: 0, totalSpent: 0, recentOrders: [] };
+  }
 }
 
-type Tab = "profile" | "security" | "addresses";
+const STATUS_COLORS: Record<string, string> = {
+  pending:    "bg-yellow-50 text-yellow-700 border-yellow-200",
+  confirmed:  "bg-blue-50 text-blue-700 border-blue-200",
+  processing: "bg-purple-50 text-purple-700 border-purple-200",
+  shipped:    "bg-indigo-50 text-indigo-700 border-indigo-200",
+  out_for_delivery: "bg-orange-50 text-orange-700 border-orange-200",
+  delivered:  "bg-green-50 text-green-700 border-green-200",
+  cancelled:  "bg-red-50 text-red-700 border-red-200",
+};
 
-export default function ProfilePage() {
-  const { data: session, status, update } = useSession();
-  const router  = useRouter();
-  const fileRef = useRef<HTMLInputElement>(null);
+function formatPrice(amount: number) {
+  return `₦${amount.toLocaleString("en-NG")}`;
+}
 
-  const [tab,       setTab]       = useState<Tab>("profile");
-  const [profile,   setProfile]   = useState<UserProfile | null>(null);
-  const [loading,   setLoading]   = useState(true);
-  const [saving,    setSaving]    = useState(false);
-  const [uploading, setUploading] = useState(false);
+function formatDate(date: string | Date) {
+  return new Date(date).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
+}
 
-  // Profile form
-  const [name,  setName]  = useState("");
-  const [phone, setPhone] = useState("");
+export default async function DashboardPage() {
+  const session = await auth();
 
-  // Password form
-  const [currentPw, setCurrentPw] = useState("");
-  const [newPw,     setNewPw]     = useState("");
-  const [confirmPw, setConfirmPw] = useState("");
-  const [showPw,    setShowPw]    = useState(false);
+  if (!session?.user) redirect("/auth/login");
+  if (session.user.role === "admin") redirect("/admin");
 
-  // Redirect if not logged in
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/login?callbackUrl=/dashboard/profile");
-    }
-  }, [status, router]);
+  const { totalOrders, totalSpent, recentOrders } = await getDashboardData(session.user.id as string);
+  const firstName = session.user.name?.split(" ")[0] ?? "there";
 
-  // Load profile
-  useEffect(() => {
-    if (status !== "authenticated") return;
-    axios.get("/api/users")
-      .then(({ data }) => {
-        if (data.success) {
-          setProfile(data.data);
-          setName(data.data.name ?? "");
-          setPhone(data.data.phone ?? "");
-        }
-      })
-      .catch(() => toast.error("Failed to load profile"))
-      .finally(() => setLoading(false));
-  }, [status]);
-
-  const uploadAvatar = async (file: File) => {
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("folder", "avatars");
-      const { data } = await axios.post("/api/upload", fd);
-      if (data.success) {
-        await axios.put("/api/users", { avatar: data.url });
-        setProfile((p) => p ? { ...p, avatar: data.url } : p);
-        await update({ avatar: data.url });
-        toast.success("Avatar updated!");
-      }
-    } catch { toast.error("Upload failed"); }
-    finally { setUploading(false); }
-  };
-
-  const saveProfile = async () => {
-    if (!name.trim()) { toast.error("Name is required"); return; }
-    setSaving(true);
-    try {
-      const { data } = await axios.put("/api/users", { name, phone });
-      if (data.success) {
-        setProfile(data.data);
-        await update({ name });
-        toast.success("Profile updated!");
-      }
-    } catch { toast.error("Failed to update profile"); }
-    finally { setSaving(false); }
-  };
-
-  const changePassword = async () => {
-    if (!currentPw || !newPw || !confirmPw) { toast.error("Fill in all password fields"); return; }
-    if (newPw.length < 8) { toast.error("Password must be at least 8 characters"); return; }
-    if (newPw !== confirmPw) { toast.error("Passwords don't match"); return; }
-    setSaving(true);
-    try {
-      const { data } = await axios.put("/api/users", {
-        currentPassword: currentPw,
-        newPassword:     newPw,
-      });
-      if (data.success) {
-        toast.success("Password changed successfully!");
-        setCurrentPw(""); setNewPw(""); setConfirmPw("");
-      }
-    } catch (err: any) {
-      toast.error(err?.response?.data?.error ?? "Failed to change password");
-    } finally { setSaving(false); }
-  };
-
-  if (status === "loading" || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-cream">
-        <Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" />
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-cream">
-        <div className="text-center">
-          <p className="text-neutral-500 mb-4">Failed to load profile</p>
-          <button onClick={() => window.location.reload()}
-            className="text-sm text-[#d98c2a] hover:underline">Try again</button>
-        </div>
-      </div>
-    );
-  }
+  const QUICK_LINKS = [
+    { label: "My Orders",   href: "/dashboard/orders",  Icon: ShoppingBag, desc: "Track your purchases" },
+    { label: "Wishlist",    href: "/dashboard/wishlist", Icon: Heart,       desc: "Saved items" },
+    { label: "My Profile",  href: "/dashboard/profile",  Icon: User,        desc: "Account settings" },
+  ];
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-[#fdf8f0]">
+
+      {/* Header */}
       <div className="bg-white border-b border-neutral-100">
-        <div className="container-site py-5">
-          <h1 className="font-display text-2xl font-semibold text-neutral-900">My Profile</h1>
-          <p className="text-sm text-neutral-400 mt-0.5">Manage your account settings</p>
+        <div className="container-site py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-neutral-400 mb-0.5">Welcome back</p>
+              <h1 className="font-display text-2xl font-semibold text-neutral-900">
+                Hi, {firstName} 👋
+              </h1>
+            </div>
+            <Link
+              href="/shop"
+              className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors"
+            >
+              Continue Shopping <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="container-site py-10">
-        <div className="grid lg:grid-cols-[280px_1fr] gap-8 items-start">
+      <div className="container-site py-8 space-y-8">
 
-          {/* Sidebar */}
-          <div className="space-y-4">
-            {/* Avatar */}
-            <div className="bg-white rounded-2xl border border-neutral-100 p-6 text-center">
-              <div className="relative w-20 h-20 mx-auto mb-4">
-                <div className="w-20 h-20 rounded-full overflow-hidden bg-[#d98c2a]/10 border-2 border-[#d98c2a]/20">
-                  {profile.avatar ? (
-                    <Image src={profile.avatar} alt={profile.name} width={80} height={80} className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-2xl font-bold text-[#d98c2a]">
-                        {profile.name?.charAt(0)?.toUpperCase()}
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {[
+            {
+              label: "Total Orders",
+              value: totalOrders,
+              Icon:  ShoppingBag,
+              color: "text-blue-600",
+              bg:    "bg-blue-50",
+            },
+            {
+              label: "Total Spent",
+              value: formatPrice(totalSpent),
+              Icon:  TrendingUp,
+              color: "text-[#d98c2a]",
+              bg:    "bg-[#d98c2a]/10",
+            },
+            {
+              label: "Active Orders",
+              value: recentOrders.filter((o: any) =>
+                ["pending", "confirmed", "processing", "shipped", "out_for_delivery"].includes(o.orderStatus)
+              ).length,
+              Icon:  Clock,
+              color: "text-purple-600",
+              bg:    "bg-purple-50",
+            },
+          ].map(({ label, value, Icon, color, bg }) => (
+            <div key={label} className="bg-white rounded-2xl border border-neutral-100 p-5">
+              <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center mb-3`}>
+                <Icon className={`w-5 h-5 ${color}`} />
+              </div>
+              <p className="text-2xl font-bold text-neutral-900">{value}</p>
+              <p className="text-xs text-neutral-400 mt-0.5">{label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick links */}
+        <div>
+          <h2 className="font-display text-lg font-semibold text-neutral-900 mb-4">Quick Access</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {QUICK_LINKS.map(({ label, href, Icon, desc }) => (
+              <Link
+                key={href}
+                href={href}
+                className="bg-white rounded-2xl border border-neutral-100 p-5 flex items-center gap-4 hover:border-[#d98c2a]/40 hover:shadow-sm transition-all group"
+              >
+                <div className="w-11 h-11 bg-[#d98c2a]/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-[#d98c2a] transition-colors">
+                  <Icon className="w-5 h-5 text-[#d98c2a] group-hover:text-white transition-colors" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-neutral-900">{label}</p>
+                  <p className="text-xs text-neutral-400 mt-0.5">{desc}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-neutral-300 ml-auto flex-shrink-0 group-hover:text-[#d98c2a] transition-colors" />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent orders */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-lg font-semibold text-neutral-900">Recent Orders</h2>
+            <Link href="/dashboard/orders" className="text-sm text-[#d98c2a] hover:underline flex items-center gap-1">
+              View all <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {recentOrders.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-neutral-100 p-10 text-center">
+              <Package className="w-12 h-12 text-neutral-200 mx-auto mb-3" />
+              <p className="text-neutral-500 text-sm mb-1">No orders yet</p>
+              <p className="text-neutral-400 text-xs mb-5">Your orders will appear here once you place one.</p>
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors"
+              >
+                Start Shopping <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentOrders.map((order: any) => (
+                <Link
+                  key={order._id}
+                  href={`/dashboard/orders?order=${order._id}`}
+                  className="bg-white rounded-2xl border border-neutral-100 p-4 sm:p-5 flex items-center gap-4 hover:border-[#d98c2a]/30 hover:shadow-sm transition-all"
+                >
+                  {/* Order icon */}
+                  <div className="w-10 h-10 bg-neutral-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <ShoppingBag className="w-5 h-5 text-neutral-400" />
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <p className="text-sm font-semibold text-neutral-900 font-mono truncate">
+                        {order.orderNumber}
+                      </p>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${STATUS_COLORS[order.orderStatus] ?? STATUS_COLORS.pending}`}>
+                        {order.orderStatus?.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
                       </span>
                     </div>
-                  )}
-                </div>
-                <button
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
-                  className="absolute bottom-0 right-0 w-7 h-7 bg-[#d98c2a] rounded-full flex items-center justify-center text-white shadow-sm hover:bg-[#c47020] transition-colors"
-                >
-                  {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3" />}
-                </button>
-                <input ref={fileRef} type="file" accept="image/*" className="hidden"
-                  onChange={(e) => e.target.files?.[0] && uploadAvatar(e.target.files[0])} />
-              </div>
-              <h3 className="font-semibold text-neutral-900">{profile.name}</h3>
-              <p className="text-xs text-neutral-400 mt-0.5">{profile.email}</p>
-              {profile.isVerified && (
-                <div className="flex items-center justify-center gap-1 mt-2 text-xs text-green-600">
-                  <CheckCircle className="w-3 h-3" /> Verified account
-                </div>
-              )}
-            </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-neutral-400">{formatDate(order.createdAt)}</p>
+                      <p className="text-sm font-bold text-neutral-900">{formatPrice(order.total)}</p>
+                    </div>
+                  </div>
 
-            {/* Nav tabs */}
-            <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden">
-              {([
-                { id: "profile",   label: "Personal Info",  icon: User },
-                { id: "security",  label: "Security",       icon: Lock },
-                { id: "addresses", label: "Addresses",      icon: MapPin },
-              ] as { id: Tab; label: string; icon: React.ElementType }[]).map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => setTab(id)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3.5 text-sm transition-colors text-left border-b border-neutral-50 last:border-0",
-                    tab === id ? "bg-[#d98c2a]/5 text-[#d98c2a] font-medium" : "text-neutral-600 hover:bg-neutral-50"
-                  )}
-                >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  {label}
-                </button>
+                  <ChevronRight className="w-4 h-4 text-neutral-300 flex-shrink-0" />
+                </Link>
               ))}
             </div>
-          </div>
+          )}
+        </div>
 
-          {/* Main content */}
-          <div className="bg-white rounded-2xl border border-neutral-100 p-6">
-
-            {/* Profile tab */}
-            {tab === "profile" && (
-              <div className="space-y-5">
-                <h2 className="font-semibold text-neutral-900">Personal Information</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">Full Name</label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name"
-                        className="w-full pl-10 pr-4 py-2.5 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[#d98c2a]" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">Email</label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                      <input value={profile.email} disabled
-                        className="w-full pl-10 pr-4 py-2.5 text-sm border border-neutral-200 rounded-lg bg-neutral-50 text-neutral-400 cursor-not-allowed" />
-                    </div>
-                    <p className="text-xs text-neutral-400 mt-1">Email cannot be changed</p>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">Phone Number</label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                      <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+234 801 234 5678" type="tel"
-                        className="w-full pl-10 pr-4 py-2.5 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[#d98c2a]" />
-                    </div>
-                  </div>
-                  <div className="pt-2">
-                    <p className="text-xs text-neutral-400 mb-3">
-                      Member since {new Date(profile.createdAt).toLocaleDateString("en-NG", { month: "long", year: "numeric" })}
-                    </p>
-                    <button onClick={saveProfile} disabled={saving}
-                      className="flex items-center gap-2 px-6 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 transition-colors">
-                      {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                      {saving ? "Saving…" : "Save Changes"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Security tab */}
-            {tab === "security" && (
-              <div className="space-y-5">
-                <h2 className="font-semibold text-neutral-900">Change Password</h2>
-                <div className="space-y-4 max-w-md">
-                  {[
-                    { label: "Current Password", value: currentPw, setter: setCurrentPw },
-                    { label: "New Password",     value: newPw,     setter: setNewPw },
-                    { label: "Confirm Password", value: confirmPw, setter: setConfirmPw },
-                  ].map(({ label, value, setter }) => (
-                    <div key={label}>
-                      <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">{label}</label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                        <input
-                          type={showPw ? "text" : "password"}
-                          value={value}
-                          onChange={(e) => setter(e.target.value)}
-                          className="w-full pl-10 pr-10 py-2.5 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[#d98c2a]"
-                        />
-                        <button type="button" onClick={() => setShowPw(!showPw)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400">
-                          {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  <button onClick={changePassword} disabled={saving}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 transition-colors">
-                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-                    {saving ? "Updating…" : "Update Password"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Addresses tab */}
-            {tab === "addresses" && (
-              <div className="space-y-4">
-                <h2 className="font-semibold text-neutral-900">Saved Addresses</h2>
-                {!profile.addresses || profile.addresses.length === 0 ? (
-                  <div className="py-10 text-center">
-                    <MapPin className="w-10 h-10 text-neutral-200 mx-auto mb-3" />
-                    <p className="text-neutral-400 text-sm">No saved addresses yet.</p>
-                    <p className="text-xs text-neutral-400 mt-1">Addresses are saved automatically when you place an order.</p>
-                  </div>
-                ) : (
-                  profile.addresses.map((addr) => (
-                    <div key={addr._id} className={cn(
-                      "p-4 rounded-xl border-2 transition-all",
-                      addr.isDefault ? "border-[#d98c2a] bg-[#d98c2a]/5" : "border-neutral-200"
-                    )}>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-bold text-neutral-500 uppercase">{addr.label}</span>
-                            {addr.isDefault && (
-                              <span className="text-[10px] font-semibold text-[#d98c2a] bg-[#d98c2a]/10 px-2 py-0.5 rounded-full">Default</span>
-                            )}
-                          </div>
-                          <p className="text-sm font-medium text-neutral-800">{addr.firstName} {addr.lastName}</p>
-                          <p className="text-sm text-neutral-500 mt-0.5">{addr.addressLine1}, {addr.city}, {addr.state}</p>
-                          <p className="text-xs text-neutral-400 mt-0.5">{addr.phone}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
+        {/* Mobile shop CTA */}
+        <div className="sm:hidden">
+          <Link
+            href="/shop"
+            className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#d98c2a] text-white text-sm font-semibold rounded-xl hover:bg-[#c47020] transition-colors"
+          >
+            Continue Shopping <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     </div>
