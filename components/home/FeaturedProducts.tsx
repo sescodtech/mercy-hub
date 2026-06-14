@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { connectDB } from "@/lib/db";
 import { Product } from "@/lib/models";
 import { ProductCard } from "@/components/product/ProductCard";
+import { ViewAllLink } from "@/components/home/ViewAllLink";
 import type { IProduct } from "@/types";
 
 async function getFeaturedProducts(): Promise<IProduct[]> {
@@ -37,15 +38,7 @@ export async function FeaturedProducts() {
               Featured Products
             </h2>
           </div>
-          <Link
-            href="/shop"
-            className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-neutral-500 transition-colors"
-            style={{} as any}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-brand-primary, #d98c2a)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = ""; }}
-          >
-            View All <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          <ViewAllLink />
         </div>
 
         {/* Grid — 2 cols mobile, 3 tablet, 4 desktop, 5 wide */}
