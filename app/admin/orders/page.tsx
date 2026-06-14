@@ -5,76 +5,84 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search, Filter, ChevronDown, ChevronUp, Package,
-  Clock, CheckCircle, Truck, XCircle, RefreshCw,
-  Phone, MapPin, MessageCircle, Eye,
+  Search, Package, Clock, CheckCircle, Truck,
+  XCircle, RefreshCw, Phone, MapPin, MessageCircle,
+  ChevronDown, ChevronUp, Navigation,
 } from "lucide-react";
 import axios from "axios";
 import { formatPrice, formatDate, cn } from "@/utils";
 import type { IOrder } from "@/types";
 
-const STATUS_CONFIG: Record<string, { color: string; bg: string; icon: React.ElementType; label: string; next?: string[] }> = {
-  pending:    { color: "text-yellow-700", bg: "bg-yellow-50 border-yellow-200",  icon: Clock,        label: "Pending",    next: ["confirmed", "cancelled"] },
-  confirmed:  { color: "text-blue-700",   bg: "bg-blue-50 border-blue-200",      icon: CheckCircle,  label: "Confirmed",  next: ["processing", "cancelled"] },
-  processing: { color: "text-purple-700", bg: "bg-purple-50 border-purple-200",  icon: RefreshCw,    label: "Processing", next: ["shipped", "cancelled"] },
-  shipped:    { color: "text-indigo-700", bg: "bg-indigo-50 border-indigo-200",  icon: Truck,        label: "Shipped",    next: ["delivered"] },
-  delivered:  { color: "text-green-700",  bg: "bg-green-50 border-green-200",    icon: CheckCircle,  label: "Delivered",  next: [] },
-  cancelled:  { color: "text-red-700",    bg: "bg-red-50 border-red-200",        icon: XCircle,      label: "Cancelled",  next: [] },
+// ── Full tracking lifecycle including "Out for Delivery" ──────
+const STATUS_CONFIG: Record<string, {
+  color: string; bg: string; icon: React.ElementType; label: string; next?: string[];
+}> = {
+  pending:          { color: "text-yellow-700",  bg: "bg-yellow-50 border-yellow-200",   icon: Clock,       label: "Pending",           next: ["confirmed", "cancelled"] },
+  confirmed:        { color: "text-blue-700",    bg: "bg-blue-50 border-blue-200",       icon: CheckCircle, label: "Confirmed",          next: ["processing", "cancelled"] },
+  processing:       { color: "text-purple-700",  bg: "bg-purple-50 border-purple-200",   icon: RefreshCw,   label: "Processing",         next: ["shipped", "cancelled"] },
+  shipped:          { color: "text-indigo-700",  bg: "bg-indigo-50 border-indigo-200",   icon: Truck,       label: "Shipped",            next: ["out_for_delivery"] },
+  out_for_delivery: { color: "text-orange-700",  bg: "bg-orange-50 border-orange-200",   icon: Navigation,  label: "Out for Delivery",   next: ["delivered"] },
+  delivered:        { color: "text-green-700",   bg: "bg-green-50 border-green-200",     icon: CheckCircle, label: "Delivered",          next: [] },
+  cancelled:        { color: "text-red-700",     bg: "bg-red-50 border-red-200",         icon: XCircle,     label: "Cancelled",          next: [] },
+  returned:         { color: "text-neutral-700", bg: "bg-neutral-50 border-neutral-200", icon: RefreshCw,   label: "Returned",           next: [] },
 };
 
 const ORDER_TIMELINE = [
-  { status: "pending",    label: "Order Placed",   icon: Package },
-  { status: "confirmed",  label: "Confirmed",      icon: CheckCircle },
-  { status: "processing", label: "Processing",     icon: RefreshCw },
-  { status: "shipped",    label: "Shipped",        icon: Truck },
-  { status: "delivered",  label: "Delivered",      icon: CheckCircle },
+  { status: "pending",          label: "Order Placed",      icon: Package },
+  { status: "confirmed",        label: "Confirmed",         icon: CheckCircle },
+  { status: "processing",       label: "Processing",        icon: RefreshCw },
+  { status: "shipped",          label: "Shipped",           icon: Truck },
+  { status: "out_for_delivery", label: "Out for Delivery",  icon: Navigation },
+  { status: "delivered",        label: "Delivered",         icon: CheckCircle },
 ];
 
-const STATUS_ORDER = ["pending", "confirmed", "processing", "shipped", "delivered"];
+const STATUS_ORDER = ["pending", "confirmed", "processing", "shipped", "out_for_delivery", "delivered"];
 
 function OrderTimeline({ currentStatus }: { currentStatus: string }) {
-  const currentIdx = STATUS_ORDER.indexOf(currentStatus);
+  const currentIdx  = STATUS_ORDER.indexOf(currentStatus);
   const isCancelled = currentStatus === "cancelled";
+  const isReturned  = currentStatus === "returned";
 
-  if (isCancelled) {
+  if (isCancelled || isReturned) {
     return (
-      <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg border border-red-100">
-        <XCircle className="w-4 h-4 text-red-500" />
-        <span className="text-sm text-red-700 font-medium">Order Cancelled</span>
+      <div className={cn(
+        "flex items-center gap-2 p-3 rounded-lg border text-sm font-medium",
+        isCancelled ? "bg-red-50 border-red-100 text-red-700" : "bg-neutral-50 border-neutral-100 text-neutral-700"
+      )}>
+        <XCircle className="w-4 h-4 flex-shrink-0" />
+        Order {isCancelled ? "Cancelled" : "Returned"}
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto py-2">
+    <div className="flex items-center gap-1 overflow-x-auto py-2 scrollbar-none">
       {ORDER_TIMELINE.map((step, i) => {
         const isCompleted = i <= currentIdx;
         const isCurrent   = i === currentIdx;
         const Icon = step.icon;
         return (
           <div key={step.status} className="flex items-center">
-            <div className={cn(
-              "flex flex-col items-center gap-1 min-w-[70px]",
-            )}>
+            <div className="flex flex-col items-center gap-1 min-w-[64px]">
               <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all",
+                "w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all",
                 isCompleted
                   ? "bg-[#d98c2a] border-[#d98c2a] text-white"
                   : "bg-white border-neutral-200 text-neutral-300",
                 isCurrent && "ring-2 ring-[#d98c2a] ring-offset-1"
               )}>
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-3 h-3" />
               </div>
               <span className={cn(
-                "text-[10px] text-center leading-tight",
-                isCompleted ? "text-[#d98c2a] font-medium" : "text-neutral-400"
+                "text-[9px] text-center leading-tight font-medium",
+                isCompleted ? "text-[#d98c2a]" : "text-neutral-400"
               )}>
                 {step.label}
               </span>
             </div>
             {i < ORDER_TIMELINE.length - 1 && (
               <div className={cn(
-                "h-0.5 w-6 mx-1 flex-shrink-0 mb-4",
+                "h-0.5 w-5 mx-0.5 flex-shrink-0 mb-4",
                 i < currentIdx ? "bg-[#d98c2a]" : "bg-neutral-200"
               )} />
             )}
@@ -86,15 +94,15 @@ function OrderTimeline({ currentStatus }: { currentStatus: string }) {
 }
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<IOrder[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [updating, setUpdating] = useState<string | null>(null);
-  const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
+  const [orders,        setOrders]        = useState<IOrder[]>([]);
+  const [loading,       setLoading]       = useState(true);
+  const [search,        setSearch]        = useState("");
+  const [statusFilter,  setStatusFilter]  = useState("");
+  const [page,          setPage]          = useState(1);
+  const [total,         setTotal]         = useState(0);
+  const [expanded,      setExpanded]      = useState<string | null>(null);
+  const [updating,      setUpdating]      = useState<string | null>(null);
+  const [trackingInputs,setTrackingInputs]= useState<Record<string, string>>({});
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -122,30 +130,32 @@ export default function AdminOrdersPage() {
         ...(trackingNumber ? { trackingNumber } : {}),
       });
 
-      // Send WhatsApp notification
+      // Send WhatsApp notification silently
       const order = orders.find((o) => o._id === orderId);
-      if (order) {
+      if (order?.shippingAddress?.phone) {
         const addr = order.shippingAddress;
-        if (addr?.phone) {
-          await axios.post("/api/whatsapp", {
-            type: "order_status",
-            data: {
-              customerName:  `${addr.firstName} ${addr.lastName}`,
-              customerPhone: addr.phone,
-              orderNumber:   order.orderNumber,
-              total:         order.total,
-              items:         order.items.map((i) => ({
-                name:     (i.product as { name?: string })?.name ?? "Product",
-                quantity: i.quantity,
-                price:    i.price,
-              })),
-              status,
-            },
-          }).catch(() => {}); // silent if WhatsApp not configured
-        }
+        await axios.post("/api/whatsapp", {
+          type: "order_status",
+          data: {
+            customerName:  `${addr.firstName} ${addr.lastName}`,
+            customerPhone: addr.phone,
+            orderNumber:   order.orderNumber,
+            total:         order.total,
+            items:         order.items.map((i) => ({
+              name:     (i.product as { name?: string })?.name ?? "Product",
+              quantity: i.quantity,
+              price:    i.price,
+            })),
+            status,
+          },
+        }).catch(() => {});
       }
 
-      setOrders((prev) => prev.map((o) => o._id === orderId ? { ...o, orderStatus: status as IOrder["orderStatus"] } : o));
+      setOrders((prev) =>
+        prev.map((o) =>
+          o._id === orderId ? { ...o, orderStatus: status as IOrder["orderStatus"] } : o
+        )
+      );
     } catch {
       alert("Failed to update order status");
     } finally {
@@ -153,15 +163,13 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const statusCounts = Object.keys(STATUS_CONFIG).reduce((acc, s) => {
-    acc[s] = orders.filter((o) => o.orderStatus === s).length;
-    return acc;
-  }, {} as Record<string, number>);
+  const pages = Math.ceil(total / 15);
 
   return (
     <div className="min-h-screen bg-neutral-100">
+      {/* Header */}
       <div className="bg-white border-b border-neutral-200 px-6 py-5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-xl font-semibold text-neutral-900">Orders</h1>
             <p className="text-sm text-neutral-400">{total} total orders</p>
@@ -170,11 +178,14 @@ export default function AdminOrdersPage() {
         </div>
 
         {/* Status filter pills */}
-        <div className="flex gap-2 mt-4 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
           <button
             onClick={() => { setStatusFilter(""); setPage(1); }}
-            className={cn("flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-all",
-              !statusFilter ? "bg-[#d98c2a] text-white border-[#d98c2a]" : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300"
+            className={cn(
+              "flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all",
+              !statusFilter
+                ? "bg-[#d98c2a] text-white border-[#d98c2a]"
+                : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300"
             )}
           >
             All ({total})
@@ -183,11 +194,14 @@ export default function AdminOrdersPage() {
             <button
               key={s}
               onClick={() => { setStatusFilter(s); setPage(1); }}
-              className={cn("flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium border transition-all capitalize",
-                statusFilter === s ? "bg-[#d98c2a] text-white border-[#d98c2a]" : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300"
+              className={cn(
+                "flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all",
+                statusFilter === s
+                  ? "bg-[#d98c2a] text-white border-[#d98c2a]"
+                  : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300"
               )}
             >
-              <config.icon className="w-3.5 h-3.5" />
+              <config.icon className="w-3 h-3" />
               {config.label}
             </button>
           ))}
@@ -195,6 +209,7 @@ export default function AdminOrdersPage() {
       </div>
 
       <div className="p-6 space-y-4 max-w-6xl mx-auto">
+
         {/* Search */}
         <div className="bg-white rounded-xl border border-neutral-100 p-4">
           <div className="relative max-w-sm">
@@ -203,16 +218,26 @@ export default function AdminOrdersPage() {
               type="text"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Search order number…"
+              placeholder="Search by order number…"
               className="pl-9 pr-4 py-2.5 text-sm rounded-lg border border-neutral-200 w-full outline-none focus:border-[#d98c2a]"
             />
           </div>
         </div>
 
-        {/* Orders list */}
+        {/* Free delivery reminder */}
+        <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex items-center gap-2">
+          <Truck className="w-4 h-4 text-amber-600 flex-shrink-0" />
+          <p className="text-sm text-amber-800 font-medium">
+            Free Delivery on orders above ₦100,000
+          </p>
+        </div>
+
+        {/* Orders */}
         {loading ? (
           <div className="space-y-3">
-            {[...Array(5)].map((_, i) => <div key={i} className="h-20 bg-white rounded-xl skeleton" />)}
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-20 bg-white rounded-xl skeleton" />
+            ))}
           </div>
         ) : orders.length === 0 ? (
           <div className="bg-white rounded-xl p-12 text-center">
@@ -222,8 +247,8 @@ export default function AdminOrdersPage() {
         ) : (
           <div className="space-y-3">
             {orders.map((order) => {
-              const statusKey = order.orderStatus as string;
-              const config = STATUS_CONFIG[statusKey] ?? STATUS_CONFIG.pending;
+              const statusKey  = order.orderStatus as string;
+              const config     = STATUS_CONFIG[statusKey] ?? STATUS_CONFIG.pending;
               const StatusIcon = config.icon;
               const isExpanded = expanded === order._id;
 
@@ -233,7 +258,7 @@ export default function AdminOrdersPage() {
                   layout
                   className="bg-white rounded-xl border border-neutral-100 overflow-hidden"
                 >
-                  {/* Order header row */}
+                  {/* Row */}
                   <button
                     onClick={() => setExpanded(isExpanded ? null : order._id)}
                     className="w-full flex items-center justify-between p-5 hover:bg-neutral-50 transition-colors text-left"
@@ -248,20 +273,25 @@ export default function AdminOrdersPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       <div className="hidden sm:block text-right">
                         <p className="font-semibold text-neutral-900">{formatPrice(order.total)}</p>
                         <p className="text-xs text-neutral-400 capitalize">{order.paymentMethod}</p>
                       </div>
-                      <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border capitalize", config.color, config.bg)}>
+                      <span className={cn(
+                        "inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-full border",
+                        config.color, config.bg
+                      )}>
                         <StatusIcon className="w-3 h-3" />
                         {config.label}
                       </span>
-                      {isExpanded ? <ChevronUp className="w-4 h-4 text-neutral-400" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
+                      {isExpanded
+                        ? <ChevronUp className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                        : <ChevronDown className="w-4 h-4 text-neutral-400 flex-shrink-0" />}
                     </div>
                   </button>
 
-                  {/* Expanded detail */}
+                  {/* Expanded */}
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
@@ -274,14 +304,19 @@ export default function AdminOrdersPage() {
 
                           {/* Timeline */}
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">Order Timeline</p>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">
+                              Order Timeline
+                            </p>
                             <OrderTimeline currentStatus={order.orderStatus} />
                           </div>
 
                           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
                             {/* Items */}
-                            <div className="lg:col-span-1">
-                              <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">Items ({order.items.length})</p>
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">
+                                Items ({order.items.length})
+                              </p>
                               <div className="space-y-2">
                                 {order.items.map((item, i) => {
                                   const p = item.product as { name?: string; images?: { url: string }[] };
@@ -294,7 +329,9 @@ export default function AdminOrdersPage() {
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <p className="text-xs font-medium text-neutral-800 truncate">{p.name}</p>
-                                        <p className="text-xs text-neutral-400">×{item.quantity} · {formatPrice(item.total)}</p>
+                                        <p className="text-xs text-neutral-400">
+                                          ×{item.quantity} · {formatPrice(item.total)}
+                                        </p>
                                       </div>
                                     </div>
                                   );
@@ -302,22 +339,24 @@ export default function AdminOrdersPage() {
                               </div>
                             </div>
 
-                            {/* Customer & Address */}
+                            {/* Customer */}
                             <div>
                               <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">Customer</p>
                               <div className="space-y-2 text-sm text-neutral-700">
                                 <div className="flex items-center gap-2">
-                                  <Package className="w-3.5 h-3.5 text-neutral-400" />
+                                  <Package className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
                                   {order.shippingAddress.firstName} {order.shippingAddress.lastName}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Phone className="w-3.5 h-3.5 text-neutral-400" />
+                                  <Phone className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
                                   {order.shippingAddress.phone}
                                 </div>
                                 <div className="flex items-start gap-2">
-                                  <MapPin className="w-3.5 h-3.5 text-neutral-400 mt-0.5" />
+                                  <MapPin className="w-3.5 h-3.5 text-neutral-400 mt-0.5 flex-shrink-0" />
                                   <span className="text-xs">
-                                    {order.shippingAddress.addressLine1}, {order.shippingAddress.city}, {order.shippingAddress.state}
+                                    {order.shippingAddress.addressLine1},{" "}
+                                    {order.shippingAddress.city},{" "}
+                                    {order.shippingAddress.state}
                                   </span>
                                 </div>
                               </div>
@@ -327,7 +366,6 @@ export default function AdminOrdersPage() {
                             <div>
                               <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">Actions</p>
                               <div className="space-y-2">
-                                {/* Status update */}
                                 <div>
                                   <label className="text-xs text-neutral-500 mb-1 block">Update Status</label>
                                   <select
@@ -342,19 +380,22 @@ export default function AdminOrdersPage() {
                                   </select>
                                 </div>
 
-                                {/* Tracking number */}
                                 <div>
                                   <label className="text-xs text-neutral-500 mb-1 block">Tracking Number</label>
                                   <div className="flex gap-2">
                                     <input
                                       type="text"
                                       value={trackingInputs[order._id] ?? order.trackingNumber ?? ""}
-                                      onChange={(e) => setTrackingInputs((t) => ({ ...t, [order._id]: e.target.value }))}
+                                      onChange={(e) =>
+                                        setTrackingInputs((t) => ({ ...t, [order._id]: e.target.value }))
+                                      }
                                       placeholder="Enter tracking #"
                                       className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2 outline-none focus:border-[#d98c2a]"
                                     />
                                     <button
-                                      onClick={() => updateStatus(order._id, order.orderStatus, trackingInputs[order._id])}
+                                      onClick={() =>
+                                        updateStatus(order._id, order.orderStatus, trackingInputs[order._id])
+                                      }
                                       className="px-3 py-2 bg-[#d98c2a] text-white text-xs rounded-lg hover:bg-[#c47020] transition-colors"
                                     >
                                       Save
@@ -362,21 +403,20 @@ export default function AdminOrdersPage() {
                                   </div>
                                 </div>
 
-                                {/* WhatsApp notify */}
                                 <button
                                   onClick={async () => {
                                     const addr = order.shippingAddress;
                                     await axios.post("/api/whatsapp", {
                                       type: "order_status",
                                       data: {
-                                        customerName: `${addr.firstName} ${addr.lastName}`,
+                                        customerName:  `${addr.firstName} ${addr.lastName}`,
                                         customerPhone: addr.phone,
-                                        orderNumber: order.orderNumber,
-                                        total: order.total,
-                                        items: order.items.map((i) => ({
-                                          name: (i.product as { name?: string })?.name ?? "Product",
+                                        orderNumber:   order.orderNumber,
+                                        total:         order.total,
+                                        items:         order.items.map((i) => ({
+                                          name:     (i.product as { name?: string })?.name ?? "Product",
                                           quantity: i.quantity,
-                                          price: i.price,
+                                          price:    i.price,
                                         })),
                                         status: order.orderStatus,
                                       },
@@ -392,24 +432,21 @@ export default function AdminOrdersPage() {
                             </div>
                           </div>
 
-                          {/* Order totals */}
-                          <div className="border-t border-neutral-100 pt-4 grid grid-cols-4 gap-4 text-center text-sm">
-                            <div>
-                              <p className="text-neutral-400 text-xs">Subtotal</p>
-                              <p className="font-semibold">{formatPrice(order.subtotal)}</p>
-                            </div>
-                            <div>
-                              <p className="text-neutral-400 text-xs">Shipping</p>
-                              <p className="font-semibold">{order.shippingCost === 0 ? "Free" : formatPrice(order.shippingCost)}</p>
-                            </div>
-                            <div>
-                              <p className="text-neutral-400 text-xs">Discount</p>
-                              <p className="font-semibold text-green-600">{order.discount > 0 ? `-${formatPrice(order.discount)}` : "—"}</p>
-                            </div>
-                            <div>
-                              <p className="text-neutral-400 text-xs">Total</p>
-                              <p className="font-bold text-base">{formatPrice(order.total)}</p>
-                            </div>
+                          {/* Totals */}
+                          <div className="border-t border-neutral-100 pt-4 grid grid-cols-4 gap-4 text-center">
+                            {[
+                              { label: "Subtotal",  value: formatPrice(order.subtotal) },
+                              { label: "Shipping",  value: order.shippingCost === 0 ? "Free 🎉" : formatPrice(order.shippingCost) },
+                              { label: "Discount",  value: order.discount > 0 ? `-${formatPrice(order.discount)}` : "—", green: order.discount > 0 },
+                              { label: "Total",     value: formatPrice(order.total), bold: true },
+                            ].map(({ label, value, green, bold }) => (
+                              <div key={label}>
+                                <p className="text-neutral-400 text-xs mb-0.5">{label}</p>
+                                <p className={cn("text-sm", bold ? "font-bold text-base" : "font-semibold", green && "text-green-600")}>
+                                  {value}
+                                </p>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       </motion.div>
@@ -422,14 +459,17 @@ export default function AdminOrdersPage() {
         )}
 
         {/* Pagination */}
-        {Math.ceil(total / 15) > 1 && (
-          <div className="flex justify-center gap-2 mt-6">
-            {Array.from({ length: Math.ceil(total / 15) }, (_, i) => i + 1).map((p) => (
+        {pages > 1 && (
+          <div className="flex justify-center gap-2 mt-4">
+            {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={cn("w-10 h-10 rounded-lg text-sm font-medium transition-all",
-                  p === page ? "bg-[#d98c2a] text-white" : "bg-white border border-neutral-200 text-neutral-600 hover:border-[#d98c2a]"
+                className={cn(
+                  "w-9 h-9 rounded-lg text-sm font-medium transition-all",
+                  p === page
+                    ? "bg-[#d98c2a] text-white"
+                    : "bg-white border border-neutral-200 text-neutral-600 hover:border-[#d98c2a]"
                 )}
               >
                 {p}

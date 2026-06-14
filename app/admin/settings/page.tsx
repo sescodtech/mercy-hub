@@ -27,10 +27,10 @@ const defaultSettings: SettingsState = {
   address: { street: "", city: "", state: "", country: "Nigeria", postalCode: "" },
   social: { instagram: "", facebook: "", twitter: "", tiktok: "", youtube: "", linkedin: "" },
   footer: { description: "", copyright: "" },
-  shipping: { enabled: true, freeShippingEnabled: true, freeShippingThreshold: 50000, defaultShippingCost: 2500 },
+  shipping: { enabled: true, freeShippingEnabled: true, freeShippingThreshold: 100000, defaultShippingCost: 2500 },
   payments: { paystackEnabled: true, flutterwaveEnabled: false, codEnabled: false },
   notifications: { orderEmail: true, orderWhatsapp: false, adminEmail: "", adminPhone: "" },
-  announcement: { enabled: false, text: "Free shipping on orders over ₦50,000", bgColor: "#1a1108", textColor: "#f5f0e8" },
+  announcement: { enabled: false, text: "Free delivery on orders above ₦100,000", bgColor: "#1a1108", textColor: "#f5f0e8" },
   homepage: { heroTitle: "Elevate Your Home", heroSubtitle: "", heroCta: "Shop Collection", heroCtaLink: "/shop", heroImage: "", showFeaturedProducts: true, showBestSellers: true, showTestimonials: true, showNewsletter: true },
   meta: { title: "", description: "", keywords: [] },
 };

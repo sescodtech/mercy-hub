@@ -1,313 +1,469 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Menu, X, Search, ShoppingBag, Heart, User, ChevronDown,
+  ShoppingBag, Search, Heart, User, Menu, X,
+  ChevronDown, Package, LogOut, Settings, LayoutDashboard,
 } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import { useCartStore } from "@/hooks/useCart";
 import { useWishlistStore } from "@/hooks/useWishlist";
 import { useSettings } from "@/hooks/useSettings";
-import { useSession } from "next-auth/react";
+import { NotificationBell } from "@/components/ui/NotificationBell";
 import { cn } from "@/utils";
 
 const NAV_LINKS = [
-  { label: "Shop",         href: "/shop" },
+  {
+    label: "Shop", href: "/shop",
+    children: [
+      { label: "All Products",  href: "/shop" },
+      { label: "Bedding",       href: "/shop?category=bedding" },
+      { label: "Kitchenware",   href: "/shop?category=kitchenware" },
+      { label: "Home Decor",    href: "/shop?category=home-decor" },
+      { label: "Bath & Body",   href: "/shop?category=bath-body" },
+      { label: "New Arrivals",  href: "/shop?filter=new" },
+      { label: "Sale",          href: "/shop?filter=sale" },
+    ],
+  },
   { label: "New Arrivals", href: "/shop?filter=new" },
-  { label: "Sale",         href: "/shop?filter=sale" },
+  { label: "Blog",         href: "/blog" },
   { label: "About",        href: "/about" },
   { label: "Contact",      href: "/contact" },
 ];
 
 export function Navbar() {
-  const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled,   setScrolled]   = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQ,    setSearchQ]    = useState("");
-
-  const itemCount  = useCartStore((s) => s.getItemCount());
-  const openCart   = useCartStore((s) => s.openCart);
-  const wishlistN  = useWishlistStore((s) => s.items.length);
+  const pathname   = usePathname();
   const { data: session } = useSession();
-  const { settings, loading: settingsLoading } = useSettings();
+  const { settings } = useSettings();
 
-  // Logos from Settings — falls back to text logo
-  const desktopLogo = settings?.logos?.desktop || settings?.logo || "";
-  const mobileLogo  = settings?.logos?.mobile  || desktopLogo || "";
-  const brandName   = settings?.businessName   || "MercyHome";
+  const [mobileOpen,     setMobileOpen]     = useState(false);
+  const [searchOpen,     setSearchOpen]     = useState(false);
+  const [scrolled,       setScrolled]       = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [searchQuery,    setSearchQuery]    = useState("");
+  const [mobileShopOpen, setMobileShopOpen] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const cartCount     = useCartStore((s) => s.getItemCount());
+  const openCart      = useCartStore((s) => s.openCart);
+  const wishlistCount = useWishlistStore((s) => s.items.length);
+
+  const announcement     = settings?.announcement;
+  const showAnnouncement = announcement?.enabled !== false;
+  const announcementText = announcement?.text ||
+    (settings?.shipping?.freeShippingEnabled
+      ? `Free delivery on orders over ₦${(settings?.shipping?.freeShippingThreshold ?? 100000).toLocaleString()} · Quality you can trust`
+      : "Quality you can trust · Premium Home Essentials");
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
-    if (mobileOpen) document.body.style.overflow = "hidden";
-    else            document.body.style.overflow = "";
+    setMobileOpen(false);
+    setActiveDropdown(null);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (searchOpen) setTimeout(() => searchRef.current?.focus(), 100);
+  }, [searchOpen]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQ.trim()) {
-      window.location.href = `/shop?search=${encodeURIComponent(searchQ.trim())}`;
+    if (searchQuery.trim()) {
+      window.location.href = `/shop?search=${encodeURIComponent(searchQuery.trim())}`;
+      setSearchOpen(false);
     }
   };
 
+  const logo    = settings?.logos?.desktop || settings?.logo;
+  const bizName = settings?.businessName || "MercyHome";
+
   return (
     <>
+      {/* ── Announcement bar ── */}
+      {showAnnouncement && (
+        <div
+          className="text-xs py-2 text-center font-medium tracking-wide"
+          style={{
+            backgroundColor: announcement?.bgColor  || "#1a1108",
+            color:           announcement?.textColor || "#f5f0e8cc",
+          }}
+        >
+          {announcementText}
+        </div>
+      )}
+
+      {/* ── Main header ── */}
       <header
         className={cn(
-          "sticky top-0 z-50 w-full transition-all duration-300",
-          scrolled ? "shadow-sm" : ""
+          "sticky top-0 z-50 w-full transition-all duration-200",
+          scrolled
+            ? "bg-white/98 backdrop-blur-md shadow-sm border-b border-neutral-100"
+            : "bg-[#fdf8f0]/98 backdrop-blur-sm"
         )}
-        style={{ backgroundColor: "var(--color-header-bg)" }}
       >
-        {/* ── Desktop nav ── */}
         <div className="container-site">
-          <div className="flex items-center justify-between h-16 sm:h-18">
+          <div className="flex h-14 items-center justify-between gap-4">
 
             {/* Logo */}
-            <Link href="/" className="flex items-center flex-shrink-0">
-              {!settingsLoading && desktopLogo ? (
-                <>
-                  {/* Desktop logo */}
-                  <div className="hidden sm:block relative h-10 w-auto">
-                    <Image
-                      src={desktopLogo}
-                      alt={brandName}
-                      height={40}
-                      width={160}
-                      className="h-10 w-auto object-contain"
-                      priority
-                    />
-                  </div>
-                  {/* Mobile logo */}
-                  <div className="sm:hidden relative h-9 w-auto">
-                    <Image
-                      src={mobileLogo}
-                      alt={brandName}
-                      height={36}
-                      width={120}
-                      className="h-9 w-auto object-contain"
-                      priority
-                    />
-                  </div>
-                </>
+            <Link href="/" className="flex-shrink-0 flex items-center gap-2">
+              {logo ? (
+                <img
+                  src={logo}
+                  alt={bizName}
+                  className="h-8 w-auto object-contain"
+                />
               ) : (
-                /* Text fallback */
-                <span className="font-display text-xl font-semibold" style={{ color: "var(--color-text-primary)" }}>
-                  {brandName.split(" ").map((word, i) => (
-                    <span key={i}>
-                      {i === 0
-                        ? word
-                        : <span style={{ color: "var(--color-brand-primary)" }}>{word}</span>}
-                      {i < brandName.split(" ").length - 1 ? " " : ""}
-                    </span>
-                  ))}
-                </span>
+                <div>
+                  <span className="font-display text-xl font-semibold text-neutral-900 tracking-tight">
+                    Mercy<span className="text-[#d98c2a]">Home</span>
+                  </span>
+                </div>
               )}
             </Link>
 
-            {/* Desktop nav links */}
-            <nav className="hidden lg:flex items-center gap-7">
-              {NAV_LINKS.map(({ label, href }) => {
-                const active = href === "/" ? pathname === "/" : pathname.startsWith(href.split("?")[0]);
+            {/* ── Desktop nav ── */}
+            <nav className="hidden lg:flex items-center gap-0">
+              {NAV_LINKS.map((link) => {
+                const isActive = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href.split("?")[0]);
                 return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={cn(
-                      "text-sm tracking-wide transition-colors font-medium",
-                      active ? "text-brand" : ""
-                    )}
-                    style={{
-                      color: active
-                        ? "var(--color-brand-primary)"
-                        : "var(--color-nav-text, var(--color-text-primary))",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!active) (e.currentTarget as HTMLElement).style.color = "var(--color-brand-primary)";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!active) (e.currentTarget as HTMLElement).style.color =
-                        "var(--color-nav-text, var(--color-text-primary))";
-                    }}
+                  <div
+                    key={link.href}
+                    className="relative"
+                    onMouseEnter={() => link.children && setActiveDropdown(link.label)}
+                    onMouseLeave={() => setActiveDropdown(null)}
                   >
-                    {label}
-                  </Link>
+                    <Link
+                      href={link.href}
+                      className={cn(
+                        "flex items-center gap-1 px-3.5 py-2 text-sm font-medium transition-colors duration-150 rounded-md",
+                        isActive
+                          ? "text-[#d98c2a]"
+                          : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/60"
+                      )}
+                    >
+                      {link.label}
+                      {link.children && (
+                        <ChevronDown
+                          className={cn(
+                            "w-3.5 h-3.5 transition-transform duration-200 opacity-60",
+                            activeDropdown === link.label && "rotate-180"
+                          )}
+                        />
+                      )}
+                    </Link>
+
+                    {/* Dropdown */}
+                    <AnimatePresence>
+                      {link.children && activeDropdown === link.label && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                          transition={{ duration: 0.15, ease: "easeOut" }}
+                          className="absolute top-full left-0 mt-1 w-52 rounded-xl bg-white border border-neutral-100 shadow-lg overflow-hidden"
+                        >
+                          {link.children.map((child) => (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              className="flex items-center px-4 py-2.5 text-sm text-neutral-600 hover:bg-[#fdf8f0] hover:text-[#d98c2a] transition-colors"
+                            >
+                              {child.label}
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 );
               })}
             </nav>
 
-            {/* Right actions */}
-            <div className="flex items-center gap-1 sm:gap-2">
+            {/* ── Right actions ── */}
+            <div className="flex items-center gap-0.5">
+
               {/* Search */}
               <button
-                onClick={() => setSearchOpen(!searchOpen)}
-                className="p-2 rounded-lg hover:bg-black/5 transition-colors"
-                style={{ color: "var(--color-text-secondary)" }}
+                onClick={() => setSearchOpen(true)}
+                className="w-9 h-9 flex items-center justify-center rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
                 aria-label="Search"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-4.5 h-4.5" style={{ width: 18, height: 18 }} />
               </button>
 
               {/* Wishlist */}
               <Link
-                href="/wishlist"
-                className="relative p-2 rounded-lg hover:bg-black/5 transition-colors hidden sm:flex"
-                style={{ color: "var(--color-text-secondary)" }}
+                href="/dashboard/wishlist"
+                className="relative w-9 h-9 flex items-center justify-center rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
                 aria-label="Wishlist"
               >
-                <Heart className="w-5 h-5" />
-                {wishlistN > 0 && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
-                    style={{ backgroundColor: "var(--color-brand-primary)" }}
-                  >
-                    {wishlistN > 9 ? "9+" : wishlistN}
+                <Heart style={{ width: 18, height: 18 }} />
+                {wishlistCount > 0 && (
+                  <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#d98c2a] text-white text-[9px] flex items-center justify-center font-bold">
+                    {wishlistCount > 9 ? "9+" : wishlistCount}
                   </span>
                 )}
               </Link>
 
-              {/* Account */}
-              <Link
-                href={session ? "/dashboard" : "/auth/login"}
-                className="relative p-2 rounded-lg hover:bg-black/5 transition-colors hidden sm:flex"
-                style={{ color: "var(--color-text-secondary)" }}
-                aria-label="Account"
-              >
-                {session?.user?.image ? (
-                  <Image
-                    src={session.user.image}
-                    alt={session.user.name ?? ""}
-                    width={20} height={20}
-                    className="rounded-full w-5 h-5 object-cover"
-                  />
-                ) : (
-                  <User className="w-5 h-5" />
-                )}
-              </Link>
+              {/* Notifications */}
+              <NotificationBell />
 
               {/* Cart */}
               <button
                 onClick={openCart}
-                className="relative p-2 rounded-lg hover:bg-black/5 transition-colors flex items-center gap-1.5"
-                style={{ color: "var(--color-text-secondary)" }}
-                aria-label="Open cart"
+                className="relative w-9 h-9 flex items-center justify-center rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
+                aria-label="Cart"
               >
-                <ShoppingBag className="w-5 h-5" />
-                {itemCount > 0 && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
-                    style={{ backgroundColor: "var(--color-brand-primary)" }}
+                <ShoppingBag style={{ width: 18, height: 18 }} />
+                {cartCount > 0 && (
+                  <motion.span
+                    key={cartCount}
+                    initial={{ scale: 1.4 }}
+                    animate={{ scale: 1 }}
+                    className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#d98c2a] text-white text-[9px] flex items-center justify-center font-bold"
                   >
-                    {itemCount > 9 ? "9+" : itemCount}
-                  </span>
+                    {cartCount > 9 ? "9+" : cartCount}
+                  </motion.span>
                 )}
               </button>
 
-              {/* Mobile menu toggle */}
+              {/* Account dropdown */}
+              {session ? (
+                <div className="relative group hidden lg:block ml-1">
+                  <button className="flex items-center gap-1.5 pl-2 pr-3 h-8 rounded-full border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:text-neutral-900 transition-colors text-sm">
+                    <div className="w-5 h-5 rounded-full bg-[#d98c2a] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                      {session.user?.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-xs font-medium max-w-[80px] truncate">
+                      {session.user?.name?.split(" ")[0]}
+                    </span>
+                    <ChevronDown className="w-3 h-3 opacity-50" />
+                  </button>
+
+                  {/* Dropdown */}
+                  <div className="absolute right-0 top-full mt-2 w-52 rounded-xl bg-white border border-neutral-100 shadow-lg overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150">
+                    <div className="px-4 py-3 border-b border-neutral-100 bg-neutral-50">
+                      <p className="text-sm font-semibold text-neutral-900 truncate">{session.user?.name}</p>
+                      <p className="text-xs text-neutral-400 truncate">{session.user?.email}</p>
+                    </div>
+                    <Link href="/dashboard" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors">
+                      <LayoutDashboard className="w-4 h-4" /> Dashboard
+                    </Link>
+                    <Link href="/dashboard/orders" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors">
+                      <Package className="w-4 h-4" /> My Orders
+                    </Link>
+                    {(session.user as any)?.role === "admin" && (
+                      <Link href="/admin" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#d98c2a] hover:bg-[#fdf3e7] transition-colors border-t border-neutral-100">
+                        <Settings className="w-4 h-4" /> Admin Panel
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors border-t border-neutral-100"
+                    >
+                      <LogOut className="w-4 h-4" /> Sign Out
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="hidden lg:flex items-center gap-1.5 ml-1 px-3.5 h-8 text-xs font-semibold rounded-full bg-[#d98c2a] text-white hover:bg-[#c47020] transition-colors"
+                >
+                  Sign In
+                </Link>
+              )}
+
+              {/* Mobile menu button */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-black/5 transition-colors ml-1"
-                style={{ color: "var(--color-text-secondary)" }}
+                className="lg:hidden w-9 h-9 flex items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 transition-colors ml-1"
                 aria-label="Menu"
               >
-                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {mobileOpen ? <X style={{ width: 18, height: 18 }} /> : <Menu style={{ width: 18, height: 18 }} />}
               </button>
             </div>
           </div>
-
-          {/* Search bar */}
-          {searchOpen && (
-            <div className="pb-3 border-t border-neutral-100 pt-3">
-              <form onSubmit={handleSearch} className="flex gap-2">
-                <input
-                  autoFocus
-                  type="search"
-                  value={searchQ}
-                  onChange={(e) => setSearchQ(e.target.value)}
-                  placeholder="Search for products…"
-                  className="form-input flex-1"
-                />
-                <button type="submit" className="btn-primary px-5 py-2.5 text-sm">
-                  Search
-                </button>
-                <button type="button" onClick={() => setSearchOpen(false)}
-                  className="p-2.5 border border-neutral-200 rounded-lg text-neutral-400 hover:text-neutral-700">
-                  <X className="w-4 h-4" />
-                </button>
-              </form>
-            </div>
-          )}
         </div>
       </header>
 
-      {/* ── Mobile drawer ── */}
-      {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-40">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <div
-            className="absolute left-0 top-0 bottom-0 w-72 flex flex-col shadow-xl"
-            style={{ backgroundColor: "var(--color-header-bg)" }}
-          >
-            <div
-              className="flex items-center justify-between px-5 py-4 border-b"
-              style={{ borderColor: "var(--color-border)" }}
+      {/* ── Mobile menu ── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/30"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "tween", duration: 0.25 }}
+              className="fixed left-0 top-0 bottom-0 z-50 w-72 bg-white shadow-xl flex flex-col"
             >
-              <Link href="/" onClick={() => setMobileOpen(false)}>
-                {desktopLogo ? (
-                  <Image src={desktopLogo} alt={brandName} height={32} width={120} className="h-8 w-auto object-contain" />
-                ) : (
-                  <span className="font-display text-lg font-semibold" style={{ color: "var(--color-text-primary)" }}>
-                    {brandName}
-                  </span>
-                )}
-              </Link>
-              <button onClick={() => setMobileOpen(false)} style={{ color: "var(--color-text-secondary)" }}>
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <nav className="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
-              {NAV_LINKS.map(({ label, href }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors"
-                  style={{
-                    color: pathname.startsWith(href.split("?")[0])
-                      ? "var(--color-brand-primary)"
-                      : "var(--color-text-primary)",
-                    backgroundColor: pathname.startsWith(href.split("?")[0])
-                      ? "color-mix(in srgb, var(--color-brand-primary) 8%, transparent)"
-                      : "transparent",
-                  }}
-                >
-                  {label}
-                  <ChevronDown className="w-3.5 h-3.5 -rotate-90 opacity-40" />
+              {/* Mobile header */}
+              <div className="flex items-center justify-between px-5 h-14 border-b border-neutral-100">
+                <Link href="/" onClick={() => setMobileOpen(false)}>
+                  {logo ? (
+                    <img src={logo} alt={bizName} className="h-7 w-auto" />
+                  ) : (
+                    <span className="font-display text-lg font-semibold">
+                      Mercy<span className="text-[#d98c2a]">Home</span>
+                    </span>
+                  )}
                 </Link>
-              ))}
-            </nav>
+                <button onClick={() => setMobileOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-neutral-100">
+                  <X className="w-4 h-4 text-neutral-500" />
+                </button>
+              </div>
 
-            <div className="px-5 py-5 space-y-3 border-t" style={{ borderColor: "var(--color-border)" }}>
-              <Link href={session ? "/dashboard" : "/auth/login"} onClick={() => setMobileOpen(false)}
-                className="btn-secondary w-full justify-center text-sm">
-                {session ? "My Account" : "Sign In"}
-              </Link>
-              <Link href="/shop" onClick={() => setMobileOpen(false)} className="btn-primary w-full justify-center text-sm">
-                Shop Now
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+              {/* Mobile links */}
+              <nav className="flex-1 overflow-y-auto px-3 py-4">
+                {/* Shop with nested */}
+                <div>
+                  <button
+                    onClick={() => setMobileShopOpen(!mobileShopOpen)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-neutral-700 rounded-lg hover:bg-neutral-50"
+                  >
+                    Shop
+                    <ChevronDown className={cn("w-4 h-4 transition-transform text-neutral-400", mobileShopOpen && "rotate-180")} />
+                  </button>
+                  <AnimatePresence>
+                    {mobileShopOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden ml-3 border-l border-neutral-100 pl-3 mt-1"
+                      >
+                        {NAV_LINKS[0].children!.map((child) => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            onClick={() => setMobileOpen(false)}
+                            className="block px-2 py-2 text-sm text-neutral-500 hover:text-[#d98c2a] rounded-md"
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {NAV_LINKS.slice(1).map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors mt-0.5",
+                      pathname.startsWith(link.href.split("?")[0])
+                        ? "bg-[#fdf3e7] text-[#d98c2a]"
+                        : "text-neutral-700 hover:bg-neutral-50"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+
+              {/* Mobile footer */}
+              <div className="px-4 py-4 border-t border-neutral-100 space-y-2">
+                {session ? (
+                  <>
+                    <Link href="/dashboard" onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2.5 text-sm text-neutral-700 rounded-lg hover:bg-neutral-50">
+                      <LayoutDashboard className="w-4 h-4" /> Dashboard
+                    </Link>
+                    <Link href="/dashboard/orders" onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2.5 text-sm text-neutral-700 rounded-lg hover:bg-neutral-50">
+                      <Package className="w-4 h-4" /> My Orders
+                    </Link>
+                    {(session.user as any)?.role === "admin" && (
+                      <Link href="/admin" onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2.5 text-sm text-[#d98c2a] rounded-lg hover:bg-[#fdf3e7]">
+                        <Settings className="w-4 h-4" /> Admin Panel
+                      </Link>
+                    )}
+                    <button onClick={() => signOut({ callbackUrl: "/" })}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-500 rounded-lg hover:bg-red-50">
+                      <LogOut className="w-4 h-4" /> Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link href="/auth/login" onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-center py-2.5 text-sm font-medium border border-neutral-200 rounded-lg text-neutral-700 hover:border-[#d98c2a] hover:text-[#d98c2a]">
+                      Sign In
+                    </Link>
+                    <Link href="/auth/register" onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-center py-2.5 text-sm font-medium rounded-lg bg-[#d98c2a] text-white hover:bg-[#c47020]">
+                      Register
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Search overlay ── */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20 px-4"
+            onClick={() => setSearchOpen(false)}
+          >
+            <motion.div
+              initial={{ y: -16, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -16, opacity: 0 }}
+              className="w-full max-w-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <form onSubmit={handleSearch} className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search products…"
+                  className="w-full pl-12 pr-12 py-4 rounded-xl bg-white text-base text-neutral-900 placeholder-neutral-400 outline-none shadow-xl border border-neutral-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(false)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

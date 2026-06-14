@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, ShoppingBag, Star, Eye } from "lucide-react";
+import { Heart, ShoppingBag, Star } from "lucide-react";
 import { useCartStore } from "@/hooks/useCart";
 import { useWishlistStore } from "@/hooks/useWishlist";
 import { formatPrice, calculateDiscount, cn } from "@/utils";
@@ -17,8 +17,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
-  const [imgIdx,     setImgIdx]     = useState(0);
-  const [isHovered,  setIsHovered]  = useState(false);
+  const [imgIdx,    setImgIdx]    = useState(0);
+  const [hovered,   setHovered]   = useState(false);
 
   const addItem = useCartStore((s) => s.addItem);
   const { toggleItem, isWishlisted } = useWishlistStore();
@@ -35,176 +35,168 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     e.preventDefault();
     if (!inStock) return;
     addItem(product, 1);
-    toast.success("Added to cart!", {
-      icon: "🛍️",
-      style: { fontFamily: "var(--font-body)" },
-    });
+    toast.success("Added to cart!", { icon: "🛍️" });
   };
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     toggleItem(product);
-    toast.success(wishlisted ? "Removed from wishlist" : "Added to wishlist!", {
-      icon: wishlisted ? "💔" : "❤️",
-    });
+    toast.success(wishlisted ? "Removed from wishlist" : "Saved!", { icon: wishlisted ? "💔" : "❤️" });
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.06, duration: 0.4 }}
+      transition={{ delay: index * 0.05, duration: 0.3 }}
+      className="group"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      <Link
-        href={`/product/${product.slug}`}
-        className="group block"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {/* Image container */}
-        <div className="relative overflow-hidden rounded-lg bg-neutral-100 aspect-[4/5] mb-3">
+      <Link href={`/product/${product.slug}`} className="block">
+
+        {/* ── Image ── */}
+        <div className="relative overflow-hidden bg-neutral-100 rounded-lg aspect-square mb-2.5">
+
           {/* Badges */}
-          <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
-            {product.isNewArrival && <span className="badge-new">New</span>}
-            {discount > 0   && <span className="badge-sale">-{discount}%</span>}
-            {product.isBestSeller && <span className="badge-trending">Best Seller</span>}
-            {!inStock        && <span className="badge-oos">Out of Stock</span>}
-            {isLowStock      && <span className="badge-sale">Only {product.stock} left</span>}
-          </div>
-
-          {/* Action buttons */}
-          <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
-            <motion.button
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : 10 }}
-              transition={{ duration: 0.2 }}
-              onClick={handleWishlist}
-              className={cn(
-                "w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-colors",
-                wishlisted
-                  ? "bg-red-500 text-white"
-                  : "bg-white text-neutral-600 hover:bg-red-50 hover:text-red-500"
-              )}
-              aria-label="Wishlist"
-            >
-              <Heart className={cn("w-4 h-4", wishlisted && "fill-current")} />
-            </motion.button>
-
-            <motion.div
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : 10 }}
-              transition={{ duration: 0.2, delay: 0.05 }}
-            >
-              <Link
-                href={`/product/${product.slug}`}
-                className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-md text-neutral-600 hover:bg-neutral-50"
-                aria-label="Quick view"
-              >
-                <Eye className="w-4 h-4" />
-              </Link>
-            </motion.div>
-          </div>
-
-          {/* Image */}
-          <div className="relative w-full h-full">
-            {primaryImage ? (
-              <Image
-                src={isHovered && secondaryImage ? secondaryImage : primaryImage}
-                alt={product.name}
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              />
-            ) : (
-              <div className="w-full h-full bg-neutral-200 flex items-center justify-center">
-                <ShoppingBag className="w-12 h-12 text-neutral-300" />
-              </div>
+          <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+            {discount > 0 && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-500 text-white leading-tight">
+                -{discount}%
+              </span>
+            )}
+            {product.isNewArrival && !discount && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#d98c2a] text-white leading-tight">
+                NEW
+              </span>
+            )}
+            {!inStock && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-neutral-400 text-white leading-tight">
+                SOLD OUT
+              </span>
             )}
           </div>
 
-          {/* Image dots */}
+          {/* Wishlist */}
+          <button
+            onClick={handleWishlist}
+            className={cn(
+              "absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-sm",
+              wishlisted
+                ? "bg-red-500 text-white opacity-100"
+                : "bg-white text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
+            )}
+            aria-label="Wishlist"
+          >
+            <Heart className={cn("w-3.5 h-3.5", wishlisted && "fill-current")} />
+          </button>
+
+          {/* Product image */}
+          {primaryImage ? (
+            <Image
+              src={hovered && secondaryImage ? secondaryImage : primaryImage}
+              alt={product.name}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ShoppingBag className="w-8 h-8 text-neutral-300" />
+            </div>
+          )}
+
+          {/* Image switcher dots */}
           {product.images?.length > 1 && (
-            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               {product.images.slice(0, 4).map((_, i) => (
                 <button
                   key={i}
                   onClick={(e) => { e.preventDefault(); setImgIdx(i); }}
                   className={cn(
                     "w-1.5 h-1.5 rounded-full transition-all",
-                    i === imgIdx ? "bg-white scale-125" : "bg-white/50"
+                    i === imgIdx ? "bg-white w-3" : "bg-white/60"
                   )}
                 />
               ))}
             </div>
           )}
 
-          {/* Add to cart bar */}
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: isHovered && inStock ? 0 : "100%" }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="absolute bottom-0 left-0 right-0 bg-ebony/95 backdrop-blur-sm"
-          >
-            <button
-              onClick={handleAddToCart}
-              className="w-full flex items-center justify-center gap-2 py-3.5 text-cream text-sm font-semibold tracking-wide hover:bg-brand-700 transition-colors"
-              style={{ fontFamily: "var(--font-body)", letterSpacing: "0.04em" }}
+          {/* Add to cart — slides up on hover */}
+          {inStock && (
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: hovered ? 0 : "100%" }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute bottom-0 left-0 right-0"
             >
-              <ShoppingBag className="w-4 h-4" />
-              Add to Cart
-            </button>
-          </motion.div>
+              <button
+                onClick={handleAddToCart}
+                className="w-full flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold tracking-wider uppercase text-white bg-[#1a1208]/90 backdrop-blur-sm hover:bg-[#1a1208] transition-colors"
+              >
+                <ShoppingBag className="w-3.5 h-3.5" />
+                Add to Cart
+              </button>
+            </motion.div>
+          )}
         </div>
 
         {/* ── Product info ── */}
-        <div className="px-0.5 space-y-1.5">
+        <div className="px-0.5">
 
-          {/* Category label */}
-          <p className="product-category-label">
-            {typeof product.category === "object" ? product.category?.name : ""}
-          </p>
+          {/* Category */}
+          {typeof product.category === "object" && product.category?.name && (
+            <p className="text-[10px] font-medium text-neutral-400 uppercase tracking-wider mb-0.5 truncate">
+              {product.category.name}
+            </p>
+          )}
 
-          {/* Product name */}
-          <h3 className={cn(
-            "product-name line-clamp-2 group-hover:text-brand-600 transition-colors",
-          )}>
+          {/* Name */}
+          <h3 className="text-sm font-medium text-neutral-800 line-clamp-2 leading-snug group-hover:text-[#d98c2a] transition-colors mb-1.5"
+            style={{ fontFamily: "var(--font-body)" }}>
             {product.name}
           </h3>
 
           {/* Rating */}
           {product.reviewCount > 0 && (
-            <div className="flex items-center gap-1.5">
-              <div className="flex">
+            <div className="flex items-center gap-1 mb-1.5">
+              <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Star
                     key={i}
                     className={cn(
-                      "w-3 h-3",
+                      "w-2.5 h-2.5",
                       i <= Math.round(product.rating)
-                        ? "text-brand-500 fill-brand-500"
+                        ? "text-[#d98c2a] fill-[#d98c2a]"
                         : "text-neutral-200 fill-neutral-200"
                     )}
                   />
                 ))}
               </div>
-              <span className="text-xs text-neutral-400" style={{ fontFamily: "var(--font-body)" }}>
-                ({product.reviewCount})
-              </span>
+              <span className="text-[10px] text-neutral-400">({product.reviewCount})</span>
             </div>
           )}
 
-          {/* Price row */}
-          <div className="flex items-baseline gap-2 pt-0.5">
-            <span className={isOnSale ? "price-sale" : "price-current"}>
+          {/* Price */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className={cn("text-sm font-bold leading-none", isOnSale ? "text-[#c47020]" : "text-neutral-900")}
+              style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}
+            >
               {formatPrice(product.price)}
             </span>
             {product.comparePrice && product.comparePrice > product.price && (
-              <span className="price-original">
+              <span
+                className="text-xs text-neutral-400 line-through leading-none"
+                style={{ fontVariantNumeric: "tabular-nums" }}
+              >
                 {formatPrice(product.comparePrice)}
               </span>
             )}
+            {isLowStock && (
+              <span className="text-[10px] text-orange-500 font-medium">Low stock</span>
+            )}
           </div>
-
         </div>
       </Link>
     </motion.div>
