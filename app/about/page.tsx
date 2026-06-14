@@ -104,8 +104,8 @@ export default function AboutPage() {
         <div className="container-site">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
             {[
-              { label: "Customers Served", value: "5,000+" },
-              { label: "Products",          value: "200+" },
+              { label: "Customers Served", value: "500+" },
+              { label: "Products",          value: "50+" },
               { label: "Years in Business", value: "5+" },
               { label: "Cities Delivered",  value: "36" },
             ].map(({ label, value }) => (
