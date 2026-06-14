@@ -47,7 +47,7 @@ const FAQS = [
       },
       {
         q: "What happens if my item arrives damaged?",
-        a: "Please take photos immediately and contact us within 48 hours of delivery via WhatsApp or email. We will arrange a replacement or full refund for items damaged during transit.",
+        a: "Please take photos immediately and contact us within 8 hours of delivery via WhatsApp or email. We will arrange a replacement or full refund for items damaged during transit.",
       },
     ],
   },
