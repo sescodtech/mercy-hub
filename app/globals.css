@@ -26,6 +26,7 @@
     --color-nav-text-hover:   #d98c2a;
     --color-button-primary:   #c47020;
     --color-button-text:      #ffffff;
+
     --color-link:             #d98c2a;
     --color-card-bg:          #ffffff;
     --color-page-bg:          #fdf8f0;
@@ -359,12 +360,12 @@
 
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: #d98c2a #f5f0e8;
+    scrollbar-color: var(--color-brand-primary, #d98c2a) #f5f0e8;
   }
 
   .scrollbar-thin::-webkit-scrollbar       { width: 4px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: #f5f0e8; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: #d98c2a; border-radius: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-brand-primary, #d98c2a); border-radius: 4px; }
 
   .divider-brand {
     width: 3rem;

@@ -53,9 +53,8 @@ const DEFAULT_CMS = {
   aboutImage: "",
   testimonials: [] as any[],
   trustBadges: [
-    { icon: "Truck",       title: "Free Delivery",   text: "On orders over ₦50,000", active: true },
+    { icon: "Truck",       title: "Free Delivery",   text: "On orders over ₦100,000", active: true },
     { icon: "ShieldCheck", title: "Secure Payment",  text: "100% protected payments", active: true },
-    { icon: "RotateCcw",   title: "Easy Returns",    text: "30-day return policy", active: true },
     { icon: "Headphones",  title: "24/7 Support",    text: "Dedicated support team", active: true },
   ] as any[],
   whyChooseUs: [] as any[],
@@ -462,7 +461,7 @@ export default function AdminHomepagePage() {
                       </select>
                     </div>
                     <Input label="Title" value={b.title} onChange={(v) => updBadge(i, "title", v)} placeholder="Free Delivery" />
-                    <Input label="Subtitle" value={b.text} onChange={(v) => updBadge(i, "text", v)} placeholder="On orders over ₦50,000" />
+                    <Input label="Subtitle" value={b.text} onChange={(v) => updBadge(i, "text", v)} placeholder="On orders over ₦100,000" />
                   </div>
                 </div>
               ))}

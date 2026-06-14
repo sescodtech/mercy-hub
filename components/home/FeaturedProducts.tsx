@@ -30,7 +30,7 @@ export async function FeaturedProducts() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <p className="text-xs font-semibold text-[#d98c2a] uppercase tracking-[0.15em] mb-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] mb-1" style={{ color: "var(--color-brand-primary, #d98c2a)" }}>
               Handpicked
             </p>
             <h2 className="font-display text-2xl font-semibold text-neutral-900">
@@ -39,7 +39,10 @@ export async function FeaturedProducts() {
           </div>
           <Link
             href="/shop"
-            className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-neutral-500 hover:text-[#d98c2a] transition-colors"
+            className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-neutral-500 transition-colors"
+            style={{} as any}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-brand-primary, #d98c2a)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = ""; }}
           >
             View All <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -56,7 +59,8 @@ export async function FeaturedProducts() {
         <div className="mt-6 text-center sm:hidden">
           <Link
             href="/shop"
-            className="inline-flex items-center gap-2 text-sm font-medium text-[#d98c2a] border border-[#d98c2a] px-5 py-2.5 rounded-lg hover:bg-[#fdf3e7] transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            style={{ color: "var(--color-brand-primary, #d98c2a)", borderWidth: "1px", borderStyle: "solid", borderColor: "var(--color-brand-primary, #d98c2a)" }}
           >
             View All Products <ArrowRight className="w-4 h-4" />
           </Link>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Save, Loader2, Palette, Monitor, RotateCcw } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { applyThemeToDOM } from "@/hooks/useSettings";
 
 type AppearanceTab = "brand" | "ui";
 
@@ -104,7 +105,15 @@ export default function AdminAppearancePage() {
     try {
       await axios.patch("/api/admin/settings", { section: "brandColors", data: brand });
       await axios.patch("/api/admin/settings", { section: "uiColors", data: ui });
-      toast.success("Appearance settings saved!");
+
+      // ── Immediately apply new colors to the DOM so the admin sees the
+      //    effect without waiting for the frontend to re-fetch settings.
+      applyThemeToDOM({
+        brandColors: brand,
+        uiColors: ui,
+      } as any);
+
+      toast.success("Appearance settings saved! Storefront will reflect changes shortly.");
     } catch { toast.error("Failed to save"); }
     finally { setSaving(false); }
   };
@@ -210,7 +219,7 @@ export default function AdminAppearancePage() {
       <div className="mt-4 bg-amber-50 border border-amber-100 rounded-xl p-4">
         <p className="text-sm text-amber-800 font-medium">⚡ Changes apply across the entire website after saving.</p>
         <p className="text-xs text-amber-700 mt-1">
-          Tip: Open your storefront in a new tab to preview changes after saving.
+          Colors update immediately in this admin panel. The storefront refreshes within 30 seconds.
         </p>
       </div>
     </div>

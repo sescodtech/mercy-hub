@@ -279,7 +279,7 @@ export default function CartPage() {
                 {shipping > 0 && (
                   <p className="text-xs text-neutral-400">
                     {settings?.shipping?.freeShippingEnabled
-                      ? `Free shipping on orders over ₦${(settings?.shipping?.freeShippingThreshold ?? 50000).toLocaleString()}`
+                      ? `Free shipping on orders over ₦${(settings?.shipping?.freeShippingThreshold ?? 100000).toLocaleString()}`
                       : "Shipping calculated at checkout"}
                   </p>
                 )}

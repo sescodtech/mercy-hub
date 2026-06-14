@@ -3,8 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Heart, ShoppingBag, Star } from "lucide-react";
+import { Heart, ShoppingBag, Star, ShoppingCart } from "lucide-react";
 import { useCartStore } from "@/hooks/useCart";
 import { useWishlistStore } from "@/hooks/useWishlist";
 import { formatPrice, calculateDiscount, cn } from "@/utils";
@@ -17,8 +16,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
-  const [imgIdx,    setImgIdx]    = useState(0);
-  const [hovered,   setHovered]   = useState(false);
+  const [imgIdx,  setImgIdx]  = useState(0);
+  const [hovered, setHovered] = useState(false);
+  const [adding,  setAdding]  = useState(false);
 
   const addItem = useCartStore((s) => s.addItem);
   const { toggleItem, isWishlisted } = useWishlistStore();
@@ -30,70 +30,72 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const inStock        = !product.trackInventory || product.stock > 0;
   const isLowStock     = product.trackInventory && product.stock > 0 && product.stock <= product.lowStockThreshold;
   const isOnSale       = discount > 0 && product.comparePrice;
+  const hasRating      = product.reviewCount > 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!inStock) return;
+    if (!inStock || adding) return;
+    setAdding(true);
     addItem(product, 1);
     toast.success("Added to cart!", { icon: "🛍️" });
+    setTimeout(() => setAdding(false), 600);
   };
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     toggleItem(product);
-    toast.success(wishlisted ? "Removed from wishlist" : "Saved!", { icon: wishlisted ? "💔" : "❤️" });
+    toast.success(wishlisted ? "Removed from wishlist" : "Saved!", {
+      icon: wishlisted ? "💔" : "❤️",
+    });
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.3 }}
-      className="group"
-      style={{ touchAction: "manipulation" }}
+    <div
+      className="group relative bg-white rounded-lg overflow-hidden transition-all duration-200 hover:shadow-md"
+      style={{ border: "1px solid var(--color-border, #e5e5e5)" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       <Link href={`/product/${product.slug}`} className="block">
 
-        {/* ── Image ── */}
-        <div className="relative overflow-hidden bg-neutral-100 rounded-lg aspect-square mb-2.5">
+        {/* ── Image container ── */}
+        <div className="relative overflow-hidden bg-neutral-50" style={{ aspectRatio: "1 / 1" }}>
 
-          {/* Badges */}
-          <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+          {/* Top-left badges */}
+          <div className="absolute top-1.5 left-1.5 z-10 flex flex-col gap-1">
             {discount > 0 && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-500 text-white leading-tight">
+              <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-red-500 text-white leading-tight tracking-wide">
                 -{discount}%
               </span>
             )}
             {product.isNewArrival && !discount && (
               <span
-                className="text-[10px] font-bold px-1.5 py-0.5 rounded text-white leading-tight"
+                className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-sm text-white leading-tight tracking-wide"
                 style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
               >
                 NEW
               </span>
             )}
             {!inStock && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-neutral-400 text-white leading-tight">
+              <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-neutral-400 text-white leading-tight">
                 SOLD OUT
               </span>
             )}
           </div>
 
-          {/* Wishlist */}
+          {/* Wishlist button */}
           <button
             onClick={handleWishlist}
             className={cn(
-              "absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-sm",
+              "absolute top-1.5 right-1.5 z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm",
               wishlisted
-                ? "text-white opacity-100"
-                : "bg-white text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
+                ? "opacity-100 text-white"
+                : "bg-white text-neutral-300 opacity-0 group-hover:opacity-100 hover:text-red-500"
             )}
             style={wishlisted ? { backgroundColor: "var(--color-brand-error, #ef4444)" } : undefined}
-            aria-label="Wishlist"
+            aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <Heart className={cn("w-3.5 h-3.5", wishlisted && "fill-current")} />
+            <Heart className={cn("w-3 h-3 sm:w-3.5 sm:h-3.5", wishlisted && "fill-current")} />
           </button>
 
           {/* Product image */}
@@ -102,129 +104,159 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               src={hovered && secondaryImage ? secondaryImage : primaryImage}
               alt={product.name}
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <ShoppingBag className="w-8 h-8 text-neutral-300" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <ShoppingBag className="w-8 h-8 text-neutral-200" />
             </div>
           )}
 
           {/* Image switcher dots */}
-          {product.images?.length > 1 && (
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {product.images?.length > 1 && hovered && (
+            <div className="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1 z-10">
               {product.images.slice(0, 4).map((_, i) => (
                 <button
                   key={i}
                   onClick={(e) => { e.preventDefault(); setImgIdx(i); }}
                   className={cn(
-                    "w-1.5 h-1.5 rounded-full transition-all",
-                    i === imgIdx ? "bg-white w-3" : "bg-white/60"
+                    "h-1 rounded-full transition-all duration-200",
+                    i === imgIdx ? "w-4 bg-white" : "w-1.5 bg-white/50"
                   )}
                 />
               ))}
             </div>
           )}
 
-          {/* Add to cart — slides up on hover */}
+          {/* Quick-add button — slides up on hover, desktop only */}
           {inStock && (
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: hovered ? 0 : "100%" }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="absolute bottom-0 left-0 right-0"
+            <div
+              className={cn(
+                "absolute bottom-0 left-0 right-0 transition-transform duration-200 hidden sm:block",
+                hovered ? "translate-y-0" : "translate-y-full"
+              )}
             >
               <button
                 onClick={handleAddToCart}
-                className="w-full flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold tracking-wider uppercase transition-colors"
-                style={{
-                  backgroundColor: "var(--color-footer-bg, #1a1208)",
-                  color: "var(--color-button-text, #ffffff)",
-                  backdropFilter: "blur(4px)",
-                }}
+                className="w-full flex items-center justify-center gap-1.5 py-2 text-[11px] font-semibold tracking-wider uppercase text-white transition-colors"
+                style={{ backgroundColor: "var(--color-footer-bg, #1a1208)" }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = "var(--color-button-primary, #c47020)";
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                    "var(--color-button-primary, #c47020)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = "var(--color-footer-bg, #1a1208)";
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                    "var(--color-footer-bg, #1a1208)";
                 }}
               >
-                <ShoppingBag className="w-3.5 h-3.5" />
-                Add to Cart
+                <ShoppingCart className="w-3 h-3" />
+                {adding ? "Added!" : "Quick Add"}
               </button>
-            </motion.div>
+            </div>
           )}
         </div>
 
         {/* ── Product info ── */}
-        <div className="px-0.5">
+        <div className="p-2 sm:p-2.5">
 
-          {/* Category */}
+          {/* Category label */}
           {typeof product.category === "object" && product.category?.name && (
-            <p className="text-[10px] font-medium text-neutral-400 uppercase tracking-wider mb-0.5 truncate">
+            <p
+              className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider mb-0.5 truncate"
+              style={{ color: "var(--color-text-secondary, #737373)" }}
+            >
               {product.category.name}
             </p>
           )}
 
-          {/* Name */}
+          {/* Product name — 2-line clamp, smaller on mobile */}
           <h3
-            className="text-sm font-medium text-neutral-800 line-clamp-2 leading-snug transition-colors mb-1.5"
-            style={{ fontFamily: "var(--font-body)" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLHeadingElement).style.color = "var(--color-brand-primary, #d98c2a)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLHeadingElement).style.color = ""; }}
+            className="text-xs sm:text-sm font-medium line-clamp-2 leading-snug mb-1.5 transition-colors duration-150"
+            style={{
+              fontFamily: "var(--font-body)",
+              color: "var(--color-text-primary, #1a1208)",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLHeadingElement).style.color =
+                "var(--color-brand-primary, #d98c2a)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLHeadingElement).style.color =
+                "var(--color-text-primary, #1a1208)";
+            }}
           >
             {product.name}
           </h3>
 
-          {/* Rating */}
-          {product.reviewCount > 0 && (
+          {/* Rating — compact */}
+          {hasRating && (
             <div className="flex items-center gap-1 mb-1.5">
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Star
                     key={i}
-                    className={cn(
-                      "w-2.5 h-2.5",
+                    className={cn("w-2 h-2 sm:w-2.5 sm:h-2.5")}
+                    style={
                       i <= Math.round(product.rating)
-                        ? "fill-current"
-                        : "text-neutral-200 fill-neutral-200"
-                    )}
-                    style={i <= Math.round(product.rating) ? { color: "var(--color-brand-primary, #d98c2a)" } : undefined}
+                        ? { color: "var(--color-brand-primary, #d98c2a)", fill: "currentColor" }
+                        : { color: "#e5e5e5", fill: "currentColor" }
+                    }
                   />
                 ))}
               </div>
-              <span className="text-[10px] text-neutral-400">({product.reviewCount})</span>
+              <span className="text-[9px] sm:text-[10px] text-neutral-400">
+                ({product.reviewCount})
+              </span>
             </div>
           )}
 
-          {/* Price */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span
-              className="text-sm font-bold leading-none"
-              style={{
-                fontFamily: "var(--font-body)",
-                letterSpacing: "-0.02em",
-                fontVariantNumeric: "tabular-nums",
-                color: isOnSale ? "var(--color-brand-accent, #c47020)" : "#171717",
-              }}
-            >
-              {formatPrice(product.price)}
-            </span>
-            {product.comparePrice && product.comparePrice > product.price && (
+          {/* Price row */}
+          <div className="flex items-center justify-between gap-1 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span
-                className="text-xs text-neutral-400 line-through leading-none"
-                style={{ fontVariantNumeric: "tabular-nums" }}
+                className="text-sm sm:text-[15px] font-bold leading-none"
+                style={{
+                  fontVariantNumeric: "tabular-nums",
+                  letterSpacing: "-0.02em",
+                  color: isOnSale
+                    ? "var(--color-brand-accent, #c47020)"
+                    : "var(--color-text-primary, #1a1208)",
+                }}
               >
-                {formatPrice(product.comparePrice)}
+                {formatPrice(product.price)}
               </span>
-            )}
-            {isLowStock && (
-              <span className="text-[10px] text-orange-500 font-medium">Low stock</span>
+              {product.comparePrice && product.comparePrice > product.price && (
+                <span
+                  className="text-[10px] sm:text-xs text-neutral-400 line-through leading-none"
+                  style={{ fontVariantNumeric: "tabular-nums" }}
+                >
+                  {formatPrice(product.comparePrice)}
+                </span>
+              )}
+            </div>
+
+            {/* Mobile add to cart — small icon button, always visible */}
+            {inStock && (
+              <button
+                onClick={handleAddToCart}
+                className="sm:hidden w-6 h-6 rounded-md flex items-center justify-center text-white flex-shrink-0 transition-opacity"
+                style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                aria-label="Add to cart"
+              >
+                <ShoppingCart className="w-3 h-3" />
+              </button>
             )}
           </div>
+
+          {/* Low stock label */}
+          {isLowStock && (
+            <p className="text-[9px] sm:text-[10px] text-orange-500 font-medium mt-1 leading-tight">
+              Only {product.stock} left
+            </p>
+          )}
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }

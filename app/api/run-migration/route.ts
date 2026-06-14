@@ -68,9 +68,8 @@ export async function GET(req: NextRequest) {
         aboutTitle: "", aboutText: settings.about ?? "", aboutImage: "",
         testimonials: [],
         trustBadges: [
-          { icon: "Truck",       title: "Free Delivery",  text: "On orders over ₦50,000", active: true },
+          { icon: "Truck",       title: "Free Delivery",  text: "On orders over ₦100,000", active: true },
           { icon: "ShieldCheck", title: "Secure Payment", text: "100% protected",          active: true },
-          { icon: "RotateCcw",   title: "Easy Returns",   text: "30-day return policy",    active: true },
           { icon: "Headphones",  title: "24/7 Support",   text: "Always here for you",     active: true },
         ],
         whyChooseUs: [],

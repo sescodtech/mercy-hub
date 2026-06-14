@@ -113,9 +113,8 @@ const HomepageCMSSchema = new Schema({
   aboutImage:      { type: String, default: "" },
   testimonials:    { type: [TestimonialSchema], default: [] },
   trustBadges:     { type: [TrustBadgeSchema], default: [
-    { icon: "Truck",        title: "Free Delivery",   text: "On orders over ₦50,000", active: true },
+    { icon: "Truck",        title: "Free Delivery",   text: "On orders over ₦100,000", active: true },
     { icon: "ShieldCheck",  title: "Secure Payment",  text: "100% protected payments", active: true },
-    { icon: "RotateCcw",    title: "Easy Returns",    text: "30-day return policy", active: true },
     { icon: "Headphones",   title: "24/7 Support",    text: "Dedicated support team", active: true },
   ]},
   whyChooseUs:     { type: [WhyChooseUsItemSchema], default: [] },
@@ -224,7 +223,7 @@ const SettingsSchema = new Schema<ISettings>({
   shipping: {
     enabled:               { type: Boolean, default: true },
     freeShippingEnabled:   { type: Boolean, default: true },
-    freeShippingThreshold: { type: Number,  default: 50000 },
+    freeShippingThreshold: { type: Number,  default: 100000 },
     defaultShippingCost:   { type: Number,  default: 2500 },
     currency:              { type: String,  default: "NGN" },
   },
@@ -241,7 +240,7 @@ const SettingsSchema = new Schema<ISettings>({
   },
   announcement: {
     enabled:   { type: Boolean, default: false },
-    text:      { type: String,  default: "Free shipping on orders over ₦50,000 · Quality you can trust" },
+    text:      { type: String,  default: "Free shipping on orders over ₦100,000 · Quality you can trust" },
     bgColor:   { type: String,  default: "#1a1108" },
     textColor: { type: String,  default: "#f5f0e8" },
   },

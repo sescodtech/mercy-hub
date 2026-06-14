@@ -5,12 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight } from "lucide-react";
 import { useCartStore } from "@/hooks/useCart";
+import { useSettings } from "@/hooks/useSettings";
 import { formatPrice } from "@/utils";
 
 export function CartDrawer() {
   const { isOpen, closeCart, items, updateQuantity, removeItem, getSubtotal } = useCartStore();
+  const { settings } = useSettings();
   const subtotal = getSubtotal();
-  const freeShippingThreshold = 50000;
+
+  const freeShippingEnabled   = settings?.shipping?.freeShippingEnabled ?? true;
+  const freeShippingThreshold = settings?.shipping?.freeShippingThreshold ?? 100000;
   const remaining = freeShippingThreshold - subtotal;
 
   return (
@@ -38,7 +42,6 @@ export function CartDrawer() {
             <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
               <div className="flex items-center gap-3">
                 <ShoppingBag className="w-5 h-5 text-brand-600" />
-                {/* Drawer title stays Cormorant — it is a heading */}
                 <h2 className="font-display text-xl font-semibold text-neutral-900">
                   Your Cart
                 </h2>
@@ -54,7 +57,7 @@ export function CartDrawer() {
             </div>
 
             {/* Free shipping progress */}
-            {subtotal < freeShippingThreshold && subtotal > 0 && (
+            {freeShippingEnabled && subtotal < freeShippingThreshold && subtotal > 0 && (
               <div className="px-6 py-3 bg-brand-50 border-b border-brand-100">
                 <p
                   className="mb-1.5 text-brand-700"
@@ -129,8 +132,6 @@ export function CartDrawer() {
 
                         {/* Details */}
                         <div className="flex-1 min-w-0">
-
-                          {/* ── Product name — Inter, semibold ── */}
                           <Link
                             href={`/product/${item.product.slug}`}
                             onClick={closeCart}
@@ -172,7 +173,6 @@ export function CartDrawer() {
                             </div>
 
                             <div className="flex items-center gap-2">
-                              {/* ── Price — Inter, bold ── */}
                               <span className="price-current-md">
                                 {formatPrice(price * item.quantity)}
                               </span>
@@ -211,10 +211,7 @@ export function CartDrawer() {
                     <span style={{ fontWeight: "500", color: "#404040" }}>Calculated at checkout</span>
                   </div>
 
-                  {/* Total row — bold Inter price */}
-                  <div
-                    className="flex justify-between pt-3 border-t border-neutral-200"
-                  >
+                  <div className="flex justify-between pt-3 border-t border-neutral-200">
                     <span
                       style={{
                         fontFamily: "var(--font-body)",

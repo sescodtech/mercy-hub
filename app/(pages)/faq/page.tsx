@@ -36,7 +36,7 @@ const FAQS = [
       },
       {
         q: "Do you offer free shipping?",
-        a: "Yes! Orders above ₦50,000 qualify for free shipping anywhere in Nigeria.",
+        a: "Yes! Orders above ₦100,000 qualify for free shipping anywhere in Nigeria.",
       },
       {
         q: "Do you ship outside Nigeria?",
@@ -52,7 +52,7 @@ const FAQS = [
     category: "Returns & Refunds",
     items: [
       {
-        q: "What is your return policy?",
+        q: "Do you offer refunds?",
         a: "We accept returns within 7 days of delivery for items in their original condition and packaging. Items that have been used or damaged by the customer cannot be returned.",
       },
       {

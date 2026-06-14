@@ -6,7 +6,8 @@ import type { ISiteSettings } from "@/types";
 // ── Cache ─────────────────────────────────────────────────────
 let cache: ISiteSettings | null = null;
 let cacheTime = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+// Reduced to 30s so admin changes propagate faster to other tabs
+const CACHE_TTL = 30 * 1000;
 
 // ── Context ───────────────────────────────────────────────────
 interface SettingsContextValue {
@@ -24,10 +25,10 @@ const SettingsContext = createContext<SettingsContextValue>({
 });
 
 // ── Theme Application ──────────────────────────────────────────
-// Reads from settings.brandColors and settings.uiColors (current schema)
-// and writes them as CSS custom properties so the entire frontend reflects
+// Reads from settings.brandColors and settings.uiColors and writes
+// them as CSS custom properties so the entire frontend reflects
 // whatever the admin saved in /admin/appearance.
-function applyThemeToDOM(settings: ISiteSettings | null) {
+export function applyThemeToDOM(settings: ISiteSettings | null) {
   if (typeof document === "undefined" || !settings) return;
 
   const root = document.documentElement;
@@ -74,9 +75,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [error,    setError]    = useState<string | null>(null);
   const [mounted,  setMounted]  = useState(false);
 
-  const fetchSettings = async () => {
-    // Use cache if still fresh
-    if (cache && Date.now() - cacheTime < CACHE_TTL) {
+  const fetchSettings = async (bypassCache = false) => {
+    // Use cache if still fresh and not explicitly bypassing
+    if (!bypassCache && cache && Date.now() - cacheTime < CACHE_TTL) {
       setSettings(cache);
       setLoading(false);
       if (mounted) applyThemeToDOM(cache);
@@ -84,7 +85,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }
     setLoading(true);
     try {
-      const res  = await fetch("/api/settings");
+      // Cache-bust so the browser always gets fresh data
+      const res  = await fetch(`/api/settings?t=${Date.now()}`, { cache: "no-store" });
       const json = await res.json();
       if (json.success) {
         cache     = json.data;
@@ -114,8 +116,15 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }
   }, [settings, mounted]);
 
+  // Expose a refetch that always bypasses cache (for post-save refresh)
+  const refetch = () => {
+    cache = null;
+    cacheTime = 0;
+    fetchSettings(true);
+  };
+
   return (
-    <SettingsContext.Provider value={{ settings, loading, error, refetch: fetchSettings }}>
+    <SettingsContext.Provider value={{ settings, loading, error, refetch }}>
       {children}
     </SettingsContext.Provider>
   );

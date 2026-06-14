@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   SlidersHorizontal, X, ChevronDown, Search,
-  Grid2X2, LayoutList, Tag,
+  Grid2X2, LayoutList, Sparkles, Truck, ChevronRight,
 } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductGridSkeleton } from "@/components/product/ProductSkeleton";
 import type { IProduct, IPagination } from "@/types";
 import { cn, formatPrice } from "@/utils";
+import { useSettings } from "@/hooks/useSettings";
 
 const SORT_OPTIONS = [
   { label: "Newest",      value: "newest" },
@@ -22,12 +23,12 @@ const SORT_OPTIONS = [
 ];
 
 const CATEGORIES = [
-  { label: "All",         value: "" },
-  { label: "Bedding",     value: "bedding" },
-  { label: "Kitchenware", value: "kitchenware" },
-  { label: "Home Decor",  value: "home-decor" },
-  { label: "Bath & Body", value: "bath-body" },
-  { label: "Lighting",    value: "lighting" },
+  { label: "All",         value: "",            emoji: "✦" },
+  { label: "Bedding",     value: "bedding",      emoji: "🛏" },
+  { label: "Kitchenware", value: "kitchenware",  emoji: "🍳" },
+  { label: "Home Decor",  value: "home-decor",   emoji: "🪴" },
+  { label: "Bath & Body", value: "bath-body",    emoji: "🛁" },
+  { label: "Lighting",    value: "lighting",     emoji: "💡" },
 ];
 
 interface ShopClientProps {
@@ -35,7 +36,9 @@ interface ShopClientProps {
 }
 
 export function ShopClient({ searchParams }: ShopClientProps) {
-  const urlParams = useSearchParams();
+  useSearchParams();
+  const { settings } = useSettings();
+  const freeShippingThreshold = settings?.shipping?.freeShippingThreshold ?? 100000;
 
   const [products,   setProducts]   = useState<IProduct[]>([]);
   const [loading,    setLoading]    = useState(true);
@@ -43,13 +46,15 @@ export function ShopClient({ searchParams }: ShopClientProps) {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const [category, setCategory] = useState(searchParams.category ?? "");
-  const [sort,     setSort]     = useState(searchParams.sort ?? "newest");
+  const [sort,     setSort]     = useState(searchParams.sort     ?? "newest");
   const [minPrice, setMinPrice] = useState(searchParams.minPrice ?? "");
   const [maxPrice, setMaxPrice] = useState(searchParams.maxPrice ?? "");
   const [inStock,  setInStock]  = useState(searchParams.inStock === "true");
-  const [search,   setSearch]   = useState(searchParams.search ?? "");
+  const [search,   setSearch]   = useState(searchParams.search   ?? "");
   const [page,     setPage]     = useState(Number(searchParams.page ?? 1));
   const [view,     setView]     = useState<"grid" | "list">("grid");
+
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -62,7 +67,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
       if (inStock)  params.set("inStock",  "true");
       if (search)   params.set("search",   search);
       params.set("page",  String(page));
-      params.set("limit", "20"); // More products per page for compact grid
+      params.set("limit", "24");
 
       const { data } = await axios.get(`/api/products?${params.toString()}`);
       if (data.success) {
@@ -84,87 +89,223 @@ export function ShopClient({ searchParams }: ShopClientProps) {
   };
 
   const activeFiltersCount = [category, minPrice, maxPrice, inStock ? "1" : ""].filter(Boolean).length;
+  const activeCategoryLabel = CATEGORIES.find((c) => c.value === category)?.label ?? "All Products";
 
   return (
-    <div className="bg-[#fdf8f0] min-h-screen">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-page-bg, #fdf8f0)" }}>
 
-      {/* Page header — compact */}
-      <div className="bg-white border-b border-neutral-100">
-        <div className="container-site py-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="font-display text-2xl font-semibold text-neutral-900">
-                {category
-                  ? CATEGORIES.find((c) => c.value === category)?.label ?? "Products"
-                  : "All Products"}
+      {/* ── PHASE 4: Professional Hero Header ─────────────────────── */}
+      <div
+        className="relative overflow-hidden"
+        style={{ backgroundColor: "var(--color-footer-bg, #1a1208)" }}
+      >
+        {/* Subtle pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `repeating-linear-gradient(
+              45deg,
+              var(--color-brand-primary, #d98c2a) 0px,
+              var(--color-brand-primary, #d98c2a) 1px,
+              transparent 1px,
+              transparent 12px
+            )`,
+          }}
+        />
+
+        <div className="relative container-site px-4 sm:px-6 py-8 sm:py-10 md:py-12">
+
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-1.5 text-xs mb-4 sm:mb-5" style={{ color: "var(--color-brand-primary, #d98c2a)" }}>
+            <span className="text-white/40">Home</span>
+            <ChevronRight className="w-3 h-3 text-white/20" />
+            <span className="font-medium">{activeCategoryLabel}</span>
+          </div>
+
+          {/* Main header content */}
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5 sm:gap-8">
+
+            {/* Left — title + tagline */}
+            <div className="max-w-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4" style={{ color: "var(--color-brand-primary, #d98c2a)" }} />
+                <span
+                  className="text-xs tracking-[0.2em] uppercase font-semibold"
+                  style={{ color: "var(--color-brand-primary, #d98c2a)" }}
+                >
+                  {category ? "Curated Collection" : "Premium Store"}
+                </span>
+              </div>
+
+              <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold text-white leading-tight mb-2">
+                {category ? activeCategoryLabel : "Home Essentials"}
+                {search && (
+                  <span className="text-white/50 font-normal">
+                    {" "}for <em>"{search}"</em>
+                  </span>
+                )}
               </h1>
-              {pagination && (
-                <p className="text-xs text-neutral-400 mt-0.5">
-                  {pagination.total} product{pagination.total !== 1 ? "s" : ""}
-                </p>
-              )}
+
+              <p className="text-sm text-white/50 leading-relaxed hidden sm:block">
+                {category
+                  ? `Handpicked ${activeCategoryLabel.toLowerCase()} designed for quality living.`
+                  : "Handpicked home goods — from bedding to kitchenware — crafted for quality living."}
+              </p>
             </div>
 
-            {/* Free delivery banner */}
-            <div className="hidden sm:flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
-              <Tag className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
-              <span className="text-xs text-green-700 font-medium">
-                Free delivery on orders above ₦100,000
+            {/* Right — search bar */}
+            <div className="w-full sm:w-auto sm:min-w-[280px] md:min-w-[340px]">
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={search}
+                  onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                  placeholder="Search products…"
+                  className="w-full pl-10 pr-10 py-3 text-sm rounded-xl text-white placeholder-white/30 outline-none transition-all"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                  }}
+                  onFocus={(e) => {
+                    (e.currentTarget as HTMLInputElement).style.borderColor =
+                      "var(--color-brand-primary, #d98c2a)";
+                    (e.currentTarget as HTMLInputElement).style.backgroundColor =
+                      "rgba(255,255,255,0.12)";
+                  }}
+                  onBlur={(e) => {
+                    (e.currentTarget as HTMLInputElement).style.borderColor =
+                      "rgba(255,255,255,0.12)";
+                    (e.currentTarget as HTMLInputElement).style.backgroundColor =
+                      "rgba(255,255,255,0.08)";
+                  }}
+                />
+                {search && (
+                  <button
+                    onClick={() => { setSearch(""); setPage(1); }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Promo strip */}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-6 pt-5 border-t border-white/10">
+            <div className="flex items-center gap-2">
+              <Truck className="w-3.5 h-3.5" style={{ color: "var(--color-brand-primary, #d98c2a)" }} />
+              <span className="text-xs text-white/60">
+                Free delivery on orders over{" "}
+                <span className="text-white font-semibold">
+                  ₦{freeShippingThreshold.toLocaleString()}
+                </span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1 h-1 rounded-full bg-white/20" />
+              <span className="text-xs text-white/60">
+                <span className="text-white font-semibold">100%</span> secure checkout
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1 h-1 rounded-full bg-white/20" />
+              <span className="text-xs text-white/60">
+                <span className="text-white font-semibold">24/7</span> customer support
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container-site py-5">
-
-        {/* Category pills — scrollable */}
-        <div className="flex gap-1.5 overflow-x-auto pb-3 mb-4 scrollbar-none">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => { setCategory(cat.value); setPage(1); }}
-              className={cn(
-                "flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all",
-                category === cat.value
-                  ? "bg-[#d98c2a] text-white border-[#d98c2a]"
-                  : "bg-white text-neutral-600 border-neutral-200 hover:border-[#d98c2a] hover:text-[#d98c2a]"
-              )}
-            >
-              {cat.label}
-            </button>
-          ))}
+      {/* ── Category pills ──────────────────────────────────────────── */}
+      <div
+        className="sticky top-0 z-20 border-b"
+        style={{
+          backgroundColor: "var(--color-card-bg, #fff)",
+          borderColor: "var(--color-border, #e5e5e5)",
+        }}
+      >
+        <div className="container-site px-4 sm:px-6">
+          <div className="flex gap-1 overflow-x-auto py-2.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {CATEGORIES.map((cat) => {
+              const isActive = category === cat.value;
+              return (
+                <button
+                  key={cat.value}
+                  onClick={() => { setCategory(cat.value); setPage(1); }}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap"
+                  style={
+                    isActive
+                      ? {
+                          backgroundColor: "var(--color-brand-primary, #d98c2a)",
+                          borderColor: "var(--color-brand-primary, #d98c2a)",
+                          color: "#fff",
+                        }
+                      : {
+                          backgroundColor: "transparent",
+                          borderColor: "var(--color-border, #e5e5e5)",
+                          color: "var(--color-text-secondary, #737373)",
+                        }
+                  }
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLButtonElement).style.borderColor =
+                        "var(--color-brand-primary, #d98c2a)";
+                      (e.currentTarget as HTMLButtonElement).style.color =
+                        "var(--color-brand-primary, #d98c2a)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLButtonElement).style.borderColor =
+                        "var(--color-border, #e5e5e5)";
+                      (e.currentTarget as HTMLButtonElement).style.color =
+                        "var(--color-text-secondary, #737373)";
+                    }
+                  }}
+                >
+                  <span className="hidden sm:inline">{cat.emoji}</span>
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
+      </div>
 
-        {/* Toolbar */}
-        <div className="flex items-center justify-between gap-3 mb-4">
+      {/* ── Toolbar ─────────────────────────────────────────────────── */}
+      <div className="container-site px-4 sm:px-6 pt-4 pb-2">
+        <div className="flex items-center justify-between gap-3">
+
+          {/* Left — filter + clear */}
           <div className="flex items-center gap-2">
-            {/* Mobile search */}
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                placeholder="Search…"
-                className="pl-8 pr-3 py-2 text-sm rounded-lg border border-neutral-200 bg-white outline-none focus:border-[#d98c2a] w-36 sm:w-48"
-              />
-            </div>
-
-            {/* Filter */}
             <button
               onClick={() => setFilterOpen(!filterOpen)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-all",
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-all"
+              style={
                 filterOpen || activeFiltersCount > 0
-                  ? "bg-[#fdf3e7] border-[#d98c2a] text-[#d98c2a]"
-                  : "bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300"
-              )}
+                  ? {
+                      backgroundColor: "color-mix(in srgb, var(--color-brand-primary, #d98c2a) 10%, transparent)",
+                      borderColor: "var(--color-brand-primary, #d98c2a)",
+                      color: "var(--color-brand-primary, #d98c2a)",
+                    }
+                  : {
+                      backgroundColor: "var(--color-card-bg, #fff)",
+                      borderColor: "var(--color-border, #e5e5e5)",
+                      color: "var(--color-text-secondary, #737373)",
+                    }
+              }
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
-              Filters
+              <span>Filters</span>
               {activeFiltersCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-[#d98c2a] text-white text-[9px] flex items-center justify-center">
+                <span
+                  className="w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold text-white"
+                  style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                >
                   {activeFiltersCount}
                 </span>
               )}
@@ -173,20 +314,32 @@ export function ShopClient({ searchParams }: ShopClientProps) {
             {activeFiltersCount > 0 && (
               <button
                 onClick={clearFilters}
-                className="text-xs text-neutral-400 hover:text-red-500 flex items-center gap-1"
+                className="text-xs text-neutral-400 hover:text-red-500 flex items-center gap-1 transition-colors"
               >
-                <X className="w-3 h-3" /> Clear
+                <X className="w-3 h-3" /> Clear all
               </button>
             )}
           </div>
 
+          {/* Right — sort + view */}
           <div className="flex items-center gap-2">
-            {/* Sort */}
             <div className="relative">
               <select
                 value={sort}
                 onChange={(e) => { setSort(e.target.value); setPage(1); }}
-                className="appearance-none pl-2.5 pr-7 py-2 text-xs rounded-lg border border-neutral-200 bg-white outline-none focus:border-[#d98c2a] cursor-pointer"
+                className="appearance-none pl-2.5 pr-7 py-2 text-xs rounded-lg border bg-white outline-none cursor-pointer transition-colors"
+                style={{
+                  borderColor: "var(--color-border, #e5e5e5)",
+                  color: "var(--color-text-primary, #1a1208)",
+                }}
+                onFocus={(e) => {
+                  (e.currentTarget as HTMLSelectElement).style.borderColor =
+                    "var(--color-brand-primary, #d98c2a)";
+                }}
+                onBlur={(e) => {
+                  (e.currentTarget as HTMLSelectElement).style.borderColor =
+                    "var(--color-border, #e5e5e5)";
+                }}
               >
                 {SORT_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -195,7 +348,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
               <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400 pointer-events-none" />
             </div>
 
-            {/* View toggle */}
+            {/* View toggle — desktop only */}
             <div className="hidden sm:flex border border-neutral-200 rounded-lg overflow-hidden">
               <button
                 onClick={() => setView("grid")}
@@ -203,6 +356,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                   "p-1.5 transition-colors",
                   view === "grid" ? "bg-neutral-900 text-white" : "bg-white text-neutral-400 hover:bg-neutral-50"
                 )}
+                aria-label="Grid view"
               >
                 <Grid2X2 className="w-3.5 h-3.5" />
               </button>
@@ -212,6 +366,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                   "p-1.5 transition-colors",
                   view === "list" ? "bg-neutral-900 text-white" : "bg-white text-neutral-400 hover:bg-neutral-50"
                 )}
+                aria-label="List view"
               >
                 <LayoutList className="w-3.5 h-3.5" />
               </button>
@@ -226,11 +381,20 @@ export function ShopClient({ searchParams }: ShopClientProps) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden mb-4"
+              className="overflow-hidden"
             >
-              <div className="bg-white rounded-xl border border-neutral-100 p-4 grid sm:grid-cols-3 gap-4">
+              <div
+                className="mt-3 rounded-xl border p-4 grid sm:grid-cols-3 gap-4"
+                style={{
+                  backgroundColor: "var(--color-card-bg, #fff)",
+                  borderColor: "var(--color-border, #e5e5e5)",
+                }}
+              >
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-neutral-400 block mb-2">
+                  <label
+                    className="text-xs font-semibold uppercase tracking-wide block mb-2"
+                    style={{ color: "var(--color-text-secondary, #737373)" }}
+                  >
                     Price Range (₦)
                   </label>
                   <div className="flex gap-2">
@@ -252,7 +416,10 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-neutral-400 block mb-2">
+                  <label
+                    className="text-xs font-semibold uppercase tracking-wide block mb-2"
+                    style={{ color: "var(--color-text-secondary, #737373)" }}
+                  >
                     Availability
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer mt-2">
@@ -262,14 +429,25 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                       onChange={(e) => setInStock(e.target.checked)}
                       className="w-4 h-4 accent-[#d98c2a]"
                     />
-                    <span className="text-sm text-neutral-700">In Stock Only</span>
+                    <span className="text-sm" style={{ color: "var(--color-text-primary, #1a1208)" }}>
+                      In Stock Only
+                    </span>
                   </label>
                 </div>
 
                 <div className="flex items-end">
                   <button
                     onClick={() => { setPage(1); setFilterOpen(false); }}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#d98c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#c47020] transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 text-white text-sm font-semibold rounded-lg transition-colors"
+                    style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                        "var(--color-brand-accent, #c47020)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                        "var(--color-brand-primary, #d98c2a)";
+                    }}
                   >
                     Apply Filters
                   </button>
@@ -278,35 +456,40 @@ export function ShopClient({ searchParams }: ShopClientProps) {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
 
-        {/* Mobile free delivery */}
-        <div className="sm:hidden flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg px-3 py-2 mb-4">
-          <Tag className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
-          <span className="text-xs text-green-700 font-medium">
-            Free delivery above ₦100,000
-          </span>
-        </div>
-
-        {/* Products grid — compact like Jumia: 2 on mobile, 3 tablet, 4 desktop, 5 wide */}
+      {/* ── Product grid ─────────────────────────────────────────────── */}
+      <div className="container-site px-4 sm:px-6 pb-12 pt-3">
         {loading ? (
-          <ProductGridSkeleton count={20} />
+          <ProductGridSkeleton count={24} />
         ) : products.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="font-display text-xl text-neutral-400 mb-3">No products found</p>
-            <p className="text-sm text-neutral-400 mb-5">Try adjusting your filters or search terms.</p>
+          <div className="text-center py-20">
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              style={{
+                backgroundColor: "color-mix(in srgb, var(--color-brand-primary, #d98c2a) 10%, transparent)",
+              }}
+            >
+              <Search className="w-7 h-7" style={{ color: "var(--color-brand-primary, #d98c2a)" }} />
+            </div>
+            <p className="font-display text-xl font-semibold text-neutral-700 mb-2">No products found</p>
+            <p className="text-sm text-neutral-400 mb-6">Try adjusting your filters or search terms.</p>
             <button
               onClick={clearFilters}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-lg hover:bg-[#c47020]"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-medium rounded-xl transition-colors"
+              style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
             >
               Clear All Filters
             </button>
           </div>
         ) : (
-          <div className={cn(
-            view === "grid"
-              ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4"
-              : "grid grid-cols-1 gap-3"
-          )}>
+          <div
+            className={cn(
+              view === "grid"
+                ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-3 md:gap-4"
+                : "grid grid-cols-1 gap-3"
+            )}
+          >
             {products.map((product, i) => (
               <ProductCard key={product._id} product={product} index={i} />
             ))}
@@ -320,12 +503,20 @@ export function ShopClient({ searchParams }: ShopClientProps) {
               <button
                 key={p}
                 onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                className={cn(
-                  "w-9 h-9 rounded-lg text-sm font-medium transition-all",
+                className="w-9 h-9 rounded-lg text-sm font-medium transition-all border"
+                style={
                   p === page
-                    ? "bg-[#d98c2a] text-white"
-                    : "bg-white border border-neutral-200 text-neutral-600 hover:border-[#d98c2a]"
-                )}
+                    ? {
+                        backgroundColor: "var(--color-brand-primary, #d98c2a)",
+                        borderColor: "var(--color-brand-primary, #d98c2a)",
+                        color: "#fff",
+                      }
+                    : {
+                        backgroundColor: "var(--color-card-bg, #fff)",
+                        borderColor: "var(--color-border, #e5e5e5)",
+                        color: "var(--color-text-secondary, #737373)",
+                      }
+                }
               >
                 {p}
               </button>

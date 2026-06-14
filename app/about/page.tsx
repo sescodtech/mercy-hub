@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "About Us" };
 
 const VALUES = [
   { icon: Award,  title: "Premium Quality",  desc: "Every product is curated for quality, durability, and beauty. We never compromise on what goes into your home." },
-  { icon: Heart,  title: "Customer First",   desc: "From fast shipping to easy returns, we put your satisfaction at the center of everything we do." },
+  { icon: Heart,  title: "Customer First",   desc: "From fast shipping to dedicated support, we put your satisfaction at the center of everything we do." },
   { icon: Leaf,   title: "Sustainability",   desc: "We source from responsible suppliers and are working toward a fully sustainable product range." },
   { icon: Shield, title: "Trust & Safety",   desc: "Secure payments, verified reviews, and transparent policies — because trust is everything." },
 ];

@@ -26,7 +26,7 @@ export default function TermsPage() {
           <p>Delivery times are estimates and not guarantees. We are not responsible for delays caused by third-party couriers or circumstances beyond our control.</p>
 
           <h2>5. Returns and Refunds</h2>
-          <p>Please see our <Link href="/returns" className="text-[#d98c2a]">Return Policy</Link> for detailed information on returns and refunds.</p>
+          <p>All purchases are final. Please contact our support team for any concerns regarding your order.</p>
 
           <h2>6. Intellectual Property</h2>
           <p>All content on this website including text, graphics, logos, and images is the property of Mercy Home Essentials and protected by Nigerian and international copyright laws.</p>

@@ -66,7 +66,7 @@ export function isLowStock(stock: number, threshold: number, track: boolean): bo
 }
 
 export function calculateShipping(subtotal: number): number {
-  if (subtotal >= 50000) return 0;   // free shipping above ₦50,000
+  if (subtotal >= 100000) return 0;   // free shipping above ₦100,000
   if (subtotal >= 20000) return 1500;
   return 2500;
 }

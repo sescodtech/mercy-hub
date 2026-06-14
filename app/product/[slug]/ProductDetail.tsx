@@ -349,7 +349,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 {
                   Icon: Truck,
                   text: settings?.shipping?.freeShippingEnabled
-                    ? `Free delivery on orders over ₦${(settings?.shipping?.freeShippingThreshold ?? 50000).toLocaleString()}`
+                    ? `Free delivery on orders over ₦${(settings?.shipping?.freeShippingThreshold ?? 100000).toLocaleString()}`
                     : "Shipping calculated at checkout",
                 },
                 { Icon: RefreshCw,   text: "30-day hassle-free returns" },

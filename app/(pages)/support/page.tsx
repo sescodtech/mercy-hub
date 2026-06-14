@@ -1,20 +1,18 @@
 import Link from "next/link";
 import {
-  ShoppingBag, Truck, RotateCcw, CreditCard,
+  ShoppingBag, Truck, CreditCard,
   MessageCircle, Mail, Phone, FileText, ChevronRight,
 } from "lucide-react";
 
 const TOPICS = [
   { icon: ShoppingBag, title: "Orders",           desc: "Track, modify or cancel your orders",   href: "/faq#Orders" },
   { icon: Truck,       title: "Shipping",          desc: "Delivery times, areas and tracking",    href: "/faq#Shipping" },
-  { icon: RotateCcw,   title: "Returns & Refunds", desc: "How to return items and get refunded",  href: "/faq#Returns" },
   { icon: CreditCard,  title: "Payments",          desc: "Payment methods and security",          href: "/faq#Orders" },
 ];
 
 const POLICIES = [
   { title: "Privacy Policy",    href: "/privacy" },
   { title: "Terms of Service",  href: "/terms" },
-  { title: "Return Policy",     href: "/returns" },
   { title: "Shipping Policy",   href: "/shipping-policy" },
 ];
 
