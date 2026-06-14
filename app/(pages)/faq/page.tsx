@@ -19,7 +19,7 @@ const FAQS = [
       },
       {
         q: "What payment methods do you accept?",
-        a: "We accept card payments, bank transfers, and USSD via Paystack and Flutterwave. We also offer Cash on Delivery (COD) for select locations.",
+        a: "We accept card payments, bank transfers, and USSD via Paystack and Flutterwave.",
       },
       {
         q: "Is my payment information secure?",

@@ -47,13 +47,13 @@ export default function AboutPage() {
               <h2 className="section-heading mb-5">From a Simple Vision to a Growing Brand</h2>
               <div className="space-y-4 text-neutral-600 leading-relaxed">
                 <p>
-                  Mercy Home Essentials started in 2019 in a small apartment in Lagos, Nigeria. Our founder, Mercy Adekunle, was frustrated by the lack of affordable, high-quality home goods in the Nigerian market — so she decided to build the solution herself.
+                  Mercy Home Essentials started in 2019 in a small apartment in Lagos, Nigeria. Our founder, Ayoola Anuoluwapo Deborah, was frustrated by the lack of affordable, high-quality home goods in the Nigerian market — so she decided to build the solution herself.
                 </p>
                 <p>
                   What started as a passion project has grown into a brand trusted by thousands of Nigerian households. We curate premium bedding, kitchenware, decor, and bath essentials — all carefully chosen to bring beauty and function to everyday living.
                 </p>
                 <p>
-                  Today, we ship across Nigeria and are rapidly expanding across West Africa. Every product we sell carries our personal guarantee of quality and value.
+                  Currently, we only provide shipping within Nigeria. However, global expansion is a key part of our growth plan. We look forward to offering international shipping options soon.
                 </p>
               </div>
               <Link href="/shop" className="btn-primary mt-8 inline-flex">
