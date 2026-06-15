@@ -3,18 +3,16 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
 import { signIn } from "next-auth/react";
-import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Loader2, ShoppingBag } from "lucide-react";
 import toast from "react-hot-toast";
 
-function LoginPage() {
-  const router = useRouter();
+function LoginForm() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+  const callbackUrl  = searchParams.get("callbackUrl") ?? "/dashboard";
 
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [showPw, setShowPw] = useState(false);
+  const [form,    setForm]    = useState({ email: "", password: "" });
+  const [showPw,  setShowPw]  = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,45 +23,123 @@ function LoginPage() {
     }
     setLoading(true);
     try {
-      await signIn("credentials", {
-        email:    form.email,
-        password: form.password,
+      const result = await signIn("credentials", {
+        email:       form.email,
+        password:    form.password,
         callbackUrl,
+        redirect:    false,
       });
-    } catch (error) {
+      if (result?.error) {
+        toast.error("Invalid email or password.");
+        setLoading(false);
+      } else {
+        window.location.href = callbackUrl;
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
       setLoading(false);
-      toast.error("Invalid email or password.");
     }
   };
 
   const handleGoogle = () => signIn("google", { callbackUrl });
 
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+    <div className="min-h-screen bg-[#fdf8f0] flex">
+
+      {/* Left panel — decorative, hidden on mobile */}
+      <div
+        className="hidden lg:flex lg:w-[42%] flex-col justify-between p-12 relative overflow-hidden"
+        style={{ backgroundColor: "#1a1208" }}
       >
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: "radial-gradient(circle at 25px 25px, #d98c2a 2px, transparent 0)",
+            backgroundSize: "50px 50px",
+          }}
+        />
+
         {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/">
-            <span className="font-display text-3xl font-semibold text-ebony">
-              Mercy<span className="text-brand-500">Home</span>
-            </span>
-          </Link>
-          <h1 className="font-display text-2xl font-semibold text-neutral-900 mt-6 mb-1">Welcome back</h1>
-          <p className="text-sm text-neutral-400">Sign in to your account</p>
+        <Link href="/" className="relative z-10">
+          <span className="font-display text-2xl font-semibold text-white">
+            Mercy<span style={{ color: "#d98c2a" }}>Home</span>
+          </span>
+        </Link>
+
+        {/* Center content */}
+        <div className="relative z-10 space-y-6">
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center"
+            style={{ backgroundColor: "rgba(217,140,42,0.15)" }}
+          >
+            <ShoppingBag className="w-7 h-7" style={{ color: "#d98c2a" }} />
+          </div>
+          <div>
+            <h2 className="font-display text-3xl font-semibold text-white leading-tight mb-3">
+              Premium Home Essentials,<br />Delivered to You
+            </h2>
+            <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Sign in to track your orders, manage your wishlist, and enjoy a personalised shopping experience.
+            </p>
+          </div>
+
+          {/* Trust points */}
+          <div className="space-y-3 pt-2">
+            {[
+              "Free delivery on orders above ₦100,000",
+              "Secure payment via Paystack",
+              "Premium quality guaranteed",
+            ].map((point) => (
+              <div key={point} className="flex items-center gap-2.5">
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-white"
+                  style={{ backgroundColor: "#d98c2a" }}
+                >
+                  ✓
+                </div>
+                <span className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  {point}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-luxury p-8">
-          {/* Google OAuth */}
+        <p className="text-xs relative z-10" style={{ color: "rgba(255,255,255,0.25)" }}>
+          © {new Date().getFullYear()} Mercy Home Essentials
+        </p>
+      </div>
+
+      {/* Right panel — form */}
+      <div className="flex-1 flex flex-col items-center justify-center px-5 sm:px-8 py-12">
+        <div className="w-full max-w-[400px]">
+
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center mb-8">
+            <Link href="/">
+              <span className="font-display text-2xl font-semibold text-neutral-900">
+                Mercy<span style={{ color: "#d98c2a" }}>Home</span>
+              </span>
+            </Link>
+          </div>
+
+          {/* Heading */}
+          <div className="mb-8">
+            <h1 className="font-display text-2xl sm:text-3xl font-semibold text-neutral-900 mb-1.5">
+              Welcome back
+            </h1>
+            <p className="text-sm text-neutral-400">
+              Sign in to your account to continue
+            </p>
+          </div>
+
+          {/* Google */}
           <button
             type="button"
             onClick={handleGoogle}
-            className="w-full flex items-center justify-center gap-3 border border-neutral-200 rounded-sm py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors mb-6"
+            className="w-full flex items-center justify-center gap-3 border border-neutral-200 rounded-xl py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 transition-all mb-6"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg className="w-4.5 h-4.5 flex-shrink-0" viewBox="0 0 24 24" style={{ width: 18, height: 18 }}>
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -72,32 +148,42 @@ function LoginPage() {
             Continue with Google
           </button>
 
+          {/* Divider */}
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-neutral-100" />
             </div>
             <div className="relative text-center">
-              <span className="bg-white px-4 text-xs text-neutral-400">or</span>
+              <span className="bg-[#fdf8f0] px-4 text-xs text-neutral-400">or sign in with email</span>
             </div>
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-neutral-700 mb-1.5">Email</label>
+              <label className="block text-xs font-semibold text-neutral-600 uppercase tracking-wide mb-1.5">
+                Email address
+              </label>
               <input
                 type="email"
                 autoComplete="email"
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                className="input-field"
                 placeholder="you@example.com"
+                className="w-full px-3.5 py-3 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[#d98c2a] focus:ring-2 focus:ring-[#d98c2a]/10 transition-all bg-white"
               />
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="text-xs font-medium text-neutral-700">Password</label>
-                <Link href="/auth/forgot-password" className="text-xs text-brand-600 hover:text-brand-700">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">
+                  Password
+                </label>
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-xs font-medium hover:underline"
+                  style={{ color: "#d98c2a" }}
+                >
                   Forgot password?
                 </Link>
               </div>
@@ -107,13 +193,14 @@ function LoginPage() {
                   autoComplete="current-password"
                   value={form.password}
                   onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                  className="input-field pr-10"
                   placeholder="••••••••"
+                  className="w-full px-3.5 py-3 pr-11 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[#d98c2a] focus:ring-2 focus:ring-[#d98c2a]/10 transition-all bg-white"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                  tabIndex={-1}
                 >
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -123,7 +210,10 @@ function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full justify-center py-3.5 mt-2"
+              className="w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-white rounded-xl disabled:opacity-60 transition-all mt-2"
+              style={{ backgroundColor: loading ? "#c47020" : "#d98c2a" }}
+              onMouseEnter={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "#c47020")}
+              onMouseLeave={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "#d98c2a")}
             >
               {loading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</>
@@ -132,23 +222,31 @@ function LoginPage() {
               )}
             </button>
           </form>
-        </div>
 
-        <p className="text-center text-sm text-neutral-400 mt-6">
-          Don&apos;t have an account?{" "}
-          <Link href="/auth/register" className="text-brand-600 font-medium hover:text-brand-700">
-            Create one
-          </Link>
-        </p>
-      </motion.div>
+          <p className="text-center text-sm text-neutral-400 mt-8">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/auth/register"
+              className="font-semibold hover:underline"
+              style={{ color: "#d98c2a" }}
+            >
+              Create one
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
 
-export default function Page() {
+export default function LoginPage() {
   return (
-    <Suspense fallback={null}>
-      <LoginPage />
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#fdf8f0] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#d98c2a" }} />
+      </div>
+    }>
+      <LoginForm />
     </Suspense>
   );
 }
