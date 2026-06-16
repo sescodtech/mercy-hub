@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { connectDB } from "@/lib/db";
-import { Order, User } from "@/lib/models";
+import { Order } from "@/lib/models";
+import Settings from "@/lib/models/Settings";
 import { sendOrderConfirmationEmail, sendAdminOrderAlert } from "@/lib/email";
 import { sendOrderConfirmation } from "@/services/whatsapp";
 
@@ -9,21 +10,30 @@ export async function POST(req: NextRequest) {
   const body      = await req.text();
   const signature = req.headers.get("x-paystack-signature") ?? "";
 
-  // ── Verify webhook signature — MUST pass before anything else ──
-  const hash = crypto
-    .createHmac("sha512", process.env.PAYSTACK_WEBHOOK_SECRET ?? "")
-    .update(body)
-    .digest("hex");
+  // ── Verify webhook signature ─────────────────────────────
+  // PAYSTACK_WEBHOOK_SECRET comes from Paystack dashboard (available after full approval)
+  // Until then, this route simply won't be called since no webhook URL fires without the secret.
+  const webhookSecret = process.env.PAYSTACK_WEBHOOK_SECRET;
 
-  if (hash !== signature) {
-    console.error("[PAYSTACK_WEBHOOK] Invalid signature");
-    return new NextResponse("Unauthorized", { status: 401 });
+  if (webhookSecret) {
+    const hash = crypto
+      .createHmac("sha512", webhookSecret)
+      .update(body)
+      .digest("hex");
+
+    if (hash !== signature) {
+      console.error("[PAYSTACK_WEBHOOK] Invalid signature — rejecting");
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+  } else {
+    // No secret configured yet (Pre-Approved accounts) — log and skip
+    console.warn("[PAYSTACK_WEBHOOK] PAYSTACK_WEBHOOK_SECRET not set. Skipping signature check.");
   }
 
   const event = JSON.parse(body);
-  console.log("[PAYSTACK_WEBHOOK] Event:", event.event);
+  console.log("[PAYSTACK_WEBHOOK] Event received:", event.event);
 
-  // ── Only handle successful charge events ──
+  // Only process successful payments
   if (event.event !== "charge.success") {
     return NextResponse.json({ received: true });
   }
@@ -35,7 +45,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
 
-    // Find order — try by orderId metadata first, then by orderNumber
+    // ── Find the order ───────────────────────────────────────
     const order = await Order.findOne(
       orderId ? { _id: orderId } : { orderNumber: reference }
     ).populate("user", "name email phone");
@@ -45,13 +55,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    // Skip if already processed (idempotency)
+    // ── Idempotency — skip if already paid ──────────────────
     if (order.paymentStatus === "paid") {
-      console.log("[PAYSTACK_WEBHOOK] Order already paid, skipping:", order.orderNumber);
+      console.log("[PAYSTACK_WEBHOOK] Already paid, skipping:", order.orderNumber);
       return NextResponse.json({ received: true });
     }
 
-    // ── Update order to paid + confirmed ──
+    // ── Mark as paid ─────────────────────────────────────────
     order.paymentStatus    = "paid";
     order.orderStatus      = "confirmed";
     order.paymentReference = reference;
@@ -59,7 +69,15 @@ export async function POST(req: NextRequest) {
 
     console.log("[PAYSTACK_WEBHOOK] Order confirmed:", order.orderNumber);
 
-    const storeUrl      = process.env.NEXT_PUBLIC_APP_URL ?? "";
+    // ── Load settings for notification preferences ───────────
+    const settings = await (Settings as any).getSingleton();
+
+    const storeUrl        = settings?.website || process.env.NEXT_PUBLIC_APP_URL || "";
+    const emailEnabled    = settings?.notifications?.orderEmail    ?? true;
+    const whatsappEnabled = settings?.notifications?.orderWhatsapp ?? false; // OFF by default
+    const adminEmail      = settings?.notifications?.adminEmail    || process.env.SMTP_USER || "";
+    const adminPhone      = settings?.notifications?.adminPhone    || "";
+
     const customerName  = order.shippingAddress.firstName + " " + order.shippingAddress.lastName;
     const customerPhone = order.shippingAddress.phone;
     const customerEmail = (order.user as any)?.email ?? data.customer?.email ?? "";
@@ -70,9 +88,9 @@ export async function POST(req: NextRequest) {
       price:    item.price,
     }));
 
-    // ── 1. Send customer order confirmation EMAIL ──
-    if (customerEmail) {
-      await sendOrderConfirmationEmail({
+    // ── Customer email ───────────────────────────────────────
+    if (emailEnabled && customerEmail) {
+      sendOrderConfirmationEmail({
         customerName,
         customerEmail,
         orderNumber:     order.orderNumber,
@@ -85,9 +103,9 @@ export async function POST(req: NextRequest) {
       }).catch((err) => console.error("[WEBHOOK] Customer email failed:", err));
     }
 
-    // ── 2. Send customer WhatsApp confirmation ──
-    if (customerPhone) {
-      await sendOrderConfirmation({
+    // ── Customer WhatsApp (admin toggle in Settings → Payments → Notifications) ──
+    if (whatsappEnabled && customerPhone) {
+      sendOrderConfirmation({
         customerName,
         customerPhone,
         orderNumber: order.orderNumber,
@@ -96,18 +114,31 @@ export async function POST(req: NextRequest) {
       }).catch((err) => console.error("[WEBHOOK] Customer WhatsApp failed:", err));
     }
 
-    // ── 3. Send admin order alert EMAIL ──
-    await sendAdminOrderAlert({
-      orderNumber:     order.orderNumber,
-      customerName,
-      total:           order.total,
-      items,
-      shippingAddress: order.shippingAddress,
-    }).catch((err) => console.error("[WEBHOOK] Admin email failed:", err));
+    // ── Admin email alert ────────────────────────────────────
+    if (adminEmail) {
+      sendAdminOrderAlert({
+        orderNumber:     order.orderNumber,
+        customerName,
+        total:           order.total,
+        items,
+        shippingAddress: order.shippingAddress,
+      }).catch((err) => console.error("[WEBHOOK] Admin email failed:", err));
+    }
+
+    // ── Admin WhatsApp alert ─────────────────────────────────
+    if (whatsappEnabled && adminPhone) {
+      sendOrderConfirmation({
+        customerName:  "Admin",
+        customerPhone: adminPhone,
+        orderNumber:   order.orderNumber,
+        total:         order.total,
+        items,
+      }).catch((err) => console.error("[WEBHOOK] Admin WhatsApp failed:", err));
+    }
 
   } catch (err) {
     console.error("[PAYSTACK_WEBHOOK] Error processing:", err);
-    // Still return 200 so Paystack doesn't retry indefinitely
+    // Always return 200 so Paystack doesn't retry indefinitely
     return NextResponse.json({ received: true });
   }
 

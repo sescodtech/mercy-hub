@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import { connectDB } from "@/lib/db";
 import { Order } from "@/lib/models";
+import Settings from "@/lib/models/Settings";
 import { sendOrderConfirmationEmail, sendAdminOrderAlert } from "@/lib/email";
 import { sendOrderConfirmation } from "@/services/whatsapp";
 
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Verify with Paystack
+    // ── 1. Verify with Paystack ──────────────────────────────
     const { data: paystackData } = await axios.get(
       `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
       {
@@ -33,6 +34,7 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
 
+    // ── 2. Find the order ────────────────────────────────────
     const orderId    = paystackData.data?.metadata?.orderId;
     const orderQuery = orderId ? { _id: orderId } : { orderNumber: reference };
 
@@ -46,15 +48,22 @@ export async function GET(req: NextRequest) {
 
     const alreadyPaid = order.paymentStatus === "paid";
 
-    // Update if not already paid
+    // ── 3. Mark paid + send notifications ───────────────────
     if (!alreadyPaid) {
       order.paymentStatus    = "paid";
       order.orderStatus      = "confirmed";
       order.paymentReference = reference;
       await order.save();
 
-      // Fire notifications (webhook may have already done this, but this is the backup)
-      const storeUrl      = process.env.NEXT_PUBLIC_APP_URL ?? "";
+      // Load store settings to check which notifications are enabled
+      const settings = await (Settings as any).getSingleton();
+
+      const storeUrl          = settings?.website || process.env.NEXT_PUBLIC_APP_URL || "";
+      const emailEnabled      = settings?.notifications?.orderEmail  ?? true;
+      const whatsappEnabled   = settings?.notifications?.orderWhatsapp ?? false; // OFF by default
+      const adminEmail        = settings?.notifications?.adminEmail  || process.env.SMTP_USER || "";
+      const adminPhone        = settings?.notifications?.adminPhone  || "";
+
       const customerName  = order.shippingAddress.firstName + " " + order.shippingAddress.lastName;
       const customerPhone = order.shippingAddress.phone;
       const customerEmail = (order.user as any)?.email ?? paystackData.data?.customer?.email ?? "";
@@ -65,10 +74,11 @@ export async function GET(req: NextRequest) {
         price:    item.price,
       }));
 
-      // Customer email
-      if (customerEmail) {
-        await sendOrderConfirmationEmail({
-          customerName, customerEmail,
+      // ── Customer email (controlled by settings.notifications.orderEmail) ──
+      if (emailEnabled && customerEmail) {
+        sendOrderConfirmationEmail({
+          customerName,
+          customerEmail,
           orderNumber:     order.orderNumber,
           total:           order.total,
           items,
@@ -76,29 +86,46 @@ export async function GET(req: NextRequest) {
           shippingCost:    order.shippingCost,
           discount:        order.discount,
           storeUrl,
-        }).catch(() => {});
+        }).catch((err) => console.error("[VERIFY] Customer email failed:", err));
       }
 
-      // Customer WhatsApp
-      if (customerPhone) {
-        await sendOrderConfirmation({
-          customerName, customerPhone,
+      // ── Customer WhatsApp (controlled by settings.notifications.orderWhatsapp) ──
+      // Default is OFF. Admin enables this from Settings → Payments → Notifications
+      if (whatsappEnabled && customerPhone) {
+        sendOrderConfirmation({
+          customerName,
+          customerPhone,
           orderNumber: order.orderNumber,
           total:       order.total,
           items,
-        }).catch(() => {});
+        }).catch((err) => console.error("[VERIFY] Customer WhatsApp failed:", err));
       }
 
-      // Admin email
-      await sendAdminOrderAlert({
-        orderNumber:     order.orderNumber,
-        customerName,
-        total:           order.total,
-        items,
-        shippingAddress: order.shippingAddress,
-      }).catch(() => {});
+      // ── Admin email alert (always fires if adminEmail is set) ──
+      if (adminEmail) {
+        sendAdminOrderAlert({
+          orderNumber:     order.orderNumber,
+          customerName,
+          total:           order.total,
+          items,
+          shippingAddress: order.shippingAddress,
+        }).catch((err) => console.error("[VERIFY] Admin email failed:", err));
+      }
+
+      // ── Admin WhatsApp alert (only if whatsapp enabled + adminPhone set) ──
+      // Uses the same whatsappEnabled toggle — admin gets WA alerts when customer WA is on
+      if (whatsappEnabled && adminPhone) {
+        sendOrderConfirmation({
+          customerName:  "Admin",
+          customerPhone: adminPhone,
+          orderNumber:   order.orderNumber,
+          total:         order.total,
+          items,
+        }).catch((err) => console.error("[VERIFY] Admin WhatsApp failed:", err));
+      }
     }
 
+    // ── 4. Respond ───────────────────────────────────────────
     return NextResponse.json({
       success: true,
       data: {
