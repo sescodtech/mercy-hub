@@ -1,42 +1,48 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { nanoid } from "nanoid";
+import { customAlphabet } from "nanoid";
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+const nanoid = customAlphabet("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 4);
+
+// ─── Order Number Generator ───────────────────────────────────
+// Format: MHE-YYMMDD-XXXX
+// Example: MHE-250612-0047
+// Short, readable, includes date for easy reference in WhatsApp chats
+export async function generateOrderNumber(): Promise<string> {
+  const now = new Date();
+  const yy   = String(now.getFullYear()).slice(2);
+  const mm   = String(now.getMonth() + 1).padStart(2, "0");
+  const dd   = String(now.getDate()).padStart(2, "0");
+
+  // 4-char random suffix (no ambiguous chars like 0/O, 1/I/L)
+  const suffix = nanoid();
+
+  return `MHE-${yy}${mm}${dd}-${suffix}`;
 }
 
-export function formatPrice(amount: number, currency = "NGN"): string {
+// Sync version for backwards compat (non-async callers)
+export function generateOrderNumberSync(): string {
+  const now = new Date();
+  const yy   = String(now.getFullYear()).slice(2);
+  const mm   = String(now.getMonth() + 1).padStart(2, "0");
+  const dd   = String(now.getDate()).padStart(2, "0");
+  const suffix = customAlphabet("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 4)();
+  return `MHE-${yy}${mm}${dd}-${suffix}`;
+}
+
+export function formatPrice(amount: number): string {
   return new Intl.NumberFormat("en-NG", {
-    style:    "currency",
-    currency,
+    style:                 "currency",
+    currency:              "NGN",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
 }
 
-export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOptions): string {
-  return new Intl.DateTimeFormat("en-NG", {
-    year:  "numeric",
-    month: "long",
+export function formatDate(date: Date | string): string {
+  return new Date(date).toLocaleDateString("en-NG", {
     day:   "numeric",
-    ...options,
-  }).format(new Date(date));
-}
-
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\w ]+/g, "")
-    .replace(/ +/g, "-")
-    .trim();
-}
-
-export function generateOrderNumber(): string {
-  const prefix = "MHE";
-  const timestamp = Date.now().toString(36).toUpperCase();
-  const random = nanoid(4).toUpperCase();
-  return `${prefix}-${timestamp}-${random}`;
+    month: "short",
+    year:  "numeric",
+  });
 }
 
 export function calculateDiscount(price: number, comparePrice?: number): number {
@@ -55,56 +61,12 @@ export function getImageUrl(url: string | undefined, fallback = "/images/placeho
   return fallback;
 }
 
-export function isInStock(stock: number, trackInventory: boolean): boolean {
-  if (!trackInventory) return true;
-  return stock > 0;
+export function cn(...classes: (string | boolean | undefined | null)[]): string {
+  return classes.filter(Boolean).join(" ");
 }
 
-export function isLowStock(stock: number, threshold: number, track: boolean): boolean {
-  if (!track) return false;
-  return stock > 0 && stock <= threshold;
-}
-
-export function calculateShipping(subtotal: number): number {
-  if (subtotal >= 100000) return 0;   // free shipping above ₦100,000
-  if (subtotal >= 20000) return 1500;
-  return 2500;
-}
-
-export function applyDiscount(
-  amount: number,
-  coupon: { type: "percent" | "fixed" | "free_shipping"; value: number; maxDiscountAmount?: number }
-): number {
-  if (coupon.type === "free_shipping") return 0;
-  if (coupon.type === "fixed") return Math.min(amount, coupon.value);
-  const discount = (amount * coupon.value) / 100;
-  if (coupon.maxDiscountAmount) return Math.min(discount, coupon.maxDiscountAmount);
-  return discount;
-}
-
-export function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
-export function buildQueryString(params: Record<string, string | number | boolean | undefined>): string {
-  const qs = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== "") {
-      qs.set(k, String(v));
-    }
-  });
-  return qs.toString() ? `?${qs.toString()}` : "";
-}
-
-export function starArray(rating: number): (1 | 0.5 | 0)[] {
-  return [1, 2, 3, 4, 5].map((i) => {
-    if (rating >= i) return 1;
-    if (rating >= i - 0.5) return 0.5;
-    return 0;
-  });
+// Kept for any legacy calls — now reads threshold from arg
+export function calculateShipping(subtotal: number, threshold = 100000, defaultCost = 3000): number {
+  if (subtotal >= threshold) return 0;
+  return defaultCost;
 }
