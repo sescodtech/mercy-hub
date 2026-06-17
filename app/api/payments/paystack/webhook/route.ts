@@ -5,14 +5,14 @@ import { Order } from "@/lib/models";
 import Settings from "@/lib/models/Settings";
 import { sendOrderConfirmationEmail, sendAdminOrderAlert } from "@/lib/email";
 import { sendOrderConfirmation } from "@/services/whatsapp";
+import { DigitalDeposit } from "@/lib/models/DigitalModels";
+import { creditWallet }   from "@/services/vtu/helpers";
 
 export async function POST(req: NextRequest) {
   const body      = await req.text();
   const signature = req.headers.get("x-paystack-signature") ?? "";
 
   // ── Verify webhook signature ─────────────────────────────
-  // PAYSTACK_WEBHOOK_SECRET comes from Paystack dashboard (available after full approval)
-  // Until then, this route simply won't be called since no webhook URL fires without the secret.
   const webhookSecret = process.env.PAYSTACK_WEBHOOK_SECRET;
 
   if (webhookSecret) {
@@ -26,7 +26,6 @@ export async function POST(req: NextRequest) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
   } else {
-    // No secret configured yet (Pre-Approved accounts) — log and skip
     console.warn("[PAYSTACK_WEBHOOK] PAYSTACK_WEBHOOK_SECRET not set. Skipping signature check.");
   }
 
@@ -37,6 +36,26 @@ export async function POST(req: NextRequest) {
   if (event.event !== "charge.success") {
     return NextResponse.json({ received: true });
   }
+
+  // ── Wallet top-up deposit ────────────────────────────────
+  if (event.data?.metadata?.purpose === "wallet_deposit") {
+    const reference = event.data.reference;
+    const userId    = event.data.metadata?.userId;
+    const amount    = event.data.amount / 100;
+    if (reference && userId) {
+      await connectDB();
+      const deposit = await DigitalDeposit.findOne({ reference });
+      if (deposit && deposit.status === "pending") {
+        await Promise.all([
+          creditWallet(userId, amount, "Wallet top-up via Paystack", reference),
+          DigitalDeposit.findOneAndUpdate({ reference }, { status: "verified" }),
+        ]);
+        console.log(`[PAYSTACK_WEBHOOK] Wallet credited: user=${userId} amount=₦${amount}`);
+      }
+    }
+    return NextResponse.json({ received: true });
+  }
+  // ─────────────────────────────────────────────────────────
 
   const data      = event.data;
   const reference = data.reference;
@@ -74,7 +93,7 @@ export async function POST(req: NextRequest) {
 
     const storeUrl        = settings?.website || process.env.NEXT_PUBLIC_APP_URL || "";
     const emailEnabled    = settings?.notifications?.orderEmail    ?? true;
-    const whatsappEnabled = settings?.notifications?.orderWhatsapp ?? false; // OFF by default
+    const whatsappEnabled = settings?.notifications?.orderWhatsapp ?? false;
     const adminEmail      = settings?.notifications?.adminEmail    || process.env.SMTP_USER || "";
     const adminPhone      = settings?.notifications?.adminPhone    || "";
 
@@ -103,7 +122,7 @@ export async function POST(req: NextRequest) {
       }).catch((err) => console.error("[WEBHOOK] Customer email failed:", err));
     }
 
-    // ── Customer WhatsApp (admin toggle in Settings → Payments → Notifications) ──
+    // ── Customer WhatsApp ────────────────────────────────────
     if (whatsappEnabled && customerPhone) {
       sendOrderConfirmation({
         customerName,
@@ -138,7 +157,6 @@ export async function POST(req: NextRequest) {
 
   } catch (err) {
     console.error("[PAYSTACK_WEBHOOK] Error processing:", err);
-    // Always return 200 so Paystack doesn't retry indefinitely
     return NextResponse.json({ received: true });
   }
 

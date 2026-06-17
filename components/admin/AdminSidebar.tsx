@@ -5,27 +5,28 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Package, ShoppingCart, Users,
   BarChart3, Tag, Image as ImageIcon, Settings, X,
-  FileText, Briefcase, Megaphone, Palette, Brush, Home,
+  FileText, Briefcase, Megaphone, Palette, Brush, Home, Zap,
 } from "lucide-react";
 import { cn } from "@/utils";
 
 export const NAV = [
-  { icon: LayoutDashboard, label: "Overview",      href: "/admin" },
-  { icon: Package,         label: "Products",      href: "/admin/products" },
-  { icon: ShoppingCart,    label: "Orders",        href: "/admin/orders" },
-  { icon: Users,           label: "Customers",     href: "/admin/customers" },
-  { icon: BarChart3,       label: "Analytics",     href: "/admin/analytics" },
-  { icon: Tag,             label: "Coupons",       href: "/admin/coupons" },
-  { icon: ImageIcon,       label: "Banners",       href: "/admin/banners" },
-  { icon: FileText,        label: "Blog",          href: "/admin/blog" },
-  { icon: Briefcase,       label: "Careers",       href: "/admin/careers" },
-  { icon: Megaphone,       label: "Announcements", href: "/admin/announcements" },
+  { icon: LayoutDashboard, label: "Overview",          href: "/admin" },
+  { icon: Package,         label: "Products",          href: "/admin/products" },
+  { icon: ShoppingCart,    label: "Orders",            href: "/admin/orders" },
+  { icon: Users,           label: "Customers",         href: "/admin/customers" },
+  { icon: BarChart3,       label: "Analytics",         href: "/admin/analytics" },
+  { icon: Tag,             label: "Coupons",           href: "/admin/coupons" },
+  { icon: ImageIcon,       label: "Banners",           href: "/admin/banners" },
+  { icon: FileText,        label: "Blog",              href: "/admin/blog" },
+  { icon: Briefcase,       label: "Careers",           href: "/admin/careers" },
+  { icon: Megaphone,       label: "Announcements",     href: "/admin/announcements" },
+  { icon: Zap,             label: "Digital Services",  href: "/admin/digital-services" },
   // ── NEW ──
-  { icon: Home,            label: "Homepage CMS",  href: "/admin/homepage" },
-  { icon: Palette,         label: "Appearance",    href: "/admin/appearance" },
-  { icon: Brush,           label: "Branding",      href: "/admin/branding" },
+  { icon: Home,            label: "Homepage CMS",      href: "/admin/homepage" },
+  { icon: Palette,         label: "Appearance",        href: "/admin/appearance" },
+  { icon: Brush,           label: "Branding",          href: "/admin/branding" },
   // ─────────
-  { icon: Settings,        label: "Settings",      href: "/admin/settings" },
+  { icon: Settings,        label: "Settings",          href: "/admin/settings" },
 ];
 
 // Visual group separators (shown before these hrefs)

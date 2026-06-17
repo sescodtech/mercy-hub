@@ -251,3 +251,6 @@ export const Order    = getOrCreateModel("Order",    OrderSchema);
 export const Coupon   = getOrCreateModel("Coupon",   CouponSchema);
 export const Banner   = getOrCreateModel("Banner",   BannerSchema);
 export { default as Settings } from "./Settings";
+
+// Digital Services
+export { DigitalOrder, DigitalWallet, DigitalConfig, DigitalDeposit } from "./DigitalModels";
