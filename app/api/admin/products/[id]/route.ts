@@ -43,12 +43,17 @@ export async function PUT(req: NextRequest, { params }: Params) {
       }
     }
 
-    const product = await Product.findByIdAndUpdate(id, { $set: body }, { new: true })
+    const product = await Product.findByIdAndUpdate(id, { $set: body }, { new: true, runValidators: true })
       .populate("category", "name slug");
     if (!product) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
 
     return NextResponse.json({ success: true, data: product, message: "Product updated" });
-  } catch {
+  } catch (error: unknown) {
+    const err = error as { name?: string; message?: string };
+    if (err.name === "ValidationError") {
+      return NextResponse.json({ success: false, error: err.message || "Validation failed" }, { status: 400 });
+    }
+    console.error("[PUT /api/admin/products/:id]", error);
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }

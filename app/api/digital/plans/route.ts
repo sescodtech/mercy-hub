@@ -13,13 +13,6 @@ import { getDigitalConfig, applyMarkup, DigitalCategory } from "@/services/vtu/h
 // Airtime amounts (in NGN) — customers can buy any amount ₦50–₦50,000
 const AIRTIME_AMOUNTS = [50, 100, 200, 500, 1000, 2000, 5000];
 
-// Education catalog
-const EDUCATION_PLANS = [
-  { id: "waec_1",   examName: "WAEC",   name: "WAEC Result Checker",   costPrice: 900,  quantity: 1 },
-  { id: "neco_1",   examName: "NECO",   name: "NECO Result Checker",   costPrice: 700,  quantity: 1 },
-  { id: "nabteb_1", examName: "NABTEB", name: "NABTEB Result Checker", costPrice: 750,  quantity: 1 },
-];
-
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -27,6 +20,7 @@ export async function GET(req: NextRequest) {
     const network  = searchParams.get("network") || "";
 
     const config = await getDigitalConfig();
+    const hidden = new Set(config.hiddenPlanIds || []);
 
     // ── Check if service is enabled ──
     if (!config.services[category]) {
@@ -35,8 +29,8 @@ export async function GET(req: NextRequest) {
 
     if (category === "data") {
       const allPlans = await fetchDataPlans();
-      let plans = allPlans;
-      if (network) plans = allPlans.filter(p => p.network === network.toLowerCase());
+      let plans = allPlans.filter(p => !hidden.has(p.id) && !hidden.has(p.providerPlanId));
+      if (network) plans = plans.filter(p => p.network === network.toLowerCase());
 
       const result = plans.map(p => ({
         id:          p.id,
@@ -56,34 +50,44 @@ export async function GET(req: NextRequest) {
     }
 
     if (category === "airtime") {
-      const result = AIRTIME_AMOUNTS.map(amount => ({
-        id:    `airtime_${amount}`,
-        name:  `₦${amount.toLocaleString("en-NG")} Airtime`,
-        price: applyMarkup(amount, "airtime", config),
-        costPrice: amount,
-      }));
+      const result = AIRTIME_AMOUNTS
+        .filter(amount => !hidden.has(`airtime_${amount}`))
+        .map(amount => ({
+          id:    `airtime_${amount}`,
+          name:  `₦${amount.toLocaleString("en-NG")} Airtime`,
+          price: applyMarkup(amount, "airtime", config),
+          costPrice: amount,
+        }));
       return NextResponse.json({ success: true, data: result, markup: config.markup.airtime });
     }
 
     if (category === "cable") {
-      const result = Object.entries(CABLE_PLANS).map(([planId, plan]) => ({
-        id:       `cable_${planId}`,
-        planId:   Number(planId),
-        name:     plan.name,
-        provider: plan.provider,
-        price:    applyMarkup(plan.price, "cable", config),
-        costPrice:plan.price,
-      }));
+      const result = Object.entries(CABLE_PLANS)
+        .filter(([planId]) => !hidden.has(`cable_${planId}`))
+        .map(([planId, plan]) => ({
+          id:       `cable_${planId}`,
+          planId:   Number(planId),
+          name:     plan.name,
+          provider: plan.provider,
+          price:    applyMarkup(plan.price, "cable", config),
+          costPrice:plan.price,
+        }));
       // Group by provider
       result.sort((a, b) => a.provider.localeCompare(b.provider) || a.price - b.price);
       return NextResponse.json({ success: true, data: result, markup: config.markup.cable });
     }
 
     if (category === "education") {
-      const result = EDUCATION_PLANS.map(p => ({
-        ...p,
-        price: applyMarkup(p.costPrice, "education", config),
-      }));
+      const result = (config.educationPlans || [])
+        .filter(p => p.isActive)
+        .map(p => ({
+          id:         p.id,
+          examName:   p.examName,
+          name:       p.name,
+          costPrice:  p.costPrice,
+          quantity:   p.quantity,
+          price:      applyMarkup(p.costPrice, "education", config),
+        }));
       return NextResponse.json({ success: true, data: result, markup: config.markup.education });
     }
 

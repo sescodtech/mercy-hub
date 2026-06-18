@@ -12,7 +12,7 @@ import { buyData, buyAirtime, buyCable, buyExamPin }        from "@/services/vtu
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -20,8 +20,9 @@ export async function POST(
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
     }
 
+    const { id } = await params;
     await connectDB();
-    const order = await DigitalOrder.findById(params.id);
+    const order = await DigitalOrder.findById(id);
     if (!order) {
       return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
     }

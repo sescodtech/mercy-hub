@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { HeroSection } from "@/components/home/HeroSection";
 import { CategorySection } from "@/components/home/CategorySection";
+import { DigitalServicesSection } from "@/components/home/DigitalServicesSection";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { BannerSection, BestSellers, TestimonialsSection } from "@/components/home/BannerSection";
 import { TrustBadges } from "@/components/home/TrustBadges";
@@ -20,6 +21,7 @@ export default function HomePage() {
     <>
       <HeroSection />
       <TrustBadges />
+      <DigitalServicesSection />
       <CategorySection />
       <FeaturedProducts />
       <BannerSection />

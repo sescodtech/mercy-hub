@@ -7,7 +7,7 @@
 import { NextResponse }  from "next/server";
 import { auth }          from "@/lib/auth";
 import { connectDB }     from "@/lib/db";
-import { DigitalOrder }  from "@/lib/models/DigitalModels";
+import { DigitalOrder, DigitalWallet }  from "@/lib/models/DigitalModels";
 import { getProviderBalance } from "@/services/vtu/gladtidings";
 
 export async function GET() {
@@ -26,6 +26,10 @@ export async function GET() {
       todayOrders,
       revenue,
       providerBalance,
+      distinctCustomers,
+      platformWalletAgg,
+      failureBreakdown,
+      categoryBreakdown,
     ] = await Promise.all([
       DigitalOrder.countDocuments(),
       DigitalOrder.countDocuments({ status: "fulfilled" }),
@@ -38,6 +42,18 @@ export async function GET() {
         { $group: { _id: null, total: { $sum: "$amount" }, cost: { $sum: "$costPrice" } } },
       ]),
       getProviderBalance(),
+      DigitalOrder.distinct("user"),
+      DigitalWallet.aggregate([{ $group: { _id: null, total: { $sum: "$balance" } } }]),
+      DigitalOrder.aggregate([
+        { $match: { status: "failed", failReason: { $exists: true, $ne: null } } },
+        { $group: { _id: "$failReason", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 5 },
+      ]),
+      DigitalOrder.aggregate([
+        { $match: { status: "fulfilled" } },
+        { $group: { _id: "$category", orders: { $sum: 1 }, revenue: { $sum: "$amount" }, cost: { $sum: "$costPrice" } } },
+      ]),
     ]);
 
     const revenueData  = revenue[0] || { total: 0, cost: 0 };
@@ -53,7 +69,14 @@ export async function GET() {
         totalRevenue:   revenueData.total,
         totalCost:      revenueData.cost,
         grossProfit,
-        providerBalance: providerBalance.balance ?? 0,
+        providerBalance:    providerBalance.balance ?? 0,
+        providerConnected:  providerBalance.success,
+        customerCount:      distinctCustomers.length,
+        platformWalletTotal: platformWalletAgg[0]?.total || 0,
+        failureBreakdown: failureBreakdown.map((f: { _id: string; count: number }) => ({ reason: f._id, count: f.count })),
+        categoryBreakdown: categoryBreakdown.map((c: { _id: string; orders: number; revenue: number; cost: number }) => ({
+          category: c._id, orders: c.orders, revenue: c.revenue, profit: c.revenue - c.cost,
+        })),
       },
     });
   } catch (error) {

@@ -102,10 +102,13 @@ export async function POST(req: NextRequest) {
       if (!examName) {
         return NextResponse.json({ success: false, error: "Missing: examName" }, { status: 400 });
       }
-      const EXAM_PRICES: Record<string, number> = { WAEC: 900, NECO: 700, NABTEB: 750 };
       const examKey = (examName as string).toUpperCase();
-      costPrice = (EXAM_PRICES[examKey] || 900) * planQty;
-      planLabel = `${examKey} Result Checker${planQty > 1 ? ` ×${planQty}` : ""}`;
+      const eduPlan = (config.educationPlans || []).find(p => p.examName.toUpperCase() === examKey && p.isActive);
+      if (!eduPlan) {
+        return NextResponse.json({ success: false, error: "Exam type not available" }, { status: 400 });
+      }
+      costPrice = eduPlan.costPrice * planQty;
+      planLabel = `${eduPlan.name}${planQty > 1 ? ` ×${planQty}` : ""}`;
     }
 
     else {

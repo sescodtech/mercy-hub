@@ -46,6 +46,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const [category, setCategory] = useState(searchParams.category ?? "");
+  const [filterTag, setFilterTag] = useState(searchParams.filter   ?? "");
   const [sort,     setSort]     = useState(searchParams.sort     ?? "newest");
   const [minPrice, setMinPrice] = useState(searchParams.minPrice ?? "");
   const [maxPrice, setMaxPrice] = useState(searchParams.maxPrice ?? "");
@@ -60,7 +61,8 @@ export function ShopClient({ searchParams }: ShopClientProps) {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (category) params.set("category", category);
+      if (category)  params.set("category", category);
+      if (filterTag) params.set("filter",   filterTag);
       if (sort)     params.set("sort",     sort);
       if (minPrice) params.set("minPrice", minPrice);
       if (maxPrice) params.set("maxPrice", maxPrice);
@@ -79,17 +81,20 @@ export function ShopClient({ searchParams }: ShopClientProps) {
     } finally {
       setLoading(false);
     }
-  }, [category, sort, minPrice, maxPrice, inStock, search, page]);
+  }, [category, filterTag, sort, minPrice, maxPrice, inStock, search, page]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
   const clearFilters = () => {
-    setCategory(""); setSort("newest"); setMinPrice("");
+    setCategory(""); setFilterTag(""); setSort("newest"); setMinPrice("");
     setMaxPrice(""); setInStock(false); setSearch(""); setPage(1);
   };
 
-  const activeFiltersCount = [category, minPrice, maxPrice, inStock ? "1" : ""].filter(Boolean).length;
-  const activeCategoryLabel = CATEGORIES.find((c) => c.value === category)?.label ?? "All Products";
+  const activeFiltersCount = [category, filterTag, minPrice, maxPrice, inStock ? "1" : ""].filter(Boolean).length;
+  const FILTER_LABELS: Record<string, string> = { new: "New Arrivals", sale: "On Sale", bestseller: "Best Sellers", featured: "Featured" };
+  const activeCategoryLabel = filterTag
+    ? (FILTER_LABELS[filterTag] ?? "Filtered")
+    : (CATEGORIES.find((c) => c.value === category)?.label ?? "All Products");
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-page-bg, #fdf8f0)" }}>
@@ -133,12 +138,12 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                   className="text-xs tracking-[0.2em] uppercase font-semibold"
                   style={{ color: "var(--color-brand-primary, #d98c2a)" }}
                 >
-                  {category ? "Curated Collection" : "Premium Store"}
+                  {category || filterTag ? "Curated Collection" : "Premium Store"}
                 </span>
               </div>
 
               <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold text-white leading-tight mb-2">
-                {category ? activeCategoryLabel : "Home Essentials"}
+                {category || filterTag ? activeCategoryLabel : "Home Essentials"}
                 {search && (
                   <span className="text-white/50 font-normal">
                     {" "}for <em>"{search}"</em>
@@ -147,7 +152,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
               </h1>
 
               <p className="text-sm text-white/50 leading-relaxed hidden sm:block">
-                {category
+                {category || filterTag
                   ? `Handpicked ${activeCategoryLabel.toLowerCase()} designed for quality living.`
                   : "Handpicked home goods — from bedding to kitchenware — crafted for quality living."}
               </p>

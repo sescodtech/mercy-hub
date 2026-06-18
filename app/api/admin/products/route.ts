@@ -71,6 +71,10 @@ export async function POST(req: NextRequest) {
     const existing = await Product.findOne({ slug });
     if (existing) slug = `${slug}-${Date.now()}`;
 
+    // Auto-generate an SKU if the admin didn't enter one — SKU is required at the DB
+    // level, but most small stores don't want to invent one for every product.
+    const finalSku = sku?.trim() || `MHE-${slug.slice(0, 12).toUpperCase()}-${Date.now().toString().slice(-5)}`;
+
     const product = await Product.create({
       name: name.trim(), slug, description, shortDescription,
       price: Number(price), comparePrice: comparePrice ? Number(comparePrice) : undefined,
@@ -78,7 +82,7 @@ export async function POST(req: NextRequest) {
       attributes: attributes ?? [], tags: tags ?? [],
       stock: Number(stock ?? 0), lowStockThreshold: Number(lowStockThreshold ?? 5),
       trackInventory: trackInventory ?? true,
-      sku: sku?.trim(), weight: weight ? Number(weight) : undefined,
+      sku: finalSku, weight: weight ? Number(weight) : undefined,
       isActive: isActive ?? true, isFeatured: isFeatured ?? false,
       isNewArrival: isNewArrival ?? false, seo: seo ?? {},
       rating: 0, reviewCount: 0,

@@ -1,0 +1,329 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, Wallet, Sparkles, Gift } from "lucide-react";
+import Link from "next/link";
+
+import type { Category, Network, PayMethod, Plan, Promo, PurchaseResult, Tab } from "./types";
+import { fmt } from "./types";
+import { CategoryTabs } from "./components/CategoryTabs";
+import { OverviewTab } from "./components/OverviewTab";
+import { DataTab, AirtimeTab, CableTab, EducationTab } from "./components/ServiceForms";
+import { PromoGrid } from "./components/PromoGrid";
+import { OtherTab } from "./components/OtherTab";
+import { OrderSummaryPanel } from "./components/OrderSummaryPanel";
+import { ResultModal } from "./components/ResultModal";
+
+const CATEGORY_TABS: Category[] = ["data", "airtime", "cable", "education"];
+
+export default function DigitalClient() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [activeTab,  setActiveTab]  = useState<Tab>("overview");
+  const [network,    setNetwork]    = useState<Network | "">("");
+  const [plans,      setPlans]      = useState<Plan[]>([]);
+  const [plan,       setPlan]       = useState<Plan | null>(null);
+  const [phone,      setPhone]      = useState("");
+  const [smartcard,  setSmartcard]  = useState("");
+  const [cableProv,  setCableProv]  = useState("dstv");
+  const [payMethod,  setPayMethod]  = useState<PayMethod>("wallet");
+  const [walletBal,  setWalletBal]  = useState(0);
+  const [loading,    setLoading]    = useState(false);
+  const [planLoad,   setPlanLoad]   = useState(false);
+  const [planError,  setPlanError]  = useState("");
+  const [result,     setResult]     = useState<PurchaseResult | null>(null);
+  const [pendingPromoId, setPendingPromoId] = useState<string | null>(null);
+
+  // The "purchase category" is just whichever of the 4 real service tabs is active.
+  // Overview / Deals / Promos / Other aren't purchase categories themselves —
+  // selecting a deal routes the user into the matching category tab first.
+  const category: Category | null = CATEGORY_TABS.includes(activeTab as Category) ? (activeTab as Category) : null;
+
+  // Fetch wallet balance on mount
+  useEffect(() => {
+    fetch("/api/digital/wallet/balance")
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setWalletBal(d.balance); })
+      .catch(() => {});
+  }, []);
+
+  const fetchPlans = useCallback(async (cat: Category, net?: string) => {
+    setPlanLoad(true);
+    setPlanError("");
+    setPlan(null);
+    setPlans([]);
+    try {
+      const q = net ? `&network=${net}` : "";
+      const r = await fetch(`/api/digital/plans?category=${cat}${q}`);
+      const d = await r.json();
+      if (d.success) {
+        setPlans(d.data || []);
+        if ((d.data || []).length === 0) setPlanError("No plans available at the moment. Please try again.");
+      } else {
+        setPlanError(d.error || "Failed to load plans.");
+      }
+    } catch {
+      setPlanError("Network error. Please check your connection.");
+    }
+    setPlanLoad(false);
+  }, []);
+
+  // Auto-select the matching plan once it loads, when the user arrived via a Hot Deal / Promo
+  useEffect(() => {
+    if (!pendingPromoId || plans.length === 0) return;
+    const match = plans.find(
+      (p) => p.providerPlanId === pendingPromoId || p.id === pendingPromoId || String(p.planId) === pendingPromoId
+    );
+    if (match) {
+      setPlan(match);
+      setPendingPromoId(null);
+    }
+  }, [plans, pendingPromoId]);
+
+  function handleTabClick(tab: Tab) {
+    setActiveTab(tab);
+    setPlan(null);
+    setNetwork("");
+    setPlans([]);
+    setPlanError("");
+    setPendingPromoId(null);
+    if (tab === "airtime")   fetchPlans("airtime");
+    if (tab === "cable")     fetchPlans("cable");
+    if (tab === "education") fetchPlans("education");
+  }
+
+  function selectPromo(promo: Promo) {
+    setPlan(null);
+    setPendingPromoId(promo.providerPlanId || null);
+
+    if (promo.category === "cable") {
+      setCableProv(promo.network || "dstv");
+      setActiveTab("cable");
+      fetchPlans("cable");
+    } else if (promo.category === "education") {
+      setActiveTab("education");
+      fetchPlans("education");
+    } else if (promo.category === "airtime") {
+      setNetwork((promo.network as Network) || "");
+      setActiveTab("airtime");
+      fetchPlans("airtime");
+    } else if (promo.category === "data") {
+      setNetwork((promo.network as Network) || "");
+      setActiveTab("data");
+      if (promo.network) fetchPlans("data", promo.network);
+    } else {
+      setActiveTab("other");
+    }
+  }
+
+  // Deep-link support: /digital?category=data lands straight on that service's tab
+  useEffect(() => {
+    const requested = searchParams.get("category") as Category | null;
+    if (requested && CATEGORY_TABS.includes(requested)) {
+      handleTabClick(requested);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  function handleDataNetworkChange(net: Network) {
+    setNetwork(net);
+    fetchPlans("data", net);
+  }
+
+  function handleAirtimeNetworkChange(net: Network) {
+    setNetwork(net);
+    fetchPlans("airtime");
+  }
+
+  async function handlePurchase() {
+    if (!plan || !category) return;
+    setLoading(true);
+
+    let body: Record<string, unknown> = { category, paymentMethod: payMethod };
+
+    if (category === "data") {
+      body = { ...body, network, phone, providerPlanId: plan.providerPlanId || plan.id, planName: plan.name };
+    } else if (category === "airtime") {
+      body = { ...body, network, phone, amount: plan.price };
+    } else if (category === "cable") {
+      body = { ...body, cableProvider: cableProv, smartcard, planId: plan.planId };
+    } else if (category === "education") {
+      body = { ...body, examName: plan.examName, quantity: plan.quantity || 1 };
+    }
+
+    if (payMethod === "paystack") {
+      const initRes = await fetch("/api/digital/wallet/deposit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: plan.price }),
+      });
+      const initData = await initRes.json();
+      if (initData.authorizationUrl) {
+        window.location.href = initData.authorizationUrl;
+        return;
+      }
+    }
+
+    try {
+      const r = await fetch("/api/digital/purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const d = await r.json();
+      setResult(d);
+      if (d.success) {
+        fetch("/api/digital/wallet/balance").then((r) => r.json()).then((d) => {
+          if (d.success) setWalletBal(d.balance);
+        });
+      }
+    } catch {
+      setResult({ success: false, error: "Network error. Please try again." });
+    }
+    setLoading(false);
+  }
+
+  function closeResult() {
+    setResult(null);
+    setPlan(null);
+    setPhone("");
+    setSmartcard("");
+  }
+
+  const canPurchase =
+    !!plan &&
+    !loading &&
+    !(payMethod === "wallet" && walletBal < (plan?.price || 0)) &&
+    !((category === "data" || category === "airtime") && (!phone || phone.length < 10)) &&
+    !(category === "cable" && !smartcard);
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-page-bg)" }}>
+
+      {/* ── Header ── */}
+      <div className="bg-white border-b border-neutral-100">
+        <div className="container-site px-4 sm:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.back()}
+              className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-500 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="font-semibold text-neutral-900 text-lg leading-none">Digital Services</h1>
+              <p className="text-xs text-neutral-400 mt-0.5">Data · Airtime · Cable TV · Exam PINs &amp; more</p>
+            </div>
+          </div>
+
+          {/* Wallet Balance */}
+          <Link
+            href="/digital/wallet"
+            className="flex items-center gap-2 rounded-xl px-3 py-2 border transition-colors"
+            style={{ backgroundColor: "rgba(217,140,42,0.1)", borderColor: "rgba(217,140,42,0.2)" }}
+          >
+            <Wallet className="w-4 h-4" style={{ color: "#d98c2a" }} />
+            <span className="text-sm font-semibold" style={{ color: "#d98c2a" }}>{fmt(walletBal)}</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* ── Persistent category navigation ── */}
+      <CategoryTabs active={activeTab} onChange={handleTabClick} />
+
+      {/* ── Content ── */}
+      <div className="container-site px-4 sm:px-6 py-6 sm:py-8">
+        <div className="grid lg:grid-cols-3 gap-6 items-start">
+
+          {/* Main column */}
+          <div className="lg:col-span-2">
+            {activeTab === "overview" && (
+              <OverviewTab onSelectTab={handleTabClick} onSelectPromo={selectPromo} />
+            )}
+
+            {activeTab === "data" && (
+              <DataTab
+                network={network} onNetworkChange={handleDataNetworkChange}
+                phone={phone} setPhone={setPhone}
+                plans={plans} planLoad={planLoad} planError={planError}
+                plan={plan} setPlan={setPlan}
+                onRetry={() => network && fetchPlans("data", network)}
+              />
+            )}
+
+            {activeTab === "airtime" && (
+              <AirtimeTab
+                network={network} onNetworkChange={handleAirtimeNetworkChange}
+                phone={phone} setPhone={setPhone}
+                plans={plans} planLoad={planLoad}
+                plan={plan} setPlan={setPlan}
+              />
+            )}
+
+            {activeTab === "cable" && (
+              <CableTab
+                cableProv={cableProv} setCableProv={setCableProv}
+                smartcard={smartcard} setSmartcard={setSmartcard}
+                plans={plans} planLoad={planLoad}
+                plan={plan} setPlan={setPlan}
+              />
+            )}
+
+            {activeTab === "education" && (
+              <EducationTab plans={plans} planLoad={planLoad} plan={plan} setPlan={setPlan} />
+            )}
+
+            {activeTab === "deals" && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-4 h-4" style={{ color: "#ef4444" }} />
+                  <h2 className="font-display text-lg font-semibold text-neutral-900">Hot Deals</h2>
+                </div>
+                <PromoGrid type="deal" onSelect={selectPromo} />
+              </div>
+            )}
+
+            {activeTab === "promos" && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Gift className="w-4 h-4" style={{ color: "#6366f1" }} />
+                  <h2 className="font-display text-lg font-semibold text-neutral-900">Promo Products</h2>
+                </div>
+                <PromoGrid type="promo" onSelect={selectPromo} />
+              </div>
+            )}
+
+            {activeTab === "other" && <OtherTab />}
+          </div>
+
+          {/* Order summary column */}
+          <div className="lg:col-span-1">
+            {plan ? (
+              <div className="lg:sticky lg:top-24">
+                <OrderSummaryPanel
+                  plan={plan}
+                  payMethod={payMethod} setPayMethod={setPayMethod}
+                  walletBal={walletBal}
+                  loading={loading}
+                  canPurchase={canPurchase}
+                  onPurchase={handlePurchase}
+                />
+              </div>
+            ) : (
+              <div
+                className="hidden lg:block lg:sticky lg:top-24 rounded-2xl border border-dashed p-6 text-center text-sm text-neutral-400"
+                style={{ borderColor: "var(--color-border, #e5e5e5)" }}
+              >
+                Select a plan to see your order summary here.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <ResultModal result={result} onClose={closeResult} />
+    </div>
+  );
+}
