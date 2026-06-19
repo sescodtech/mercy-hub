@@ -191,51 +191,49 @@ export async function fetchDataPlans(): Promise<DataPlan[]> {
   }
 
   try {
-    const r = await fetch(`${BASE_URL}/user/`, {
+    // /api/services/ returns the full plan catalogue with real plan_type values:
+    // { data_plans: [{ name: "MTN", items: [...] }, { name: "GLO", items: [...] }, ...] }
+    const r = await fetch(`${BASE_URL}/services/`, {
       headers: getHeaders(),
       signal: AbortSignal.timeout(15000),
     });
 
     if (!r.ok) {
-      console.warn(`[GladTidings] /user/ returned HTTP ${r.status}`);
+      console.warn(`[GladTidings] /services/ returned HTTP ${r.status}`);
       return _planCache.plans;
     }
 
     const data = await r.json();
 
-    // The top-level key may be "Dataplans" or "DataPlans" — normalise
-    const Dataplans =
-      data?.Dataplans ?? data?.DataPlans ?? data?.dataplans ?? null;
-
-    if (!Dataplans || typeof Dataplans !== "object") {
-      console.warn("[GladTidings] No Dataplans key in API response. Keys received:",
+    // Top-level key is data_plans — an array of { name, items } objects
+    const dataPlans = data?.data_plans;
+    if (!Array.isArray(dataPlans) || dataPlans.length === 0) {
+      console.warn("[GladTidings] No data_plans array in /services/ response. Keys:",
         Object.keys(data).join(", "));
-      return _planCache.plans; // return stale cache rather than empty
+      return _planCache.plans;
     }
 
     const plans: DataPlan[] = [];
 
-    for (const [planKey, planGroups] of Object.entries(
-      Dataplans as Record<string, unknown>
-    )) {
-      const network = resolveNetwork(planKey);
+    for (const networkGroup of dataPlans) {
+      const network = resolveNetwork(String(networkGroup.name ?? ""));
       if (!network) {
-        console.debug(`[GladTidings] Skipping unknown network key: ${planKey}`);
+        console.debug(`[GladTidings] Skipping unknown network: ${networkGroup.name}`);
         continue;
       }
 
-      // ── Collect every item from every sub-group ───────────────
-      const raw = collectGroupItems(planGroups);
-      if (raw.length === 0) continue;
+      const items: Record<string, unknown>[] = Array.isArray(networkGroup.items)
+        ? networkGroup.items
+        : [];
 
-      for (const item of raw) {
+      for (const item of items) {
         const planId  = item.dataplan_id ?? item.id;
         const cost    = parseFloat(String(item.plan_amount ?? 0));
         const rawName = String(item.plan ?? "").trim();
 
         if (!planId || !cost || !rawName || cost > 500_000) continue;
 
-        // Sanity-check: skip suspiciously expensive micro-bundles
+        // Skip plans with absurdly inflated prices (data entry errors on provider side)
         const sizeMatch = rawName.match(/(\d+(?:\.\d+)?)\s*(GB|MB|TB)/i);
         if (sizeMatch) {
           const sizeVal     = parseFloat(sizeMatch[1]);
@@ -251,7 +249,6 @@ export async function fetchDataPlans(): Promise<DataPlan[]> {
 
         const networkLabel = network === "9mobile" ? "9mobile" : network.toUpperCase();
 
-        // Build a stable, URL-safe deduplication key
         const dedupeKey = `${network}_${planLabel}_${String(planId)}`
           .toLowerCase()
           .replace(/\s+/g, "_")
@@ -296,11 +293,17 @@ export async function fetchDataPlans(): Promise<DataPlan[]> {
 }
 
 function mapPlanType(raw: string): string {
-  const t = (raw || "").toUpperCase();
-  if (t.includes("SME2"))      return "sme2";
-  if (t.includes("SME"))       return "sme";
-  if (t.includes("CORPORATE")) return "corporate";
-  return "gifting";
+  // Remove all spaces so "CORPORATE GIFTING", "MTN AWOOF", "DATA SHARE" all match cleanly
+  const t = (raw || "").toUpperCase().replace(/\s+/g, "");
+  if (t.includes("SME2"))                                   return "sme2";
+  if (t.includes("SME"))                                    return "sme";
+  if (t.includes("CORPORATEGIFTING") || t.includes("CORPORATE")) return "corporate";
+  if (t.includes("MTNAWOOF") || t.includes("AWOOF"))        return "awoof";
+  if (t.includes("TALKMORE"))                               return "talkmore";
+  if (t.includes("DATASHARE") || t.includes("SHARE"))       return "datashare";
+  if (t.includes("SPECIAL"))                                return "special";
+  if (t.includes("GIFTING"))                                return "gifting";
+  return "gifting"; // safe fallback
 }
 
 // ─── Data Purchase ───────────────────────────────────────────

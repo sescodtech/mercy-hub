@@ -94,11 +94,15 @@ const NET_LOGO: Record<Network, React.FC<{ size?: number }>> = {
 //  PLAN TYPE FILTER PILLS
 // ═══════════════════════════════════════════════════════════
 const PLAN_TYPE_TABS = [
-  { id: "all",       label: "All"       },
-  { id: "sme",       label: "SME"       },
-  { id: "sme2",      label: "SME 2.0"   },
-  { id: "corporate", label: "Corporate" },
-  { id: "gifting",   label: "Gifting"   },
+  { id: "all",       label: "All"        },
+  { id: "sme",       label: "SME"        },
+  { id: "sme2",      label: "SME 2.0"    },
+  { id: "corporate", label: "Corporate"  },
+  { id: "gifting",   label: "Gifting"    },
+  { id: "special",   label: "Special"    },
+  { id: "awoof",     label: "Awoof"      },
+  { id: "datashare", label: "Data Share" },
+  { id: "talkmore",  label: "Talk More"  },
 ];
 
 const PLAN_TYPE_BADGE: Record<string, { label: string; color: string; bg: string }> = {
@@ -106,6 +110,10 @@ const PLAN_TYPE_BADGE: Record<string, { label: string; color: string; bg: string
   sme2:      { label: "SME 2.0",   color: "#7c3aed", bg: "#ede9fe" },
   corporate: { label: "Corp",      color: "#0f766e", bg: "#ccfbf1" },
   gifting:   { label: "Gift",      color: "#b45309", bg: "#fef3c7" },
+  special:   { label: "Special",   color: "#dc2626", bg: "#fee2e2" },
+  awoof:     { label: "Awoof",     color: "#d97706", bg: "#fff7ed" },
+  datashare: { label: "Share",     color: "#0369a1", bg: "#e0f2fe" },
+  talkmore:  { label: "Talk+",     color: "#7c3aed", bg: "#f3e8ff" },
 };
 
 // ═══════════════════════════════════════════════════════════
