@@ -121,9 +121,9 @@ const PLAN_TYPE_BADGE: Record<string, { label: string; color: string; bg: string
 // ═══════════════════════════════════════════════════════════
 function DataPlanSkeleton() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="rounded-2xl bg-neutral-100 animate-pulse h-[110px]" />
+        <div key={i} className="rounded-xl bg-neutral-100 animate-pulse h-[88px]" />
       ))}
     </div>
   );
@@ -148,34 +148,33 @@ function NetworkSelector({
           <button
             key={id}
             onClick={() => onChange(id)}
-            className="relative flex flex-col items-center justify-center gap-2 py-4 rounded-2xl border-2 transition-all"
+            className="relative flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border-2 transition-all"
             style={{
               borderColor:     selected ? brand.color  : "#e5e5e5",
               backgroundColor: selected ? brand.bg     : "#fafafa",
               boxShadow:       selected ? `0 0 0 3px ${brand.ring}28` : "none",
             }}
           >
-            {/* Selected indicator ring on logo */}
             <div
               className="relative rounded-full transition-all"
               style={{
                 boxShadow: selected ? `0 0 0 3px ${brand.color}, 0 0 0 5px ${brand.color}30` : "none",
               }}
             >
-              <Logo size={38} />
+              <Logo size={32} />
             </div>
             <span
-              className="text-[11px] font-bold"
+              className="text-[10px] font-bold"
               style={{ color: selected ? brand.text : "#737373" }}
             >
               {label}
             </span>
             {selected && (
               <span
-                className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
+                className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: brand.color }}
               >
-                <CheckCircle2 className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                <CheckCircle2 className="w-2 h-2 text-white" strokeWidth={3} />
               </span>
             )}
           </button>
@@ -201,11 +200,11 @@ function PhoneInput({
         Phone Number
       </label>
       <div
-        className="flex items-center rounded-2xl border-2 overflow-hidden transition-all"
+        className="flex items-center rounded-xl border-2 overflow-hidden transition-all"
         style={{ borderColor: value ? (accentColor ?? "#d98c2a") : "#e5e5e5" }}
       >
-        <div className="flex items-center gap-1.5 px-3.5 py-3 border-r border-neutral-200 bg-neutral-50 flex-shrink-0">
-          <span className="text-base leading-none">🇳🇬</span>
+        <div className="flex items-center gap-1.5 px-3 py-2.5 border-r border-neutral-200 bg-neutral-50 flex-shrink-0">
+          <span className="text-sm leading-none">🇳🇬</span>
           <span className="text-xs font-semibold text-neutral-500">+234</span>
         </div>
         <input
@@ -214,7 +213,7 @@ function PhoneInput({
           onChange={(e) => onChange(e.target.value)}
           placeholder="080 1234 5678"
           maxLength={11}
-          className="flex-1 px-3.5 py-3 text-sm focus:outline-none bg-transparent"
+          className="flex-1 px-3 py-2.5 text-sm focus:outline-none bg-transparent"
         />
       </div>
     </div>
@@ -222,7 +221,7 @@ function PhoneInput({
 }
 
 // ═══════════════════════════════════════════════════════════
-//  DATA BUNDLES TAB  — OPay/PalmPay visual style
+//  DATA BUNDLES TAB  — compact, responsive
 // ═══════════════════════════════════════════════════════════
 interface DataProps extends BaseProps {
   network:         Network | "";
@@ -265,11 +264,11 @@ export function DataTab({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
 
       {/* ── Network Selector Card ── */}
-      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
-        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
+      <div className="bg-white rounded-2xl border border-neutral-100 p-3 shadow-sm">
+        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">
           Select Network
         </p>
         <NetworkSelector value={network} onChange={handleNetworkChange} />
@@ -277,43 +276,43 @@ export function DataTab({
 
       {network && (
         <>
-          {/* ── Network hero banner ── */}
+          {/* ── Network hero banner — compact ── */}
           <div
-            className="rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm"
+            className="rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm"
             style={{ background: brand?.gradient }}
           >
             {Logo && (
-              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 shadow">
-                <Logo size={36} />
+              <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 shadow">
+                <Logo size={28} />
               </div>
             )}
             <div>
-              <p className="font-extrabold text-white text-base leading-tight">
+              <p className="font-extrabold text-white text-sm leading-tight">
                 {network === "9mobile" ? "9mobile" : network.toUpperCase()} Data Plans
               </p>
-              <p className="text-white/75 text-xs mt-0.5">
+              <p className="text-white/75 text-[11px] mt-0.5">
                 {plans.length > 0 ? `${plans.length} plans available` : "Loading plans…"}
               </p>
             </div>
           </div>
 
           {/* ── Phone Input Card ── */}
-          <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+          <div className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
             <PhoneInput value={phone} onChange={setPhone} accentColor={brand?.color} />
           </div>
 
           {/* ── Plan Selector Card ── */}
-          <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+          <div className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
 
             {/* Plan type filter pills */}
             {!planLoad && !planError && plans.length > 0 && availableTypes.length > 1 && (
-              <div className="flex gap-1.5 overflow-x-auto pb-1 mb-3 [&::-webkit-scrollbar]:hidden">
+              <div className="flex gap-1 overflow-x-auto pb-1 mb-2.5 [&::-webkit-scrollbar]:hidden">
                 {availableTypes.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => setTypeFilter(t.id)}
                     className={cn(
-                      "flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all whitespace-nowrap",
+                      "flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all whitespace-nowrap",
                       typeFilter === t.id
                         ? "text-white border-transparent"
                         : "border-neutral-200 text-neutral-500 bg-white hover:border-neutral-300"
@@ -330,21 +329,21 @@ export function DataTab({
 
             {/* Search */}
             {!planLoad && !planError && plans.length > 5 && (
-              <div className="relative mb-3">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
+              <div className="relative mb-2.5">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-neutral-400" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search size or validity…"
-                  className="w-full text-sm border border-neutral-200 rounded-xl pl-9 pr-8 py-2.5 focus:outline-none focus:border-neutral-400 transition-colors bg-neutral-50"
+                  className="w-full text-xs border border-neutral-200 rounded-lg pl-8 pr-7 py-2 focus:outline-none focus:border-neutral-400 transition-colors bg-neutral-50"
                 />
                 {search && (
                   <button
                     onClick={() => setSearch("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-3 h-3" />
                   </button>
                 )}
               </div>
@@ -355,7 +354,7 @@ export function DataTab({
 
             {/* Error */}
             {planError && !planLoad && (
-              <div className="text-center py-8">
+              <div className="text-center py-6">
                 <p className="text-sm text-red-400 mb-3">{planError}</p>
                 <button
                   onClick={onRetry}
@@ -368,7 +367,7 @@ export function DataTab({
 
             {/* No match after filter */}
             {!planLoad && !planError && filtered.length === 0 && plans.length > 0 && (
-              <div className="text-center py-8 text-sm text-neutral-400">
+              <div className="text-center py-6 text-xs text-neutral-400">
                 No plans match.{" "}
                 <button
                   onClick={() => { setTypeFilter("all"); setSearch(""); }}
@@ -379,28 +378,33 @@ export function DataTab({
               </div>
             )}
 
-            {/* ── PLAN GRID — OPay/PalmPay card style ── */}
+            {/* ── PLAN GRID — compact responsive cards ── */}
             {!planLoad && !planError && filtered.length > 0 && (
               <>
-                <p className="text-[11px] text-neutral-400 mb-2.5 font-medium">
+                <p className="text-[10px] text-neutral-400 mb-2 font-medium">
                   {filtered.length} plan{filtered.length !== 1 ? "s" : ""}
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[480px] overflow-y-auto pr-0.5 scrollbar-thin">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[420px] overflow-y-auto pr-0.5 scrollbar-thin">
                   {filtered.map((p) => {
                     const isSelected = plan?.id === p.id;
                     const typeMeta   = PLAN_TYPE_BADGE[p.planType ?? "gifting"];
 
-                    // Extract hero data size from plan name
+                    // Extract hero data size — prefer a clean "XGB/XMB" token;
+                    // fall back to the plan name minus leading network prefix.
+                    // Break-words + clamping ensure long fallback names never overflow.
                     const sizeMatch = p.name.match(/(\d+(?:\.\d+)?\s*(?:GB|MB|TB))/i);
                     const displaySize = sizeMatch
                       ? sizeMatch[0].replace(/\s+/g, "").toUpperCase()
                       : p.name.replace(/^(MTN|AIRTEL|GLO|9mobile)\s*/i, "");
 
+                    // True GB/MB labels are short; long fallback names need smaller text.
+                    const isSizeToken = !!sizeMatch;
+
                     return (
                       <button
                         key={p.id}
                         onClick={() => setPlan(isSelected ? null : p)}
-                        className="relative flex flex-col p-3.5 rounded-2xl border-2 text-left transition-all active:scale-[0.96] overflow-hidden"
+                        className="relative flex flex-col p-2.5 rounded-xl border-2 text-left transition-all active:scale-[0.96] overflow-hidden"
                         style={{
                           borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "#ebebeb",
                           backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "#fafafa",
@@ -409,26 +413,26 @@ export function DataTab({
                             : "0 1px 3px rgba(0,0,0,0.04)",
                         }}
                       >
-                        {/* Decorative circle top-right (OPay style) */}
+                        {/* Decorative circle top-right */}
                         <div
-                          className="absolute -top-4 -right-4 w-14 h-14 rounded-full opacity-10 pointer-events-none"
+                          className="absolute -top-3 -right-3 w-10 h-10 rounded-full opacity-10 pointer-events-none"
                           style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
                         />
 
                         {/* Selected tick */}
                         {isSelected && (
                           <span
-                            className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center z-10"
+                            className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full flex items-center justify-center z-10"
                             style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
                           >
-                            <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />
+                            <CheckCircle2 className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                           </span>
                         )}
 
                         {/* Plan type pill */}
                         {typeMeta && (
                           <span
-                            className="mb-2 self-start px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md"
+                            className="mb-1.5 self-start px-1 py-0.5 text-[8px] font-black uppercase tracking-wider rounded"
                             style={{ color: typeMeta.color, backgroundColor: typeMeta.bg }}
                           >
                             {typeMeta.label}
@@ -437,7 +441,12 @@ export function DataTab({
 
                         {/* ── Hero data size ── */}
                         <p
-                          className="text-2xl font-black leading-none tracking-tight"
+                          className={cn(
+                            "font-black leading-tight break-words w-full",
+                            isSizeToken
+                              ? "text-xl"          // "10GB" — short, large
+                              : "text-xs line-clamp-2"  // long plan name — small + clamped
+                          )}
                           style={{ color: isSelected ? (brand?.text ?? "#665200") : "#171717" }}
                         >
                           {displaySize}
@@ -445,12 +454,12 @@ export function DataTab({
 
                         {/* Validity */}
                         {p.validity && (
-                          <p className="text-[10px] text-neutral-400 mt-1 font-medium">{p.validity}</p>
+                          <p className="text-[9px] text-neutral-400 mt-0.5 font-medium leading-tight">{p.validity}</p>
                         )}
 
-                        {/* Price — prominent */}
+                        {/* Price */}
                         <p
-                          className="text-sm font-black mt-auto pt-2"
+                          className="text-xs font-black mt-auto pt-1.5"
                           style={{ color: brand?.color ?? "#d98c2a" }}
                         >
                           {fmt(p.price)}
@@ -486,9 +495,9 @@ export function AirtimeTab({
   const Logo  = network ? NET_LOGO[network as Network]  : null;
 
   return (
-    <div className="space-y-3">
-      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
-        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
+    <div className="space-y-2.5">
+      <div className="bg-white rounded-2xl border border-neutral-100 p-3 shadow-sm">
+        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">
           Select Network
         </p>
         <NetworkSelector value={network} onChange={onNetworkChange} />
@@ -498,34 +507,34 @@ export function AirtimeTab({
         <>
           {/* Network hero banner */}
           <div
-            className="rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm"
+            className="rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm"
             style={{ background: brand?.gradient }}
           >
             {Logo && (
-              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 shadow">
-                <Logo size={36} />
+              <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 shadow">
+                <Logo size={28} />
               </div>
             )}
             <div>
-              <p className="font-extrabold text-white text-base leading-tight">
+              <p className="font-extrabold text-white text-sm leading-tight">
                 {network === "9mobile" ? "9mobile" : network.toUpperCase()} Airtime
               </p>
-              <p className="text-white/75 text-xs mt-0.5">Instant top-up</p>
+              <p className="text-white/75 text-[11px] mt-0.5">Instant top-up</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+          <div className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
             <PhoneInput value={phone} onChange={setPhone} accentColor={brand?.color} />
           </div>
 
-          <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
-            <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
+          <div className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
+            <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">
               Select Amount
             </p>
             {planLoad ? (
               <div className="grid grid-cols-3 gap-2">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="bg-neutral-100 animate-pulse rounded-xl h-14" />
+                  <div key={i} className="bg-neutral-100 animate-pulse rounded-xl h-12" />
                 ))}
               </div>
             ) : (
@@ -536,7 +545,7 @@ export function AirtimeTab({
                     <button
                       key={p.id}
                       onClick={() => setPlan(selected ? null : p)}
-                      className="py-4 rounded-xl text-center border-2 transition-all font-black text-sm"
+                      className="py-3 rounded-xl text-center border-2 transition-all font-black text-xs sm:text-sm"
                       style={{
                         borderColor:     selected ? (brand?.color ?? "#d98c2a") : "#ebebeb",
                         backgroundColor: selected ? (brand?.bg   ?? "rgba(217,140,42,0.1)") : "#fafafa",
@@ -580,9 +589,9 @@ export function CableTab({
   const meta = CABLE_META[cableProv];
 
   return (
-    <div className="space-y-3">
-      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
-        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
+    <div className="space-y-2.5">
+      <div className="bg-white rounded-2xl border border-neutral-100 p-3 shadow-sm">
+        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">
           Cable Provider
         </p>
         <div className="grid grid-cols-3 gap-2">
@@ -593,7 +602,7 @@ export function CableTab({
               <button
                 key={p}
                 onClick={() => { setCableProv(p); setPlan(null); }}
-                className="py-4 rounded-xl border-2 text-sm font-black transition-all"
+                className="py-3 rounded-xl border-2 text-xs font-black transition-all"
                 style={{
                   borderColor:     selected ? m.color : "#ebebeb",
                   backgroundColor: selected ? m.bg    : "#fafafa",
@@ -610,17 +619,17 @@ export function CableTab({
 
       {/* Provider gradient banner */}
       <div
-        className="rounded-2xl px-5 py-3 flex items-center gap-3 shadow-sm"
+        className="rounded-xl px-4 py-2.5 flex items-center gap-3 shadow-sm"
         style={{ background: meta.gradient }}
       >
         <div>
           <p className="font-extrabold text-white text-sm">{meta.label} Subscription</p>
-          <p className="text-white/70 text-[11px] mt-0.5">Enter your smartcard to continue</p>
+          <p className="text-white/70 text-[10px] mt-0.5">Enter your smartcard to continue</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
-        <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">
+      <div className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
+        <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">
           Smartcard / IUC Number
         </label>
         <input
@@ -628,23 +637,23 @@ export function CableTab({
           value={smartcard}
           onChange={(e) => setSmartcard(e.target.value)}
           placeholder="Enter smartcard number"
-          className="w-full border-2 border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors"
+          className="w-full border-2 border-neutral-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none transition-colors"
           style={{ borderColor: smartcard ? (meta?.color ?? "#d98c2a") : "#e5e5e5" }}
         />
       </div>
 
-      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
-        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
+      <div className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
+        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">
           Select Plan
         </p>
         {planLoad ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-neutral-100 animate-pulse rounded-xl h-14" />
+              <div key={i} className="bg-neutral-100 animate-pulse rounded-xl h-12" />
             ))}
           </div>
         ) : (
-          <div className="space-y-2 max-h-[360px] overflow-y-auto pr-0.5 scrollbar-thin">
+          <div className="space-y-1.5 max-h-[320px] overflow-y-auto pr-0.5 scrollbar-thin">
             {plans
               .filter((p) => p.provider === cableProv)
               .map((p) => {
@@ -653,16 +662,16 @@ export function CableTab({
                   <button
                     key={p.id}
                     onClick={() => setPlan(selected ? null : p)}
-                    className="w-full p-3.5 rounded-xl text-left border-2 flex justify-between items-center transition-all"
+                    className="w-full px-3 py-2.5 rounded-xl text-left border-2 flex justify-between items-center gap-2 transition-all"
                     style={{
                       borderColor:     selected ? (meta?.color ?? "#d98c2a") : "#ebebeb",
                       backgroundColor: selected ? (meta?.bg   ?? "rgba(217,140,42,0.08)") : "#fafafa",
                       boxShadow:       selected ? `0 0 0 2px ${meta?.color ?? "#d98c2a"}20` : "0 1px 3px rgba(0,0,0,0.04)",
                     }}
                   >
-                    <span className="text-sm font-semibold text-neutral-800">{p.name}</span>
+                    <span className="text-xs font-semibold text-neutral-800 leading-snug">{p.name}</span>
                     <span
-                      className="text-sm font-black flex-shrink-0 ml-3"
+                      className="text-xs font-black flex-shrink-0"
                       style={{ color: meta?.color ?? "#d98c2a" }}
                     >
                       {fmt(p.price)}
@@ -688,26 +697,26 @@ export function EducationTab({ plans, planLoad, plan, setPlan }: BaseProps) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <div
-        className="rounded-2xl px-5 py-4 shadow-sm"
+        className="rounded-xl px-4 py-3 shadow-sm"
         style={{ background: "linear-gradient(135deg,#1e3a8a,#1e40af)" }}
       >
-        <p className="font-extrabold text-white text-base">Exam Result Checker</p>
-        <p className="text-white/70 text-xs mt-1">
+        <p className="font-extrabold text-white text-sm">Exam Result Checker</p>
+        <p className="text-white/70 text-xs mt-0.5">
           Purchase a scratch card PIN to check your exam results instantly.
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+      <div className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
         {planLoad ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-neutral-100 animate-pulse rounded-2xl h-16" />
+              <div key={i} className="bg-neutral-100 animate-pulse rounded-xl h-14" />
             ))}
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {plans.map((p) => {
               const selected = plan?.id === p.id;
               const meta     = EXAM_META[p.examName ?? ""] ?? { color: "#d98c2a", bg: "#fff7ed", gradient: "linear-gradient(135deg,#d98c2a,#b87020)" };
@@ -715,27 +724,27 @@ export function EducationTab({ plans, planLoad, plan, setPlan }: BaseProps) {
                 <button
                   key={p.id}
                   onClick={() => setPlan(selected ? null : p)}
-                  className="w-full p-4 rounded-2xl text-left border-2 flex items-center justify-between transition-all"
+                  className="w-full p-3 rounded-xl text-left border-2 flex items-center justify-between gap-3 transition-all"
                   style={{
                     borderColor:     selected ? meta.color : "#ebebeb",
                     backgroundColor: selected ? meta.bg    : "#fafafa",
                     boxShadow:       selected ? `0 0 0 2px ${meta.color}20` : "0 1px 3px rgba(0,0,0,0.04)",
                   }}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <span
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xs flex-shrink-0"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-[10px] flex-shrink-0"
                       style={{ background: meta.gradient }}
                     >
                       {(p.examName ?? "").slice(0, 3)}
                     </span>
-                    <div>
-                      <p className="font-bold text-neutral-900 text-sm">{p.name}</p>
-                      <p className="text-xs text-neutral-400">1 scratch card PIN</p>
+                    <div className="min-w-0">
+                      <p className="font-bold text-neutral-900 text-xs leading-snug truncate">{p.name}</p>
+                      <p className="text-[10px] text-neutral-400">1 scratch card PIN</p>
                     </div>
                   </div>
                   <span
-                    className="text-sm font-black flex-shrink-0 ml-3"
+                    className="text-xs font-black flex-shrink-0"
                     style={{ color: meta.color }}
                   >
                     {fmt(p.price)}

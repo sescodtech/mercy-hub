@@ -70,7 +70,10 @@ export default function DigitalClient() {
     setPlanLoad(false);
   }, []);
 
-  // Auto-select the matching plan once it loads, when the user arrived via a Hot Deal / Promo
+  // Auto-select the matching plan once it loads, when the user arrived via a Hot Deal / Promo.
+  // Also back-fills the network selector from the matched plan — this matters when the promo
+  // itself didn't have a network set (e.g. admin picked the plan but the network field was
+  // left blank), so the UI still lands on the correct network tab once the plan resolves.
   useEffect(() => {
     if (!pendingPromoId || plans.length === 0) return;
     const match = plans.find(
@@ -78,9 +81,10 @@ export default function DigitalClient() {
     );
     if (match) {
       setPlan(match);
+      if (!network && match.network) setNetwork(match.network as Network);
       setPendingPromoId(null);
     }
-  }, [plans, pendingPromoId]);
+  }, [plans, pendingPromoId, network]);
 
   function handleTabClick(tab: Tab) {
     setActiveTab(tab);
@@ -112,7 +116,12 @@ export default function DigitalClient() {
     } else if (promo.category === "data") {
       setNetwork((promo.network as Network) || "");
       setActiveTab("data");
-      if (promo.network) fetchPlans("data", promo.network);
+      // FIX: previously this only fetched plans when promo.network was set, which meant a
+      // data promo/hot deal with no network field (or one resolved purely via providerPlanId)
+      // never loaded any plans — so clicking it silently did nothing on the checkout step.
+      // Now we always fetch: scoped to the network if we have one, otherwise all data plans,
+      // and the pendingPromoId effect above will find + select the right one once they load.
+      fetchPlans("data", promo.network || undefined);
     } else {
       setActiveTab("other");
     }
