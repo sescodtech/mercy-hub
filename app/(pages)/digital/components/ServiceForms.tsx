@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2, RefreshCw, Search, CheckCircle2 } from "lucide-react";
+import { Loader2, RefreshCw, Search, CheckCircle2, X } from "lucide-react";
 import { NETWORKS, CABLE_PROVIDERS, fmt } from "../types";
 import type { Network, Plan } from "../types";
 import { cn } from "@/utils";
@@ -18,50 +18,111 @@ interface BaseProps {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  NETWORK BRAND CONFIG
+//  NETWORK BRAND CONFIG  (OPay/PalmPay-style colours)
 // ═══════════════════════════════════════════════════════════
 const NET_BRAND: Record<Network, {
   color: string; bg: string; border: string; text: string; ring: string;
+  gradient: string;
 }> = {
-  mtn:     { color: "#FFCC00", bg: "#FFFBE6", border: "#FFE066", text: "#7A5900", ring: "#FFCC00" },
-  airtel:  { color: "#EE0000", bg: "#FFF0F0", border: "#FFB3B3", text: "#8B0000", ring: "#EE0000" },
-  glo:     { color: "#009A44", bg: "#EDFBF3", border: "#86EFAC", text: "#005C29", ring: "#009A44" },
-  "9mobile": { color: "#00A86B", bg: "#ECFDF5", border: "#6EE7B7", text: "#00503A", ring: "#00A86B" },
+  mtn:       { color: "#FFCC00", bg: "#FFFBE6", border: "#FFE066", text: "#7A5900", ring: "#FFCC00", gradient: "linear-gradient(135deg,#FFDE00,#FFA500)" },
+  airtel:    { color: "#EE0000", bg: "#FFF0F0", border: "#FFB3B3", text: "#8B0000", ring: "#EE0000", gradient: "linear-gradient(135deg,#FF0000,#CC0000)" },
+  glo:       { color: "#009A44", bg: "#EDFBF3", border: "#86EFAC", text: "#005C29", ring: "#009A44", gradient: "linear-gradient(135deg,#00B850,#007A35)" },
+  "9mobile": { color: "#00A86B", bg: "#ECFDF5", border: "#6EE7B7", text: "#00503A", ring: "#00A86B", gradient: "linear-gradient(135deg,#00C080,#008050)" },
+};
+
+// ═══════════════════════════════════════════════════════════
+//  INLINE SVG NETWORK LOGOS  (no external images needed)
+// ═══════════════════════════════════════════════════════════
+function MtnLogo({ size = 40 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="20" fill="#FFCC00"/>
+      <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle"
+        fontFamily="Arial Black,Arial,sans-serif" fontWeight="900" fontSize="11" fill="#1A1A1A" letterSpacing="-0.5">
+        MTN
+      </text>
+    </svg>
+  );
+}
+function AirtelLogo({ size = 40 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="20" fill="#EE0000"/>
+      <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle"
+        fontFamily="Arial Black,Arial,sans-serif" fontWeight="900" fontSize="8.5" fill="#FFFFFF" letterSpacing="-0.3">
+        AIRTEL
+      </text>
+    </svg>
+  );
+}
+function GloLogo({ size = 40 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="20" fill="#009A44"/>
+      <circle cx="20" cy="20" r="13" fill="none" stroke="#FFFFFF" strokeWidth="3"/>
+      <text x="50%" y="56%" dominantBaseline="middle" textAnchor="middle"
+        fontFamily="Arial Black,Arial,sans-serif" fontWeight="900" fontSize="10" fill="#FFFFFF" letterSpacing="0">
+        GLO
+      </text>
+    </svg>
+  );
+}
+function NineMobileLogo({ size = 40 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="20" fill="#007B5E"/>
+      <text x="50%" y="42%" dominantBaseline="middle" textAnchor="middle"
+        fontFamily="Arial Black,Arial,sans-serif" fontWeight="900" fontSize="12" fill="#FFFFFF">
+        9
+      </text>
+      <text x="50%" y="68%" dominantBaseline="middle" textAnchor="middle"
+        fontFamily="Arial,sans-serif" fontWeight="700" fontSize="7" fill="#FFFFFF" letterSpacing="0.3">
+        mobile
+      </text>
+    </svg>
+  );
+}
+
+const NET_LOGO: Record<Network, React.FC<{ size?: number }>> = {
+  mtn:       MtnLogo,
+  airtel:    AirtelLogo,
+  glo:       GloLogo,
+  "9mobile": NineMobileLogo,
 };
 
 // ═══════════════════════════════════════════════════════════
 //  PLAN TYPE FILTER PILLS
 // ═══════════════════════════════════════════════════════════
 const PLAN_TYPE_TABS = [
-  { id: "all",       label: "All Plans"  },
-  { id: "sme",       label: "SME"        },
-  { id: "sme2",      label: "SME 2.0"    },
-  { id: "corporate", label: "Corporate"  },
-  { id: "gifting",   label: "Gifting"    },
+  { id: "all",       label: "All"       },
+  { id: "sme",       label: "SME"       },
+  { id: "sme2",      label: "SME 2.0"   },
+  { id: "corporate", label: "Corporate" },
+  { id: "gifting",   label: "Gifting"   },
 ];
 
 const PLAN_TYPE_BADGE: Record<string, { label: string; color: string; bg: string }> = {
   sme:       { label: "SME",       color: "#1d4ed8", bg: "#dbeafe" },
   sme2:      { label: "SME 2.0",   color: "#7c3aed", bg: "#ede9fe" },
   corporate: { label: "Corp",      color: "#0f766e", bg: "#ccfbf1" },
-  gifting:   { label: "Gifting",   color: "#b45309", bg: "#fef3c7" },
+  gifting:   { label: "Gift",      color: "#b45309", bg: "#fef3c7" },
 };
 
 // ═══════════════════════════════════════════════════════════
-//  DATA PLAN SKELETON LOADER
+//  SKELETON LOADER
 // ═══════════════════════════════════════════════════════════
 function DataPlanSkeleton() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="rounded-2xl skeleton h-[88px]" />
+        <div key={i} className="rounded-2xl bg-neutral-100 animate-pulse h-[110px]" />
       ))}
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════
-//  NETWORK SELECTOR (shared by Data + Airtime tabs)
+//  NETWORK SELECTOR  — OPay/PalmPay circle logo style
 // ═══════════════════════════════════════════════════════════
 function NetworkSelector({
   value, onChange,
@@ -73,33 +134,42 @@ function NetworkSelector({
     <div className="grid grid-cols-4 gap-2">
       {NETWORKS.map(({ id, label }) => {
         const brand    = NET_BRAND[id];
+        const Logo     = NET_LOGO[id];
         const selected = value === id;
         return (
           <button
             key={id}
             onClick={() => onChange(id)}
-            className="relative flex flex-col items-center justify-center gap-1 py-3 rounded-2xl border-2 transition-all text-sm font-bold"
+            className="relative flex flex-col items-center justify-center gap-2 py-4 rounded-2xl border-2 transition-all"
             style={{
               borderColor:     selected ? brand.color  : "#e5e5e5",
               backgroundColor: selected ? brand.bg     : "#fafafa",
-              color:           selected ? brand.text   : "#737373",
-              boxShadow:       selected ? `0 0 0 3px ${brand.ring}30` : "none",
+              boxShadow:       selected ? `0 0 0 3px ${brand.ring}28` : "none",
             }}
           >
+            {/* Selected indicator ring on logo */}
+            <div
+              className="relative rounded-full transition-all"
+              style={{
+                boxShadow: selected ? `0 0 0 3px ${brand.color}, 0 0 0 5px ${brand.color}30` : "none",
+              }}
+            >
+              <Logo size={38} />
+            </div>
+            <span
+              className="text-[11px] font-bold"
+              style={{ color: selected ? brand.text : "#737373" }}
+            >
+              {label}
+            </span>
             {selected && (
               <span
-                className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full flex items-center justify-center"
+                className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: brand.color }}
               >
-                <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                <CheckCircle2 className="w-2.5 h-2.5 text-white" strokeWidth={3} />
               </span>
             )}
-            {/* Network colour dot */}
-            <span
-              className="w-4 h-4 rounded-full"
-              style={{ backgroundColor: brand.color }}
-            />
-            <span className="text-xs">{label}</span>
           </button>
         );
       })}
@@ -126,7 +196,6 @@ function PhoneInput({
         className="flex items-center rounded-2xl border-2 overflow-hidden transition-all"
         style={{ borderColor: value ? (accentColor ?? "#d98c2a") : "#e5e5e5" }}
       >
-        {/* Nigeria flag prefix */}
         <div className="flex items-center gap-1.5 px-3.5 py-3 border-r border-neutral-200 bg-neutral-50 flex-shrink-0">
           <span className="text-base leading-none">🇳🇬</span>
           <span className="text-xs font-semibold text-neutral-500">+234</span>
@@ -145,14 +214,14 @@ function PhoneInput({
 }
 
 // ═══════════════════════════════════════════════════════════
-//  DATA BUNDLES TAB  ← redesigned
+//  DATA BUNDLES TAB  — OPay/PalmPay visual style
 // ═══════════════════════════════════════════════════════════
 interface DataProps extends BaseProps {
-  network:          Network | "";
-  onNetworkChange:  (n: Network) => void;
-  phone:            string;
-  setPhone:         (v: string) => void;
-  onRetry:          () => void;
+  network:         Network | "";
+  onNetworkChange: (n: Network) => void;
+  phone:           string;
+  setPhone:        (v: string) => void;
+  onRetry:         () => void;
 }
 
 export function DataTab({
@@ -164,30 +233,23 @@ export function DataTab({
   const [search,     setSearch]     = useState("");
 
   const brand = network ? NET_BRAND[network as Network] : null;
+  const Logo  = network ? NET_LOGO[network as Network]  : null;
 
-  // Available plan types for the selected network
   const availableTypes = useMemo(() => {
     const types = new Set(plans.map((p) => p.planType ?? "gifting"));
     return PLAN_TYPE_TABS.filter((t) => t.id === "all" || types.has(t.id));
   }, [plans]);
 
-  // Filtered plan list
   const filtered = useMemo(() => {
     let list = plans;
-    if (typeFilter !== "all") {
-      list = list.filter((p) => (p.planType ?? "gifting") === typeFilter);
-    }
+    if (typeFilter !== "all") list = list.filter((p) => (p.planType ?? "gifting") === typeFilter);
     if (search.trim()) {
       const q = search.toLowerCase();
-      list = list.filter((p) =>
-        p.name.toLowerCase().includes(q) ||
-        (p.validity ?? "").toLowerCase().includes(q)
-      );
+      list = list.filter((p) => p.name.toLowerCase().includes(q) || (p.validity ?? "").toLowerCase().includes(q));
     }
     return list;
   }, [plans, typeFilter, search]);
 
-  // Reset filter when network changes (new plan list arrives)
   const handleNetworkChange = (n: Network) => {
     setTypeFilter("all");
     setSearch("");
@@ -195,46 +257,61 @@ export function DataTab({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
 
-      {/* ── Network Selector ── */}
-      <div className="bg-white rounded-2xl border border-neutral-100 p-5">
-        <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide mb-3">
+      {/* ── Network Selector Card ── */}
+      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
           Select Network
         </p>
         <NetworkSelector value={network} onChange={handleNetworkChange} />
       </div>
 
-      {/* ── Phone + Plans (shown after network pick) ── */}
       {network && (
         <>
-          {/* Phone input card */}
-          <div className="bg-white rounded-2xl border border-neutral-100 p-5">
-            <PhoneInput
-              value={phone}
-              onChange={setPhone}
-              accentColor={brand?.color}
-            />
+          {/* ── Network hero banner ── */}
+          <div
+            className="rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm"
+            style={{ background: brand?.gradient }}
+          >
+            {Logo && (
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 shadow">
+                <Logo size={36} />
+              </div>
+            )}
+            <div>
+              <p className="font-extrabold text-white text-base leading-tight">
+                {network === "9mobile" ? "9mobile" : network.toUpperCase()} Data Plans
+              </p>
+              <p className="text-white/75 text-xs mt-0.5">
+                {plans.length > 0 ? `${plans.length} plans available` : "Loading plans…"}
+              </p>
+            </div>
           </div>
 
-          {/* Plans card */}
-          <div className="bg-white rounded-2xl border border-neutral-100 p-5">
+          {/* ── Phone Input Card ── */}
+          <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+            <PhoneInput value={phone} onChange={setPhone} accentColor={brand?.color} />
+          </div>
+
+          {/* ── Plan Selector Card ── */}
+          <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
 
             {/* Plan type filter pills */}
             {!planLoad && !planError && plans.length > 0 && availableTypes.length > 1 && (
-              <div className="flex gap-1.5 overflow-x-auto pb-0.5 mb-4 [&::-webkit-scrollbar]:hidden">
+              <div className="flex gap-1.5 overflow-x-auto pb-1 mb-3 [&::-webkit-scrollbar]:hidden">
                 {availableTypes.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => setTypeFilter(t.id)}
                     className={cn(
-                      "flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap",
+                      "flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all whitespace-nowrap",
                       typeFilter === t.id
                         ? "text-white border-transparent"
                         : "border-neutral-200 text-neutral-500 bg-white hover:border-neutral-300"
                     )}
                     style={typeFilter === t.id
-                      ? { backgroundColor: brand?.color ?? "#d98c2a", borderColor: brand?.color ?? "#d98c2a" }
+                      ? { backgroundColor: brand?.color, borderColor: brand?.color }
                       : {}}
                   >
                     {t.label}
@@ -243,47 +320,48 @@ export function DataTab({
               </div>
             )}
 
-            {/* Search input */}
+            {/* Search */}
             {!planLoad && !planError && plans.length > 5 && (
-              <div className="relative mb-4">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <div className="relative mb-3">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by size or validity…"
-                  className="w-full text-sm border border-neutral-200 rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-neutral-400 transition-colors"
+                  placeholder="Search size or validity…"
+                  className="w-full text-sm border border-neutral-200 rounded-xl pl-9 pr-8 py-2.5 focus:outline-none focus:border-neutral-400 transition-colors bg-neutral-50"
                 />
+                {search && (
+                  <button
+                    onClick={() => setSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             )}
 
-            {/* Plan header count */}
-            {!planLoad && !planError && filtered.length > 0 && (
-              <p className="text-xs text-neutral-400 mb-3">
-                {filtered.length} plan{filtered.length !== 1 ? "s" : ""} available
-              </p>
-            )}
-
-            {/* Loading skeleton */}
+            {/* Loading */}
             {planLoad && <DataPlanSkeleton />}
 
-            {/* Error state */}
+            {/* Error */}
             {planError && !planLoad && (
               <div className="text-center py-8">
                 <p className="text-sm text-red-400 mb-3">{planError}</p>
                 <button
                   onClick={onRetry}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
                 >
                   <RefreshCw className="w-3 h-3" /> Retry
                 </button>
               </div>
             )}
 
-            {/* No results (after filter/search) */}
+            {/* No match after filter */}
             {!planLoad && !planError && filtered.length === 0 && plans.length > 0 && (
               <div className="text-center py-8 text-sm text-neutral-400">
-                No plans match your filter.{" "}
+                No plans match.{" "}
                 <button
                   onClick={() => { setTypeFilter("all"); setSearch(""); }}
                   className="underline hover:text-neutral-600"
@@ -293,74 +371,87 @@ export function DataTab({
               </div>
             )}
 
-            {/* Plan grid */}
+            {/* ── PLAN GRID — OPay/PalmPay card style ── */}
             {!planLoad && !planError && filtered.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[420px] overflow-y-auto pr-0.5 scrollbar-thin">
-                {filtered.map((p) => {
-                  const isSelected = plan?.id === p.id;
-                  const typeMeta   = PLAN_TYPE_BADGE[p.planType ?? "gifting"];
+              <>
+                <p className="text-[11px] text-neutral-400 mb-2.5 font-medium">
+                  {filtered.length} plan{filtered.length !== 1 ? "s" : ""}
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[480px] overflow-y-auto pr-0.5 scrollbar-thin">
+                  {filtered.map((p) => {
+                    const isSelected = plan?.id === p.id;
+                    const typeMeta   = PLAN_TYPE_BADGE[p.planType ?? "gifting"];
 
-                  // Extract display size (e.g. "2GB", "500MB") from plan name
-                  const sizeMatch = p.name.match(/(\d+(?:\.\d+)?\s*(?:GB|MB|TB))/i);
-                  const displaySize = sizeMatch
-                    ? sizeMatch[0].replace(/\s+/g, "").toUpperCase()
-                    : p.name.replace(/^(MTN|AIRTEL|GLO|9mobile)\s*/i, "");
+                    // Extract hero data size from plan name
+                    const sizeMatch = p.name.match(/(\d+(?:\.\d+)?\s*(?:GB|MB|TB))/i);
+                    const displaySize = sizeMatch
+                      ? sizeMatch[0].replace(/\s+/g, "").toUpperCase()
+                      : p.name.replace(/^(MTN|AIRTEL|GLO|9mobile)\s*/i, "");
 
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => setPlan(isSelected ? null : p)}
-                      className="relative flex flex-col p-3.5 rounded-2xl border-2 text-left transition-all active:scale-[0.97]"
-                      style={{
-                        borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "#e5e5e5",
-                        backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "#fafafa",
-                        boxShadow:       isSelected ? `0 0 0 2px ${brand?.ring ?? "#d98c2a"}30` : "none",
-                      }}
-                    >
-                      {/* Selected tick */}
-                      {isSelected && (
-                        <span
-                          className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center"
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => setPlan(isSelected ? null : p)}
+                        className="relative flex flex-col p-3.5 rounded-2xl border-2 text-left transition-all active:scale-[0.96] overflow-hidden"
+                        style={{
+                          borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "#ebebeb",
+                          backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "#fafafa",
+                          boxShadow:       isSelected
+                            ? `0 0 0 2px ${brand?.ring ?? "#d98c2a"}25, 0 4px 12px ${brand?.ring ?? "#d98c2a"}15`
+                            : "0 1px 3px rgba(0,0,0,0.04)",
+                        }}
+                      >
+                        {/* Decorative circle top-right (OPay style) */}
+                        <div
+                          className="absolute -top-4 -right-4 w-14 h-14 rounded-full opacity-10 pointer-events-none"
                           style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
+                        />
+
+                        {/* Selected tick */}
+                        {isSelected && (
+                          <span
+                            className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center z-10"
+                            style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
+                          >
+                            <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />
+                          </span>
+                        )}
+
+                        {/* Plan type pill */}
+                        {typeMeta && (
+                          <span
+                            className="mb-2 self-start px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md"
+                            style={{ color: typeMeta.color, backgroundColor: typeMeta.bg }}
+                          >
+                            {typeMeta.label}
+                          </span>
+                        )}
+
+                        {/* ── Hero data size ── */}
+                        <p
+                          className="text-2xl font-black leading-none tracking-tight"
+                          style={{ color: isSelected ? (brand?.text ?? "#665200") : "#171717" }}
                         >
-                          <CheckCircle2 className="w-3 h-3 text-white" />
-                        </span>
-                      )}
+                          {displaySize}
+                        </p>
 
-                      {/* Plan type badge */}
-                      {typeMeta && (
-                        <span
-                          className="mb-1.5 self-start px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide rounded"
-                          style={{ color: typeMeta.color, backgroundColor: typeMeta.bg }}
+                        {/* Validity */}
+                        {p.validity && (
+                          <p className="text-[10px] text-neutral-400 mt-1 font-medium">{p.validity}</p>
+                        )}
+
+                        {/* Price — prominent */}
+                        <p
+                          className="text-sm font-black mt-auto pt-2"
+                          style={{ color: brand?.color ?? "#d98c2a" }}
                         >
-                          {typeMeta.label}
-                        </span>
-                      )}
-
-                      {/* Data size — hero text */}
-                      <p
-                        className="text-lg font-extrabold leading-none tracking-tight"
-                        style={{ color: isSelected ? (brand?.text ?? "#665200") : "#171717" }}
-                      >
-                        {displaySize}
-                      </p>
-
-                      {/* Validity */}
-                      {p.validity && (
-                        <p className="text-[10px] text-neutral-400 mt-0.5">{p.validity}</p>
-                      )}
-
-                      {/* Price */}
-                      <p
-                        className="text-sm font-bold mt-2"
-                        style={{ color: brand?.color ?? "#d98c2a" }}
-                      >
-                        {fmt(p.price)}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
+                          {fmt(p.price)}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
         </>
@@ -370,7 +461,7 @@ export function DataTab({
 }
 
 // ═══════════════════════════════════════════════════════════
-//  AIRTIME TAB  (improved, layout preserved)
+//  AIRTIME TAB
 // ═══════════════════════════════════════════════════════════
 interface AirtimeProps extends BaseProps {
   network:         Network | "";
@@ -384,12 +475,12 @@ export function AirtimeTab({
   plans, planLoad, plan, setPlan,
 }: AirtimeProps) {
   const brand = network ? NET_BRAND[network as Network] : null;
+  const Logo  = network ? NET_LOGO[network as Network]  : null;
 
   return (
-    <div className="space-y-4">
-      {/* Network */}
-      <div className="bg-white rounded-2xl border border-neutral-100 p-5">
-        <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide mb-3">
+    <div className="space-y-3">
+      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
           Select Network
         </p>
         <NetworkSelector value={network} onChange={onNetworkChange} />
@@ -397,20 +488,36 @@ export function AirtimeTab({
 
       {network && (
         <>
-          {/* Phone */}
-          <div className="bg-white rounded-2xl border border-neutral-100 p-5">
+          {/* Network hero banner */}
+          <div
+            className="rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm"
+            style={{ background: brand?.gradient }}
+          >
+            {Logo && (
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 shadow">
+                <Logo size={36} />
+              </div>
+            )}
+            <div>
+              <p className="font-extrabold text-white text-base leading-tight">
+                {network === "9mobile" ? "9mobile" : network.toUpperCase()} Airtime
+              </p>
+              <p className="text-white/75 text-xs mt-0.5">Instant top-up</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
             <PhoneInput value={phone} onChange={setPhone} accentColor={brand?.color} />
           </div>
 
-          {/* Amounts */}
-          <div className="bg-white rounded-2xl border border-neutral-100 p-5">
-            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide mb-3">
+          <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+            <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
               Select Amount
             </p>
             {planLoad ? (
               <div className="grid grid-cols-3 gap-2">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="skeleton rounded-xl h-14" />
+                  <div key={i} className="bg-neutral-100 animate-pulse rounded-xl h-14" />
                 ))}
               </div>
             ) : (
@@ -421,11 +528,12 @@ export function AirtimeTab({
                     <button
                       key={p.id}
                       onClick={() => setPlan(selected ? null : p)}
-                      className="py-3.5 rounded-xl text-center border-2 transition-all font-bold text-sm"
+                      className="py-4 rounded-xl text-center border-2 transition-all font-black text-sm"
                       style={{
-                        borderColor:     selected ? (brand?.color ?? "#d98c2a") : "#e5e5e5",
+                        borderColor:     selected ? (brand?.color ?? "#d98c2a") : "#ebebeb",
                         backgroundColor: selected ? (brand?.bg   ?? "rgba(217,140,42,0.1)") : "#fafafa",
                         color:           selected ? (brand?.text ?? "#d98c2a") : "#404040",
+                        boxShadow:       selected ? `0 0 0 2px ${brand?.ring ?? "#d98c2a"}25` : "0 1px 3px rgba(0,0,0,0.04)",
                       }}
                     >
                       {fmt(p.price)}
@@ -442,7 +550,7 @@ export function AirtimeTab({
 }
 
 // ═══════════════════════════════════════════════════════════
-//  CABLE TV TAB  (improved layout)
+//  CABLE TV TAB
 // ═══════════════════════════════════════════════════════════
 interface CableProps extends BaseProps {
   cableProv:    string;
@@ -451,10 +559,10 @@ interface CableProps extends BaseProps {
   setSmartcard: (v: string) => void;
 }
 
-const CABLE_META: Record<string, { label: string; color: string; bg: string }> = {
-  dstv:      { label: "DStv",      color: "#003087", bg: "#EEF2FF" },
-  gotv:      { label: "GOtv",      color: "#FF6B00", bg: "#FFF4EE" },
-  startimes: { label: "StarTimes", color: "#C8102E", bg: "#FFF0F2" },
+const CABLE_META: Record<string, { label: string; color: string; bg: string; gradient: string }> = {
+  dstv:      { label: "DStv",      color: "#003087", bg: "#EEF2FF", gradient: "linear-gradient(135deg,#003087,#1a5cbc)" },
+  gotv:      { label: "GOtv",      color: "#FF6B00", bg: "#FFF4EE", gradient: "linear-gradient(135deg,#FF6B00,#cc5500)" },
+  startimes: { label: "StarTimes", color: "#C8102E", bg: "#FFF0F2", gradient: "linear-gradient(135deg,#C8102E,#9a0a22)" },
 };
 
 export function CableTab({
@@ -464,10 +572,9 @@ export function CableTab({
   const meta = CABLE_META[cableProv];
 
   return (
-    <div className="space-y-4">
-      {/* Provider selector */}
-      <div className="bg-white rounded-2xl border border-neutral-100 p-5">
-        <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide mb-3">
+    <div className="space-y-3">
+      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
           Cable Provider
         </p>
         <div className="grid grid-cols-3 gap-2">
@@ -478,11 +585,12 @@ export function CableTab({
               <button
                 key={p}
                 onClick={() => { setCableProv(p); setPlan(null); }}
-                className="py-3.5 rounded-xl border-2 text-sm font-bold transition-all"
+                className="py-4 rounded-xl border-2 text-sm font-black transition-all"
                 style={{
-                  borderColor:     selected ? m.color : "#e5e5e5",
+                  borderColor:     selected ? m.color : "#ebebeb",
                   backgroundColor: selected ? m.bg    : "#fafafa",
                   color:           selected ? m.color : "#525252",
+                  boxShadow:       selected ? `0 0 0 2px ${m.color}25` : "0 1px 3px rgba(0,0,0,0.04)",
                 }}
               >
                 {m.label}
@@ -492,9 +600,19 @@ export function CableTab({
         </div>
       </div>
 
-      {/* Smartcard */}
-      <div className="bg-white rounded-2xl border border-neutral-100 p-5">
-        <label className="block text-xs font-semibold text-neutral-400 uppercase tracking-wide mb-1.5">
+      {/* Provider gradient banner */}
+      <div
+        className="rounded-2xl px-5 py-3 flex items-center gap-3 shadow-sm"
+        style={{ background: meta.gradient }}
+      >
+        <div>
+          <p className="font-extrabold text-white text-sm">{meta.label} Subscription</p>
+          <p className="text-white/70 text-[11px] mt-0.5">Enter your smartcard to continue</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+        <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">
           Smartcard / IUC Number
         </label>
         <input
@@ -502,20 +620,19 @@ export function CableTab({
           value={smartcard}
           onChange={(e) => setSmartcard(e.target.value)}
           placeholder="Enter smartcard number"
-          className="w-full border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors"
+          className="w-full border-2 border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors"
           style={{ borderColor: smartcard ? (meta?.color ?? "#d98c2a") : "#e5e5e5" }}
         />
       </div>
 
-      {/* Plans */}
-      <div className="bg-white rounded-2xl border border-neutral-100 p-5">
-        <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide mb-3">
+      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
           Select Plan
         </p>
         {planLoad ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="skeleton rounded-xl h-14" />
+              <div key={i} className="bg-neutral-100 animate-pulse rounded-xl h-14" />
             ))}
           </div>
         ) : (
@@ -530,13 +647,14 @@ export function CableTab({
                     onClick={() => setPlan(selected ? null : p)}
                     className="w-full p-3.5 rounded-xl text-left border-2 flex justify-between items-center transition-all"
                     style={{
-                      borderColor:     selected ? (meta?.color ?? "#d98c2a") : "#e5e5e5",
+                      borderColor:     selected ? (meta?.color ?? "#d98c2a") : "#ebebeb",
                       backgroundColor: selected ? (meta?.bg   ?? "rgba(217,140,42,0.08)") : "#fafafa",
+                      boxShadow:       selected ? `0 0 0 2px ${meta?.color ?? "#d98c2a"}20` : "0 1px 3px rgba(0,0,0,0.04)",
                     }}
                   >
-                    <span className="text-sm font-medium text-neutral-800">{p.name}</span>
+                    <span className="text-sm font-semibold text-neutral-800">{p.name}</span>
                     <span
-                      className="text-sm font-bold flex-shrink-0 ml-3"
+                      className="text-sm font-black flex-shrink-0 ml-3"
                       style={{ color: meta?.color ?? "#d98c2a" }}
                     >
                       {fmt(p.price)}
@@ -552,63 +670,74 @@ export function CableTab({
 }
 
 // ═══════════════════════════════════════════════════════════
-//  EDUCATION / EXAM PINs TAB  (improved layout)
+//  EDUCATION / EXAM PINs TAB
 // ═══════════════════════════════════════════════════════════
 export function EducationTab({ plans, planLoad, plan, setPlan }: BaseProps) {
-  const EXAM_META: Record<string, { color: string; bg: string }> = {
-    WAEC:   { color: "#1d4ed8", bg: "#dbeafe" },
-    NECO:   { color: "#059669", bg: "#d1fae5" },
-    NABTEB: { color: "#7c3aed", bg: "#ede9fe" },
+  const EXAM_META: Record<string, { color: string; bg: string; gradient: string }> = {
+    WAEC:   { color: "#1d4ed8", bg: "#dbeafe", gradient: "linear-gradient(135deg,#1d4ed8,#1e40af)" },
+    NECO:   { color: "#059669", bg: "#d1fae5", gradient: "linear-gradient(135deg,#059669,#047857)" },
+    NABTEB: { color: "#7c3aed", bg: "#ede9fe", gradient: "linear-gradient(135deg,#7c3aed,#6d28d9)" },
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-neutral-100 p-5">
-      <h2 className="font-semibold text-neutral-900 mb-0.5">Exam Result Checker</h2>
-      <p className="text-sm text-neutral-400 mb-5">
-        Purchase a scratch card PIN to check your exam results.
-      </p>
+    <div className="space-y-3">
+      <div
+        className="rounded-2xl px-5 py-4 shadow-sm"
+        style={{ background: "linear-gradient(135deg,#1e3a8a,#1e40af)" }}
+      >
+        <p className="font-extrabold text-white text-base">Exam Result Checker</p>
+        <p className="text-white/70 text-xs mt-1">
+          Purchase a scratch card PIN to check your exam results instantly.
+        </p>
+      </div>
 
-      {planLoad ? (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="skeleton rounded-2xl h-16" />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {plans.map((p) => {
-            const selected = plan?.id === p.id;
-            const meta     = EXAM_META[p.examName ?? ""] ?? { color: "#d98c2a", bg: "#fff7ed" };
-            return (
-              <button
-                key={p.id}
-                onClick={() => setPlan(selected ? null : p)}
-                className="w-full p-4 rounded-2xl text-left border-2 flex items-center justify-between transition-all"
-                style={{
-                  borderColor:     selected ? meta.color : "#e5e5e5",
-                  backgroundColor: selected ? meta.bg    : "#fafafa",
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className="px-2.5 py-1 text-xs font-bold rounded-lg"
-                    style={{ color: meta.color, backgroundColor: `${meta.color}18` }}
-                  >
-                    {p.examName}
-                  </span>
-                  <div>
-                    <p className="font-semibold text-neutral-900 text-sm">{p.name}</p>
-                    <p className="text-xs text-neutral-400">1 scratch card PIN</p>
+      <div className="bg-white rounded-2xl border border-neutral-100 p-4 shadow-sm">
+        {planLoad ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-neutral-100 animate-pulse rounded-2xl h-16" />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {plans.map((p) => {
+              const selected = plan?.id === p.id;
+              const meta     = EXAM_META[p.examName ?? ""] ?? { color: "#d98c2a", bg: "#fff7ed", gradient: "linear-gradient(135deg,#d98c2a,#b87020)" };
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => setPlan(selected ? null : p)}
+                  className="w-full p-4 rounded-2xl text-left border-2 flex items-center justify-between transition-all"
+                  style={{
+                    borderColor:     selected ? meta.color : "#ebebeb",
+                    backgroundColor: selected ? meta.bg    : "#fafafa",
+                    boxShadow:       selected ? `0 0 0 2px ${meta.color}20` : "0 1px 3px rgba(0,0,0,0.04)",
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xs flex-shrink-0"
+                      style={{ background: meta.gradient }}
+                    >
+                      {(p.examName ?? "").slice(0, 3)}
+                    </span>
+                    <div>
+                      <p className="font-bold text-neutral-900 text-sm">{p.name}</p>
+                      <p className="text-xs text-neutral-400">1 scratch card PIN</p>
+                    </div>
                   </div>
-                </div>
-                <span className="text-sm font-bold flex-shrink-0 ml-3" style={{ color: meta.color }}>
-                  {fmt(p.price)}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+                  <span
+                    className="text-sm font-black flex-shrink-0 ml-3"
+                    style={{ color: meta.color }}
+                  >
+                    {fmt(p.price)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
