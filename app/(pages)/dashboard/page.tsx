@@ -5,7 +5,7 @@ import { Order } from "@/lib/models";
 import Link from "next/link";
 import {
   ShoppingBag, Package, Heart, User,
-  ArrowRight, TrendingUp, Clock,
+  ArrowRight, TrendingUp, Clock, ChevronRight,
 } from "lucide-react";
 
 async function getDashboardData(userId: string) {

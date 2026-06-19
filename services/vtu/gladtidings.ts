@@ -124,6 +124,60 @@ export async function getProviderBalance(): Promise<{ success: boolean; balance?
 let _planCache: { plans: DataPlan[]; fetchedAt: number } = { plans: [], fetchedAt: 0 };
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
+/**
+ * Network key normaliser.
+ * Gladtidings has returned both "MTN_PLAN" and plain "MTN" in different API
+ * versions — we handle all known variants here.
+ */
+function resolveNetwork(key: string): string | null {
+  const k = (key || "").toUpperCase().trim();
+  if (k.includes("MTN"))          return "mtn";
+  if (k.includes("GLO"))          return "glo";
+  if (k.includes("AIRTEL"))       return "airtel";
+  if (k.includes("9MOBILE") || k.includes("ETISALAT")) return "9mobile";
+  return null;
+}
+
+/**
+ * Collect every plan item across ALL plan-type sub-groups for a network.
+ *
+ * The Gladtidings API response looks like:
+ *   { "MTN_PLAN": { "SME": [...], "SME2": [...], "GIFTING": [...], "CORPORATE": [...] } }
+ *
+ * Previous code did `groups.ALL || groups[firstKey]` — meaning it either relied
+ * on an aggregate "ALL" key (not always present) or silently dropped every group
+ * except the first one.  This version iterates ALL groups and merges them.
+ * Downstream deduplication (keep cheapest per uid) removes any true duplicates.
+ */
+function collectGroupItems(planGroups: unknown): Record<string, unknown>[] {
+  const groups = planGroups as Record<string, unknown>;
+  const items: Record<string, unknown>[] = [];
+
+  // If the provider returns a pre-merged "ALL" key AND it has content, prefer it
+  // to avoid double-counting plans that appear in both "ALL" and the sub-groups.
+  const allGroup = groups["ALL"];
+  if (Array.isArray(allGroup) && allGroup.length > 0) {
+    return allGroup as Record<string, unknown>[];
+  }
+
+  // Otherwise merge all sub-groups (SME, SME2, GIFTING, CORPORATE …)
+  for (const [groupKey, groupItems] of Object.entries(groups)) {
+    if (groupKey === "ALL") continue; // already handled above (was empty)
+    if (Array.isArray(groupItems)) {
+      for (const item of groupItems as Record<string, unknown>[]) {
+        // Tag each item with its plan_type group name so mapPlanType works even
+        // when the item's own plan_type field is absent.
+        items.push(
+          item.plan_type
+            ? (item as Record<string, unknown>)
+            : { ...item, plan_type: groupKey }
+        );
+      }
+    }
+  }
+  return items;
+}
+
 export async function fetchDataPlans(): Promise<DataPlan[]> {
   const now = Date.now();
   if (now - _planCache.fetchedAt < CACHE_TTL && _planCache.plans.length > 0) {
@@ -131,63 +185,96 @@ export async function fetchDataPlans(): Promise<DataPlan[]> {
   }
 
   const apiKey = process.env.GLADTIDINGS_API_KEY;
-  if (!apiKey) return [];
+  if (!apiKey) {
+    console.warn("[GladTidings] GLADTIDINGS_API_KEY is not set — no data plans available.");
+    return [];
+  }
 
   try {
     const r = await fetch(`${BASE_URL}/user/`, {
       headers: getHeaders(),
       signal: AbortSignal.timeout(15000),
     });
-    const data = await r.json();
-    const Dataplans = data?.Dataplans;
-    if (!Dataplans) return [];
 
-    const GTD_NET: Record<string, string> = {
-      MTN_PLAN: "mtn", GLO_PLAN: "glo", AIRTEL_PLAN: "airtel", "9MOBILE_PLAN": "9mobile",
-    };
+    if (!r.ok) {
+      console.warn(`[GladTidings] /user/ returned HTTP ${r.status}`);
+      return _planCache.plans;
+    }
+
+    const data = await r.json();
+
+    // The top-level key may be "Dataplans" or "DataPlans" — normalise
+    const Dataplans =
+      data?.Dataplans ?? data?.DataPlans ?? data?.dataplans ?? null;
+
+    if (!Dataplans || typeof Dataplans !== "object") {
+      console.warn("[GladTidings] No Dataplans key in API response. Keys received:",
+        Object.keys(data).join(", "));
+      return _planCache.plans; // return stale cache rather than empty
+    }
 
     const plans: DataPlan[] = [];
-    for (const [planKey, planGroups] of Object.entries(Dataplans as Record<string, unknown>)) {
-      const network = GTD_NET[planKey];
-      if (!network) continue;
-      const groups = planGroups as Record<string, unknown[]>;
-      const raw = (groups.ALL || groups[Object.keys(groups)[0]]) as unknown[];
-      if (!Array.isArray(raw)) continue;
 
-      for (const item of raw as Record<string, unknown>[]) {
-        const planId  = item.dataplan_id || item.id;
-        const cost    = parseFloat(String(item.plan_amount || 0));
-        const rawName = String(item.plan || "").trim();
-        if (!planId || !cost || !rawName || cost > 500000) continue;
+    for (const [planKey, planGroups] of Object.entries(
+      Dataplans as Record<string, unknown>
+    )) {
+      const network = resolveNetwork(planKey);
+      if (!network) {
+        console.debug(`[GladTidings] Skipping unknown network key: ${planKey}`);
+        continue;
+      }
 
-        const sizeMatch = rawName.match(/(\d+(?:\.\d+)?\s*(?:GB|MB|TB))/i);
+      // ── Collect every item from every sub-group ───────────────
+      const raw = collectGroupItems(planGroups);
+      if (raw.length === 0) continue;
+
+      for (const item of raw) {
+        const planId  = item.dataplan_id ?? item.id;
+        const cost    = parseFloat(String(item.plan_amount ?? 0));
+        const rawName = String(item.plan ?? "").trim();
+
+        if (!planId || !cost || !rawName || cost > 500_000) continue;
+
+        // Sanity-check: skip suspiciously expensive micro-bundles
+        const sizeMatch = rawName.match(/(\d+(?:\.\d+)?)\s*(GB|MB|TB)/i);
         if (sizeMatch) {
           const sizeVal     = parseFloat(sizeMatch[1]);
-          const isMB        = sizeMatch[0].toLowerCase().includes("mb");
+          const isMB        = sizeMatch[2].toUpperCase() === "MB";
           const effectiveGB = isMB ? sizeVal / 1024 : sizeVal;
-          if (effectiveGB < 10 && cost > 50000) continue;
+          if (effectiveGB < 10 && cost > 50_000) continue;
         }
 
-        const planLabel    = sizeMatch
-          ? sizeMatch[1].toUpperCase().replace(/\s+/g, "")
-          : rawName.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+        const planLabel =
+          sizeMatch
+            ? `${sizeMatch[1]}${sizeMatch[2].toUpperCase()}`
+            : rawName.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+
         const networkLabel = network === "9mobile" ? "9mobile" : network.toUpperCase();
-        const dedupeKey    = `${network}_${planLabel}`.toLowerCase().replace(/\s+/g, "_").replace(/[^\w_]/g, "");
-        const uid          = `gtd_${dedupeKey}`;
+
+        // Build a stable, URL-safe deduplication key
+        const dedupeKey = `${network}_${planLabel}_${String(planId)}`
+          .toLowerCase()
+          .replace(/\s+/g, "_")
+          .replace(/[^\w_]/g, "");
 
         plans.push({
-          id:             uid,
+          id:             `gtd_${dedupeKey}`,
           name:           `${networkLabel} ${planLabel}`,
-          validity:       String(item.month_validate || ""),
+          validity:       String(item.month_validate ?? ""),
           cost,
-          planType:       mapPlanType(String(item.plan_type || "")),
+          planType:       mapPlanType(String(item.plan_type ?? "")),
           network,
           providerPlanId: String(planId),
         });
       }
     }
 
-    // Deduplicate: keep cheapest per unique key
+    if (plans.length === 0) {
+      console.warn("[GladTidings] fetchDataPlans parsed 0 plans — check API response structure.");
+      return _planCache.plans;
+    }
+
+    // Deduplicate: for any two plans with the same uid, keep the cheaper one
     const planMap: Record<string, DataPlan> = {};
     for (const plan of plans) {
       if (!planMap[plan.id] || plan.cost < planMap[plan.id].cost) {
@@ -197,11 +284,14 @@ export async function fetchDataPlans(): Promise<DataPlan[]> {
 
     const deduped = Object.values(planMap);
     _planCache = { plans: deduped, fetchedAt: now };
-    console.log(`[GladTidings] Loaded ${deduped.length} data plans`);
+    console.log(
+      `[GladTidings] Loaded ${deduped.length} data plans across networks: ` +
+      [...new Set(deduped.map((p) => p.network))].join(", ")
+    );
     return deduped;
   } catch (e) {
     console.warn("[GladTidings] fetchDataPlans error:", (e as Error).message);
-    return _planCache.plans; // return stale cache on error
+    return _planCache.plans; // return stale cache on error rather than empty array
   }
 }
 
