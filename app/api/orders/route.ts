@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     }
 
     const order = await Order.create({
-      orderNumber: generateOrderNumber(),
+      orderNumber: await generateOrderNumber(),
       user:        session.user.id,
       items,
       shippingAddress,

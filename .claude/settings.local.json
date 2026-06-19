@@ -7,7 +7,10 @@
       "Bash(\" -Force)",
       "Bash(Remove-Item \"components/product/ReviewSection.tsx`\" -Force)",
       "Bash(xargs grep -l \"MTN.*page\\\\|page.*MTN\")",
-      "Bash(xargs grep -l \"data.*bundle\\\\|bundle.*data\")"
+      "Bash(xargs grep -l \"data.*bundle\\\\|bundle.*data\")",
+      "Bash(grep *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)"
     ]
   }
 }

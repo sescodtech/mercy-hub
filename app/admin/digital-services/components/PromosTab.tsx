@@ -304,7 +304,7 @@ export function PromosTab() {
                 <button onClick={() => {
                   handlePlanSelect(selectedPlan);
                   setPlanSelectionOpen(false);
-                })
+                }}
                   className="ml-4 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#c47020] text-white hover:bg-[#a3551c]">
                   <Search className="w-4 h-4" /> Use Selected Plan
                 </button>
