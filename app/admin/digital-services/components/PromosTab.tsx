@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Loader2, X, Sparkles, Gift } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, X, Sparkles, Gift, RefreshCw, Search } from "lucide-react";
 
 interface Promo {
   _id: string;
@@ -18,6 +18,13 @@ interface Promo {
   sortOrder: number;
 }
 
+interface PlanRow {
+  id: string;
+  label: string;
+  meta: string;
+  hidden: boolean;
+}
+
 type EditingPromo = Omit<Promo, "_id"> & { _id?: string };
 
 const EMPTY: EditingPromo = {
@@ -32,6 +39,13 @@ export function PromosTab() {
   const [editing, setEditing] = useState<EditingPromo | null>(null);
   const [saving,  setSaving]  = useState(false);
 
+  // Plan selection states
+  const [planSelectionOpen, setPlanSelectionOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<PlanRow | null>(null);
+  const [plans, setPlans] = useState<PlanRow[]>([]);
+  const [plansLoading, setPlansLoading] = useState(false);
+  const [planCategory, setPlanCategory] = useState<"data" | "airtime" | "cable">("data");
+
   useEffect(() => { fetchPromos(); }, []);
 
   async function fetchPromos() {
@@ -40,6 +54,22 @@ export function PromosTab() {
     const d = await r.json();
     if (d.success) setPromos(d.data);
     setLoading(false);
+  }
+
+  // Fetch plans for selection modal
+  async function fetchPlansForSelection() {
+    if (planCategory === "data" || planCategory === "airtime" || planCategory === "cable") {
+      setPlansLoading(true);
+      try {
+        const r = await fetch(`/api/admin/digital/plans?category=${planCategory}`);
+        const d = await r.json();
+        if (d.success) setPlans(d.data);
+      } catch (error) {
+        console.error("Failed to fetch plans:", error);
+      } finally {
+        setPlansLoading(false);
+      }
+    }
   }
 
   async function save() {
@@ -69,6 +99,45 @@ export function PromosTab() {
     fetchPromos();
   }
 
+  // Handle plan selection
+  const handlePlanSelect = (plan: PlanRow) => {
+    setSelectedPlan(plan);
+    // When a plan is selected, populate the promo fields
+    if (editing) {
+      const updates: Partial<EditingPromo> = {};
+
+      // Set category based on plan type
+      if (planCategory === "data") updates.category = "data";
+      else if (planCategory === "airtime") updates.category = "airtime";
+      else if (planCategory === "cable") updates.category = "cable";
+
+      // Set network from plan meta (extract from meta like "MTN · 30 days")
+      if (plan.meta) {
+        const networkMatch = plan.meta.match(/^(MTN|AIRTEL|GLO|9MOBILE)/i);
+        if (networkMatch) {
+          updates.network = networkMatch[0].toLowerCase() as "mtn" | "airtel" | "glo" | "9mobile";
+        }
+      }
+
+      // Set providerPlanId
+      updates.providerPlanId = plan.id;
+
+      // Generate a title if not already set
+      if (!editing.title || editing.title.trim() === "") {
+        updates.title = plan.label;
+      }
+
+      setEditing({ ...editing, ...updates });
+    }
+    setPlanSelectionOpen(false);
+  };
+
+  const handleOpenPlanSelection = () => {
+    setPlanSelectionOpen(true);
+    // Fetch plans for the current category when opening
+    fetchPlansForSelection();
+  };
+
   const filtered = promos.filter((p) => p.type === type);
 
   return (
@@ -84,10 +153,19 @@ export function PromosTab() {
             <Gift className="w-3.5 h-3.5" /> Promo Products
           </button>
         </div>
-        <button onClick={() => setEditing({ ...EMPTY, type })}
-          className="flex items-center gap-2 bg-[#c47020] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#a3551c]">
-          <Plus className="w-4 h-4" /> Add {type === "deal" ? "Deal" : "Promo Product"}
-        </button>
+        <div className="flex gap-1">
+          <button onClick={() => setEditing({ ...EMPTY, type })}
+            className="flex items-center gap-2 bg-[#c47020] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#a3551c]">
+            <Plus className="w-4 h-4" /> Add {type === "deal" ? "Deal" : "Promo Product"}
+          </button>
+          {/* Plan selection button - only show when creating/editing a promo */}
+          {editing && (
+            <button onClick={handleOpenPlanSelection}
+              className="flex items-center gap-2 bg-[#d98c2a] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#b87020]">
+              <Search className="w-4 h-4" /> Select from Plans
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Inline create/edit form */}
@@ -166,6 +244,76 @@ export function PromosTab() {
         </div>
       )}
 
+      {/* Plan Selection Modal */}
+      {planSelectionOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-neutral-100 p-8 text-center max-w-md w-full relative">
+            <button onClick={() => setPlanSelectionOpen(false)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-700">
+              <X className="w-4 h-4" />
+            </button>
+
+            <h2 className="font-semibold text-neutral-900 text-xl mb-4">
+              Select {planCategory === "data" ? "Data Plan" : planCategory === "airtime" ? "Airtime Amount" : "Cable Plan"}
+            </h2>
+
+            {plansLoading ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="w-5 h-5 animate-spin text-[#d98c2a]" />
+              </div>
+            ) : plans.length === 0 ? (
+              <p className="text-neutral-500 text-sm">
+                No {planCategory === "data" ? "data plans" : planCategory === "airtime" ? "airtime amounts" : "cable plans"} available.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {/* Search */}
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <input
+                    type="text"
+                    placeholder="Search plans..."
+                    className="w-full pl-10 pr-4 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-[#d98c2a]"
+                  />
+                </div>
+
+                {/* Plans List */}
+                <div className="max-h-[400px] overflow-y-auto border border-neutral-100 rounded-xl">
+                  {plans.map((plan) => (
+                    <div key={plan.id} className="flex items-center justify-between px-4 py-3 border-b border-neutral-50 hover:bg-neutral-50">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-neutral-800">{plan.label}</p>
+                        <p className="text-xs text-neutral-500">{plan.meta}</p>
+                      </div>
+                      <button onClick={() => handlePlanSelect(plan)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${selectedPlan?.planId === plan.id ? "bg-[#d98c2a] text-white" : "border border-neutral-200 text-neutral-600 hover:bg-neutral-50"}`}>
+                        Select
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4 pt-4 border-t border-neutral-100">
+              <button onClick={() => setPlanSelectionOpen(false)}
+                className="px-4 py-2 rounded-xl text-sm font-medium text-neutral-600 hover:bg-neutral-50">
+                Cancel
+              </button>
+              {selectedPlan && (
+                <button onClick={() => {
+                  handlePlanSelect(selectedPlan);
+                  setPlanSelectionOpen(false);
+                }}
+                  className="ml-4 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#c47020] text-white hover:bg-[#a3551c]">
+                  <Search className="w-4 h-4" /> Use Selected Plan
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* List */}
       <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden">
         {loading ? (
@@ -195,7 +343,7 @@ export function PromosTab() {
                   <td className="px-4 py-3">
                     <button onClick={() => toggleActive(p)}
                       className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${p.isActive ? "bg-[#d98c2a]" : "bg-neutral-200"}`}>
-                      <span className={`inline-block w-3.5 h-3.5 transform rounded-full bg-white shadow transition-transform mt-0.5 ${p.isActive ? "translate-x-5" : "translate-x-0.5"}`} />
+                      <span className={`inline-block w-3.5 h-3.5 transform rounded-full bg-white shadow transition-transform mt-0.5 ${p.isActive ? "translate-x-5" : "translate-x-0.5`}"} />
                     </button>
                   </td>
                   <td className="px-4 py-3">

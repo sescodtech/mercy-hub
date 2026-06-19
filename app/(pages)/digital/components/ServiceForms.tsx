@@ -121,10 +121,12 @@ const PLAN_TYPE_BADGE: Record<string, { label: string; color: string; bg: string
 // ═══════════════════════════════════════════════════════════
 function DataPlanSkeleton() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="rounded-xl bg-neutral-100 animate-pulse h-[88px]" />
-      ))}
+    <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&::-webkit-scrollbar]:hidden">
+      <div className="h-full">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="rounded-xl bg-neutral-100 animate-pulse h-[180px] sm:h-[200px]" />
+        ))}
+      </div>
     </div>
   );
 }
@@ -267,8 +269,8 @@ export function DataTab({
     <div className="space-y-2.5">
 
       {/* ── Network Selector Card ── */}
-      <div className="bg-white rounded-2xl border border-neutral-100 p-3 shadow-sm">
-        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">
+      <div className="bg-white rounded-2xl border border-neutral-100 p-4 sm:p-5 shadow-sm">
+        <p className="text-[10px] sm:text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
           Select Network
         </p>
         <NetworkSelector value={network} onChange={handleNetworkChange} />
@@ -278,26 +280,26 @@ export function DataTab({
         <>
           {/* ── Network hero banner — compact ── */}
           <div
-            className="rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm"
+            className="rounded-xl px-5 sm:px-6 py-4 sm:py-5 flex items-center gap-4 sm:gap-5 shadow-sm"
             style={{ background: brand?.gradient }}
           >
             {Logo && (
-              <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 shadow">
-                <Logo size={28} />
+              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 shadow">
+                <Logo size={32} />
               </div>
             )}
             <div>
-              <p className="font-extrabold text-white text-sm leading-tight">
+              <p className="font-extrabold text-white text-base sm:text-lg leading-tight">
                 {network === "9mobile" ? "9mobile" : network.toUpperCase()} Data Plans
               </p>
-              <p className="text-white/75 text-[11px] mt-0.5">
+              <p className="text-white/75 text-sm sm:text-base mt-1">
                 {plans.length > 0 ? `${plans.length} plans available` : "Loading plans…"}
               </p>
             </div>
           </div>
 
           {/* ── Phone Input Card ── */}
-          <div className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
+          <div className="bg-white rounded-xl border border-neutral-100 p-4 sm:p-5 shadow-sm">
             <PhoneInput value={phone} onChange={setPhone} accentColor={brand?.color} />
           </div>
 
@@ -306,13 +308,13 @@ export function DataTab({
 
             {/* Plan type filter pills */}
             {!planLoad && !planError && plans.length > 0 && availableTypes.length > 1 && (
-              <div className="flex gap-1 overflow-x-auto pb-1 mb-2.5 [&::-webkit-scrollbar]:hidden">
+              <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 sm:pb-3 [&::-webkit-scrollbar]:hidden">
                 {availableTypes.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => setTypeFilter(t.id)}
                     className={cn(
-                      "flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all whitespace-nowrap",
+                      "flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-[11px] font-bold border transition-all whitespace-nowrap",
                       typeFilter === t.id
                         ? "text-white border-transparent"
                         : "border-neutral-200 text-neutral-500 bg-white hover:border-neutral-300"
@@ -329,21 +331,21 @@ export function DataTab({
 
             {/* Search */}
             {!planLoad && !planError && plans.length > 5 && (
-              <div className="relative mb-2.5">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-neutral-400" />
+              <div className="relative mb-3 sm:mb-4">
+                <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search size or validity…"
-                  className="w-full text-xs border border-neutral-200 rounded-lg pl-8 pr-7 py-2 focus:outline-none focus:border-neutral-400 transition-colors bg-neutral-50"
+                  className="w-full pl-10 sm:pl-12 pr-4 sm:pr-5 py-2 sm:py-2.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400 transition-colors bg-neutral-50"
                 />
                 {search && (
                   <button
                     onClick={() => setSearch("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                    className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -354,11 +356,11 @@ export function DataTab({
 
             {/* Error */}
             {planError && !planLoad && (
-              <div className="text-center py-6">
-                <p className="text-sm text-red-400 mb-3">{planError}</p>
+              <div className="text-center py-8 sm:py-10">
+                <p className="text-sm sm:text-base text-red-400 mb-3 sm:mb-4">{planError}</p>
                 <button
                   onClick={onRetry}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+                  className="inline-flex items-center gap-2 sm:gap-2.5 text-sm sm:text-base font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
                 >
                   <RefreshCw className="w-3 h-3" /> Retry
                 </button>
@@ -367,7 +369,7 @@ export function DataTab({
 
             {/* No match after filter */}
             {!planLoad && !planError && filtered.length === 0 && plans.length > 0 && (
-              <div className="text-center py-6 text-xs text-neutral-400">
+              <div className="text-center py-8 sm:py-10 text-xs sm:text-sm text-neutral-400">
                 No plans match.{" "}
                 <button
                   onClick={() => { setTypeFilter("all"); setSearch(""); }}
@@ -378,95 +380,98 @@ export function DataTab({
               </div>
             )}
 
-            {/* ── PLAN GRID — compact responsive cards ── */}
+            {/* ── PLAN GRID — fully responsive cards ── */}
             {!planLoad && !planError && filtered.length > 0 && (
               <>
-                <p className="text-[10px] text-neutral-400 mb-2 font-medium">
+                <p className="text-[10px] sm:text-[11px] text-neutral-400 mb-3 sm:mb-4 font-medium">
                   {filtered.length} plan{filtered.length !== 1 ? "s" : ""}
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[420px] overflow-y-auto pr-0.5 scrollbar-thin">
-                  {filtered.map((p) => {
-                    const isSelected = plan?.id === p.id;
-                    const typeMeta   = PLAN_TYPE_BADGE[p.planType ?? "gifting"];
+                <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&::-webkit-scrollbar]:hidden">
+                  <div className="h-full">
+                    {filtered.map((p) => {
+                      const isSelected = plan?.id === p.id;
+                      const typeMeta   = PLAN_TYPE_BADGE[p.planType ?? "gifting"];
 
-                    // Extract hero data size — prefer a clean "XGB/XMB" token;
-                    // fall back to the plan name minus leading network prefix.
-                    // Break-words + clamping ensure long fallback names never overflow.
-                    const sizeMatch = p.name.match(/(\d+(?:\.\d+)?\s*(?:GB|MB|TB))/i);
-                    const displaySize = sizeMatch
-                      ? sizeMatch[0].replace(/\s+/g, "").toUpperCase()
-                      : p.name.replace(/^(MTN|AIRTEL|GLO|9mobile)\s*/i, "");
+                      // Extract hero data size — prefer a clean "XGB/XMB" token;
+                      // fall back to the plan name minus leading network prefix.
+                      // Break-words + clamping ensure long fallback names never overflow.
+                      const sizeMatch = p.name.match(/(\d+(?:\.\d+)?\s*(?:GB|MB|GB\/|MB\/))/i);
+                      const displaySize = sizeMatch
+                        ? sizeMatch[0].replace(/\s+/g, "").toUpperCase()
+                        : p.name.replace(/^(MTN|AIRTEL|GLO|9mobile)\s*/i, "");
 
-                    // True GB/MB labels are short; long fallback names need smaller text.
-                    const isSizeToken = !!sizeMatch;
+                      // True GB/MB labels are short; long fallback names need smaller text.
+                      const isSizeToken = !!sizeMatch;
 
-                    return (
-                      <button
-                        key={p.id}
-                        onClick={() => setPlan(isSelected ? null : p)}
-                        className="relative flex flex-col p-2.5 rounded-xl border-2 text-left transition-all active:scale-[0.96] overflow-hidden"
-                        style={{
-                          borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "#ebebeb",
-                          backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "#fafafa",
-                          boxShadow:       isSelected
-                            ? `0 0 0 2px ${brand?.ring ?? "#d98c2a"}25, 0 4px 12px ${brand?.ring ?? "#d98c2a"}15`
-                            : "0 1px 3px rgba(0,0,0,0.04)",
-                        }}
-                      >
-                        {/* Decorative circle top-right */}
-                        <div
-                          className="absolute -top-3 -right-3 w-10 h-10 rounded-full opacity-10 pointer-events-none"
-                          style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
-                        />
-
-                        {/* Selected tick */}
-                        {isSelected && (
-                          <span
-                            className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full flex items-center justify-center z-10"
-                            style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
+                      return (
+                        <div key={p.id} className="relative">
+                          <button
+                            onClick={() => setPlan(isSelected ? null : p)}
+                            className="relative flex flex-col h-full p-4 sm:p-5 rounded-xl border-2 text-left transition-all active:scale-[0.96] overflow-hidden"
+                            style={{
+                              borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "#ebebeb",
+                              backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "#fafafa",
+                              boxShadow:       isSelected
+                                ? `0 0 0 2px ${brand?.ring ?? "#d98c2a"}25, 0 4px 12px ${brand?.ring ?? "#d98c2a"}15`
+                                : "0 1px 3px rgba(0,0,0,0.04)",
+                            }}
                           >
-                            <CheckCircle2 className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                          </span>
-                        )}
+                            {/* Decorative circle top-right */}
+                            <div
+                              className="absolute -top-4 sm:-top-5 -right-4 sm:-right-5 w-11 h-11 rounded-full opacity-10 pointer-events-none"
+                              style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
+                            />
 
-                        {/* Plan type pill */}
-                        {typeMeta && (
-                          <span
-                            className="mb-1.5 self-start px-1 py-0.5 text-[8px] font-black uppercase tracking-wider rounded"
-                            style={{ color: typeMeta.color, backgroundColor: typeMeta.bg }}
-                          >
-                            {typeMeta.label}
-                          </span>
-                        )}
+                            {/* Selected tick */}
+                            {isSelected && (
+                              <span
+                                className="absolute top-2 sm:top-2.5 right-2 sm:right-2.5 w-4 h-4 rounded-full flex items-center justify-center z-10"
+                                style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
+                              >
+                                <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />
+                              </span>
+                            )}
 
-                        {/* ── Hero data size ── */}
-                        <p
-                          className={cn(
-                            "font-black leading-tight break-words w-full",
-                            isSizeToken
-                              ? "text-xl"          // "10GB" — short, large
-                              : "text-xs line-clamp-2"  // long plan name — small + clamped
-                          )}
-                          style={{ color: isSelected ? (brand?.text ?? "#665200") : "#171717" }}
-                        >
-                          {displaySize}
-                        </p>
+                            {/* Plan type pill */}
+                            {typeMeta && (
+                              <span
+                                className="mb-2 sm:mb-2.5 self-start px-2 sm:px-2.5 py-0.5 sm:py-0.75 text-[9px] sm:text-[10px] font-black uppercase tracking-wider rounded"
+                                style={{ color: typeMeta.color, backgroundColor: typeMeta.bg }}
+                              >
+                                {typeMeta.label}
+                              </span>
+                            )}
 
-                        {/* Validity */}
-                        {p.validity && (
-                          <p className="text-[9px] text-neutral-400 mt-0.5 font-medium leading-tight">{p.validity}</p>
-                        )}
+                            {/* ── Hero data size ── */}
+                            <p
+                              className={cn(
+                                "font-black leading-tight break-words w-full",
+                                isSizeToken
+                                  ? "text-2xl sm:text-3xl"          // "10GB" — short, large
+                                  : "text-xs sm:text-sm line-clamp-2"  // long plan name — smaller + clamped
+                              )}
+                              style={{ color: isSelected ? (brand?.text ?? "#665200") : "#171717" }}
+                            >
+                              {displaySize}
+                            </p>
 
-                        {/* Price */}
-                        <p
-                          className="text-xs font-black mt-auto pt-1.5"
-                          style={{ color: brand?.color ?? "#d98c2a" }}
-                        >
-                          {fmt(p.price)}
-                        </p>
-                      </button>
-                    );
-                  })}
+                            {/* Validity */}
+                            {p.validity && (
+                              <p className="text-[9px] sm:text-[10px] text-neutral-400 mt-2 sm:mt-2.5 font-medium leading-tight">{p.validity}</p>
+                            )}
+
+                            {/* Price */}
+                            <p
+                              className="text-sm sm:text-base font-black mt-auto pt-2 sm:pt-2.5"
+                              style={{ color: brand?.color ?? "#d98c2a" }}
+                            >
+                              {fmt(p.price)}
+                            </p>
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </>
             )}
