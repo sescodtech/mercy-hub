@@ -1,4 +1,4 @@
-export const metadata = { title: "You're Offline | Mercy Home Essentials" };
+"use client";
 
 export default function OfflinePage() {
   return (
