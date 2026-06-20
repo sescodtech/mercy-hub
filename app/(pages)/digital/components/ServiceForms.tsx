@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2, RefreshCw, Search, CheckCircle2, X } from "lucide-react";
+import { RefreshCw, Search, Check, X, PackageSearch } from "lucide-react";
 import { NETWORKS, CABLE_PROVIDERS, fmt } from "../types";
 import type { Network, Plan } from "../types";
 import { cn } from "@/utils";
@@ -105,34 +105,23 @@ const PLAN_TYPE_TABS = [
   { id: "talkmore",  label: "Talk More"  },
 ];
 
-const PLAN_TYPE_BADGE: Record<string, { label: string; color: string; bg: string }> = {
-  sme:       { label: "SME",       color: "#1d4ed8", bg: "#dbeafe" },
-  sme2:      { label: "SME 2.0",   color: "#7c3aed", bg: "#ede9fe" },
-  corporate: { label: "Corp",      color: "#0f766e", bg: "#ccfbf1" },
-  gifting:   { label: "Gift",      color: "#b45309", bg: "#fef3c7" },
-  special:   { label: "Special",   color: "#dc2626", bg: "#fee2e2" },
-  awoof:     { label: "Awoof",     color: "#d97706", bg: "#fff7ed" },
-  datashare: { label: "Share",     color: "#0369a1", bg: "#e0f2fe" },
-  talkmore:  { label: "Talk+",     color: "#7c3aed", bg: "#f3e8ff" },
-};
-
 // ═══════════════════════════════════════════════════════════
-//  SKELETON LOADER
+//  SKELETON LOADER  — cards are direct grid children (fixes
+//  the layout bug that made plans render as one tall scattered
+//  column instead of a proper card grid)
 // ═══════════════════════════════════════════════════════════
 function DataPlanSkeleton() {
   return (
-    <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&::-webkit-scrollbar]:hidden">
-      <div className="h-full">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="rounded-xl bg-neutral-100 animate-pulse h-[180px] sm:h-[200px]" />
-        ))}
-      </div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="rounded-xl bg-neutral-100 animate-pulse h-[92px] sm:h-[100px]" />
+      ))}
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════
-//  NETWORK SELECTOR  — OPay/PalmPay circle logo style
+//  NETWORK SELECTOR  — OPay/PalmPay-style logo chip
 // ═══════════════════════════════════════════════════════════
 function NetworkSelector({
   value, onChange,
@@ -150,24 +139,16 @@ function NetworkSelector({
           <button
             key={id}
             onClick={() => onChange(id)}
-            className="relative flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border-2 transition-all"
+            className="relative flex flex-col items-center gap-1.5 py-2.5 rounded-xl border transition-all"
             style={{
-              borderColor:     selected ? brand.color  : "#e5e5e5",
-              backgroundColor: selected ? brand.bg     : "#fafafa",
-              boxShadow:       selected ? `0 0 0 3px ${brand.ring}28` : "none",
+              borderColor:     selected ? brand.color : "var(--color-border, #e5e5e5)",
+              backgroundColor: selected ? brand.bg     : "var(--color-card-bg, #fff)",
             }}
           >
-            <div
-              className="relative rounded-full transition-all"
-              style={{
-                boxShadow: selected ? `0 0 0 3px ${brand.color}, 0 0 0 5px ${brand.color}30` : "none",
-              }}
-            >
-              <Logo size={32} />
-            </div>
+            <Logo size={28} />
             <span
-              className="text-[10px] font-bold"
-              style={{ color: selected ? brand.text : "#737373" }}
+              className="text-[10px] font-semibold"
+              style={{ color: selected ? brand.text : "var(--color-text-secondary, #737373)" }}
             >
               {label}
             </span>
@@ -176,7 +157,7 @@ function NetworkSelector({
                 className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: brand.color }}
               >
-                <CheckCircle2 className="w-2 h-2 text-white" strokeWidth={3} />
+                <Check className="w-2 h-2 text-white" strokeWidth={3.5} />
               </span>
             )}
           </button>
@@ -223,7 +204,7 @@ function PhoneInput({
 }
 
 // ═══════════════════════════════════════════════════════════
-//  DATA BUNDLES TAB  — compact, responsive
+//  DATA BUNDLES TAB  — fintech purchase flow (network → plan)
 // ═══════════════════════════════════════════════════════════
 interface DataProps extends BaseProps {
   network:         Network | "";
@@ -233,16 +214,25 @@ interface DataProps extends BaseProps {
   onRetry:         () => void;
 }
 
+// Pull a clean "10GB" / "1.5GB" token out of a plan name; fall back to the
+// name itself (minus the network prefix) for plans that don't follow that
+// pattern (e.g. talk-time bundles, data-share plans).
+function planSizeLabel(name: string) {
+  const match = name.match(/(\d+(?:\.\d+)?\s*(?:GB|MB))/i);
+  if (match) return match[0].replace(/\s+/g, "").toUpperCase();
+  return name.replace(/^(MTN|AIRTEL|GLO|9mobile)\s*/i, "").trim();
+}
+
 export function DataTab({
   network, onNetworkChange, phone, setPhone,
   plans, planLoad, planError,
   plan, setPlan, onRetry,
 }: DataProps) {
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [search,     setSearch]     = useState("");
+  const [typeFilter,   setTypeFilter]   = useState<string>("all");
+  const [searchOpen,   setSearchOpen]   = useState(false);
+  const [search,       setSearch]       = useState("");
 
   const brand = network ? NET_BRAND[network as Network] : null;
-  const Logo  = network ? NET_LOGO[network as Network]  : null;
 
   const availableTypes = useMemo(() => {
     const types = new Set(plans.map((p) => p.planType ?? "gifting"));
@@ -262,92 +252,101 @@ export function DataTab({
   const handleNetworkChange = (n: Network) => {
     setTypeFilter("all");
     setSearch("");
+    setSearchOpen(false);
     onNetworkChange(n);
   };
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-3">
 
-      {/* ── Network Selector Card ── */}
-      <div className="bg-white rounded-2xl border border-neutral-100 p-4 sm:p-5 shadow-sm">
-        <p className="text-[10px] sm:text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-3">
-          Select Network
-        </p>
+      {/* ── Step 1 — Select Network ── */}
+      <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
+        <div className="flex items-center gap-1.5 mb-3">
+          <span
+            className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+            style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+          >
+            1
+          </span>
+          <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide">Select Network</p>
+        </div>
         <NetworkSelector value={network} onChange={handleNetworkChange} />
       </div>
 
       {network && (
         <>
-          {/* ── Network hero banner — compact ── */}
-          <div
-            className="rounded-xl px-5 sm:px-6 py-4 sm:py-5 flex items-center gap-4 sm:gap-5 shadow-sm"
-            style={{ background: brand?.gradient }}
-          >
-            {Logo && (
-              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 shadow">
-                <Logo size={32} />
-              </div>
-            )}
-            <div>
-              <p className="font-extrabold text-white text-base sm:text-lg leading-tight">
-                {network === "9mobile" ? "9mobile" : network.toUpperCase()} Data Plans
-              </p>
-              <p className="text-white/75 text-sm sm:text-base mt-1">
-                {plans.length > 0 ? `${plans.length} plans available` : "Loading plans…"}
-              </p>
-            </div>
-          </div>
-
-          {/* ── Phone Input Card ── */}
-          <div className="bg-white rounded-xl border border-neutral-100 p-4 sm:p-5 shadow-sm">
+          {/* ── Phone number ── */}
+          <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
             <PhoneInput value={phone} onChange={setPhone} accentColor={brand?.color} />
           </div>
 
-          {/* ── Plan Selector Card ── */}
-          <div className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
+          {/* ── Step 2 — Select Plan ── */}
+          <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+                  style={{ backgroundColor: brand?.color ?? "var(--color-brand-primary, #d98c2a)" }}
+                >
+                  2
+                </span>
+                <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide">
+                  Available Plans
+                </p>
+              </div>
 
-            {/* Plan type filter pills */}
-            {!planLoad && !planError && plans.length > 0 && availableTypes.length > 1 && (
-              <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 sm:pb-3 [&::-webkit-scrollbar]:hidden">
+              {!planLoad && !planError && plans.length > 5 && (
+                <button
+                  onClick={() => setSearchOpen((v) => !v)}
+                  className="p-1.5 rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors flex-shrink-0"
+                  aria-label="Search plans"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Search — tucked away, only opens on demand to keep the page calm */}
+            {searchOpen && (
+              <div className="relative mb-3">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
+                <input
+                  autoFocus
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search size or validity…"
+                  className="w-full pl-9 pr-9 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400 transition-colors bg-neutral-50"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Plan type filter pills — only shown when there's an actual choice to make */}
+            {!planLoad && !planError && availableTypes.length > 1 && (
+              <div className="flex gap-1.5 overflow-x-auto pb-3 -mx-0.5 px-0.5 [&::-webkit-scrollbar]:hidden">
                 {availableTypes.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => setTypeFilter(t.id)}
                     className={cn(
-                      "flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-[11px] font-bold border transition-all whitespace-nowrap",
+                      "flex-shrink-0 px-2.5 py-1 rounded-full text-[10.5px] font-semibold border transition-all whitespace-nowrap",
                       typeFilter === t.id
                         ? "text-white border-transparent"
-                        : "border-neutral-200 text-neutral-500 bg-white hover:border-neutral-300"
+                        : "border-neutral-200 text-neutral-500 bg-white"
                     )}
-                    style={typeFilter === t.id
-                      ? { backgroundColor: brand?.color, borderColor: brand?.color }
-                      : {}}
+                    style={typeFilter === t.id ? { backgroundColor: brand?.color, borderColor: brand?.color } : {}}
                   >
                     {t.label}
                   </button>
                 ))}
-              </div>
-            )}
-
-            {/* Search */}
-            {!planLoad && !planError && plans.length > 5 && (
-              <div className="relative mb-3 sm:mb-4">
-                <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search size or validity…"
-                  className="w-full pl-10 sm:pl-12 pr-4 sm:pr-5 py-2 sm:py-2.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400 transition-colors bg-neutral-50"
-                />
-                {search && (
-                  <button
-                    onClick={() => setSearch("")}
-                    className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
               </div>
             )}
 
@@ -356,20 +355,21 @@ export function DataTab({
 
             {/* Error */}
             {planError && !planLoad && (
-              <div className="text-center py-8 sm:py-10">
-                <p className="text-sm sm:text-base text-red-400 mb-3 sm:mb-4">{planError}</p>
+              <div className="text-center py-10">
+                <p className="text-sm text-red-400 mb-3">{planError}</p>
                 <button
                   onClick={onRetry}
-                  className="inline-flex items-center gap-2 sm:gap-2.5 text-sm sm:text-base font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+                  className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
                 >
-                  <RefreshCw className="w-3 h-3" /> Retry
+                  <RefreshCw className="w-3.5 h-3.5" /> Retry
                 </button>
               </div>
             )}
 
-            {/* No match after filter */}
+            {/* No results after filter/search */}
             {!planLoad && !planError && filtered.length === 0 && plans.length > 0 && (
-              <div className="text-center py-8 sm:py-10 text-xs sm:text-sm text-neutral-400">
+              <div className="text-center py-10 text-sm text-neutral-400">
+                <PackageSearch className="w-7 h-7 mx-auto mb-2 text-neutral-300" />
                 No plans match.{" "}
                 <button
                   onClick={() => { setTypeFilter("all"); setSearch(""); }}
@@ -380,100 +380,51 @@ export function DataTab({
               </div>
             )}
 
-            {/* ── PLAN GRID — fully responsive cards ── */}
+            {/* ── PLAN GRID — compact cards: size · validity · price · select ── */}
             {!planLoad && !planError && filtered.length > 0 && (
-              <>
-                <p className="text-[10px] sm:text-[11px] text-neutral-400 mb-3 sm:mb-4 font-medium">
-                  {filtered.length} plan{filtered.length !== 1 ? "s" : ""}
-                </p>
-                <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&::-webkit-scrollbar]:hidden">
-                  <div className="h-full">
-                    {filtered.map((p) => {
-                      const isSelected = plan?.id === p.id;
-                      const typeMeta   = PLAN_TYPE_BADGE[p.planType ?? "gifting"];
-
-                      // Extract hero data size — prefer a clean "XGB/XMB" token;
-                      // fall back to the plan name minus leading network prefix.
-                      // Break-words + clamping ensure long fallback names never overflow.
-                      const sizeMatch = p.name.match(/(\d+(?:\.\d+)?\s*(?:GB|MB|GB\/|MB\/))/i);
-                      const displaySize = sizeMatch
-                        ? sizeMatch[0].replace(/\s+/g, "").toUpperCase()
-                        : p.name.replace(/^(MTN|AIRTEL|GLO|9mobile)\s*/i, "");
-
-                      // True GB/MB labels are short; long fallback names need smaller text.
-                      const isSizeToken = !!sizeMatch;
-
-                      return (
-                        <div key={p.id} className="relative">
-                          <button
-                            onClick={() => setPlan(isSelected ? null : p)}
-                            className="relative flex flex-col h-full p-4 sm:p-5 rounded-xl border-2 text-left transition-all active:scale-[0.96] overflow-hidden"
-                            style={{
-                              borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "#ebebeb",
-                              backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "#fafafa",
-                              boxShadow:       isSelected
-                                ? `0 0 0 2px ${brand?.ring ?? "#d98c2a"}25, 0 4px 12px ${brand?.ring ?? "#d98c2a"}15`
-                                : "0 1px 3px rgba(0,0,0,0.04)",
-                            }}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+                {filtered.map((p) => {
+                  const isSelected = plan?.id === p.id;
+                  const size = planSizeLabel(p.name);
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => setPlan(isSelected ? null : p)}
+                      className="flex flex-col items-start gap-1 p-3 rounded-xl border text-left transition-all active:scale-[0.97]"
+                      style={{
+                        borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "var(--color-border, #e5e5e5)",
+                        backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "var(--color-card-bg, #fff)",
+                      }}
+                    >
+                      <div className="flex items-center justify-between w-full gap-1">
+                        <span
+                          className="font-bold text-[15px] sm:text-base leading-tight truncate"
+                          style={{ color: isSelected ? (brand?.text ?? "#665200") : "#171717" }}
+                        >
+                          {size}
+                        </span>
+                        {isSelected && (
+                          <span
+                            className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
+                            style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
                           >
-                            {/* Decorative circle top-right */}
-                            <div
-                              className="absolute -top-4 sm:-top-5 -right-4 sm:-right-5 w-11 h-11 rounded-full opacity-10 pointer-events-none"
-                              style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
-                            />
-
-                            {/* Selected tick */}
-                            {isSelected && (
-                              <span
-                                className="absolute top-2 sm:top-2.5 right-2 sm:right-2.5 w-4 h-4 rounded-full flex items-center justify-center z-10"
-                                style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
-                              >
-                                <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />
-                              </span>
-                            )}
-
-                            {/* Plan type pill */}
-                            {typeMeta && (
-                              <span
-                                className="mb-2 sm:mb-2.5 self-start px-2 sm:px-2.5 py-0.5 sm:py-0.75 text-[9px] sm:text-[10px] font-black uppercase tracking-wider rounded"
-                                style={{ color: typeMeta.color, backgroundColor: typeMeta.bg }}
-                              >
-                                {typeMeta.label}
-                              </span>
-                            )}
-
-                            {/* ── Hero data size ── */}
-                            <p
-                              className={cn(
-                                "font-black leading-tight break-words w-full",
-                                isSizeToken
-                                  ? "text-2xl sm:text-3xl"          // "10GB" — short, large
-                                  : "text-xs sm:text-sm line-clamp-2"  // long plan name — smaller + clamped
-                              )}
-                              style={{ color: isSelected ? (brand?.text ?? "#665200") : "#171717" }}
-                            >
-                              {displaySize}
-                            </p>
-
-                            {/* Validity */}
-                            {p.validity && (
-                              <p className="text-[9px] sm:text-[10px] text-neutral-400 mt-2 sm:mt-2.5 font-medium leading-tight">{p.validity}</p>
-                            )}
-
-                            {/* Price */}
-                            <p
-                              className="text-sm sm:text-base font-black mt-auto pt-2 sm:pt-2.5"
-                              style={{ color: brand?.color ?? "#d98c2a" }}
-                            >
-                              {fmt(p.price)}
-                            </p>
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </>
+                            <Check className="w-2.5 h-2.5 text-white" strokeWidth={3.5} />
+                          </span>
+                        )}
+                      </div>
+                      {p.validity && (
+                        <span className="text-[11px] text-neutral-400 leading-none">{p.validity}</span>
+                      )}
+                      <span
+                        className="text-[13px] font-bold mt-1"
+                        style={{ color: brand?.color ?? "#d98c2a" }}
+                      >
+                        {fmt(p.price)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
         </>
@@ -497,65 +448,57 @@ export function AirtimeTab({
   plans, planLoad, plan, setPlan,
 }: AirtimeProps) {
   const brand = network ? NET_BRAND[network as Network] : null;
-  const Logo  = network ? NET_LOGO[network as Network]  : null;
 
   return (
-    <div className="space-y-2.5">
-      <div className="bg-white rounded-2xl border border-neutral-100 p-3 shadow-sm">
-        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">
-          Select Network
-        </p>
+    <div className="space-y-3">
+      <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
+        <div className="flex items-center gap-1.5 mb-3">
+          <span
+            className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+            style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+          >
+            1
+          </span>
+          <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide">Select Network</p>
+        </div>
         <NetworkSelector value={network} onChange={onNetworkChange} />
       </div>
 
       {network && (
         <>
-          {/* Network hero banner */}
-          <div
-            className="rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm"
-            style={{ background: brand?.gradient }}
-          >
-            {Logo && (
-              <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 shadow">
-                <Logo size={28} />
-              </div>
-            )}
-            <div>
-              <p className="font-extrabold text-white text-sm leading-tight">
-                {network === "9mobile" ? "9mobile" : network.toUpperCase()} Airtime
-              </p>
-              <p className="text-white/75 text-[11px] mt-0.5">Instant top-up</p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
+          <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
             <PhoneInput value={phone} onChange={setPhone} accentColor={brand?.color} />
           </div>
 
-          <div className="bg-white rounded-xl border border-neutral-100 p-3 shadow-sm">
-            <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">
-              Select Amount
-            </p>
+          <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
+            <div className="flex items-center gap-1.5 mb-3">
+              <span
+                className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+                style={{ backgroundColor: brand?.color ?? "var(--color-brand-primary, #d98c2a)" }}
+              >
+                2
+              </span>
+              <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide">Select Amount</p>
+            </div>
             {planLoad ? (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2.5">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="bg-neutral-100 animate-pulse rounded-xl h-12" />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2.5">
                 {plans.map((p) => {
                   const selected = plan?.id === p.id;
                   return (
                     <button
                       key={p.id}
                       onClick={() => setPlan(selected ? null : p)}
-                      className="py-3 rounded-xl text-center border-2 transition-all font-black text-xs sm:text-sm"
+                      className="py-3 rounded-xl text-center border font-bold text-sm transition-all active:scale-[0.97]"
                       style={{
-                        borderColor:     selected ? (brand?.color ?? "#d98c2a") : "#ebebeb",
-                        backgroundColor: selected ? (brand?.bg   ?? "rgba(217,140,42,0.1)") : "#fafafa",
+                        borderColor:     selected ? (brand?.color ?? "#d98c2a") : "var(--color-border, #e5e5e5)",
+                        backgroundColor: selected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "var(--color-card-bg, #fff)",
                         color:           selected ? (brand?.text ?? "#d98c2a") : "#404040",
-                        boxShadow:       selected ? `0 0 0 2px ${brand?.ring ?? "#d98c2a"}25` : "0 1px 3px rgba(0,0,0,0.04)",
                       }}
                     >
                       {fmt(p.price)}
