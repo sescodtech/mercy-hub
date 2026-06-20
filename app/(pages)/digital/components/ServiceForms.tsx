@@ -322,6 +322,14 @@ interface DataProps extends BaseProps {
 // name itself (minus the network prefix) for plans that don't follow that
 // pattern (e.g. talk-time bundles, data-share plans).
 function planSizeLabel(name: string) {
+  // Talk More plans are airtime/talk-time bundles named like
+  // "TALKMOREN400FOR7DAYS" (no GB/MB at all — the number is a naira amount,
+  // not a data size). Matching this first turns a 21-character unbroken
+  // string into a short "₦400 Talk" label instead of relying on CSS to
+  // wrap or clip something that was never meant to be read in full anyway.
+  const talkMore = name.toUpperCase().match(/TALK\s*MORE\s*N?\s*(\d+)/);
+  if (talkMore) return `₦${talkMore[1]} Talk`;
+
   const match = name.match(/(\d+(?:\.\d+)?\s*(?:GB|MB))/i);
   if (match) return match[0].replace(/\s+/g, "").toUpperCase();
   return name.replace(/^(MTN|AIRTEL|GLO|9mobile)\s*/i, "").trim();
@@ -463,11 +471,15 @@ export function DataTab({
           )}
 
           {/* ── PLAN GRID — always 3 columns, compact cards.
-               Long MTN labels (TALKMOREN400FOR7DAYS, 50030DAYSMB, etc.)
-               now WRAP onto 2 lines instead of truncating/clipping — a
-               fixed card height keeps every card the same size whether
-               the label is short ("1GB") or long, so the grid never loses
-               its 3rd column the way truncate + break-all combo did. ── */}
+               planSizeLabel() shortens the worst offenders (Talk More
+               plans -> "₦400 Talk") before they ever reach this markup.
+               For anything still long, word-break: break-all forces a hard
+               split at ANY character (not just word boundaries) — that's
+               required here because overflow-wrap/break-word only breaks
+               at "soft" points and otherwise lets a single unbroken run of
+               letters/digits stay on one line, which is what was pushing
+               the 3rd column out of view. Fixed card height keeps every
+               card the same size regardless of network or label length. ── */}
           {!planLoad && !planError && filtered.length > 0 && (
             <div className="grid grid-cols-3 gap-1.5 [&>*]:min-w-0">
               {filtered.map((p) => {
@@ -487,8 +499,7 @@ export function DataTab({
                       className="block w-full font-bold text-[10.5px] leading-[1.1]"
                       style={{
                         color: isSelected ? (brand?.text ?? "#665200") : "#171717",
-                        wordBreak: "break-word",
-                        overflowWrap: "break-word",
+                        wordBreak: "break-all",
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: "vertical",
