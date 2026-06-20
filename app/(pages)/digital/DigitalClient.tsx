@@ -253,7 +253,7 @@ export default function DigitalClient() {
     !(category === "cable" && !smartcard);
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "var(--color-page-bg)" }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "var(--color-page-bg)", width: "100%", maxWidth: "100vw", boxSizing: "border-box" }}>
 
       {/* ── Header ── */}
       <div className="bg-white border-b border-neutral-100">

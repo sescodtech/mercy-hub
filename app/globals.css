@@ -67,6 +67,14 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Prevent any child leaking wider than the screen on iOS Safari.
+       Without this, CSS grid calculates column widths from the scrollable
+       layout viewport (wider than screen) instead of the visual viewport.
+       In portrait mode this makes grid-cols-3 render as only 2 visible
+       columns — the 3rd column exists but is pushed off-screen. Landscape
+       works because the screen is wide enough to absorb the leak. */
+    overflow-x: hidden;
+    max-width: 100%;
   }
 
   body {
@@ -77,6 +85,11 @@
     font-size: 15px;
     line-height: 1.65;
     font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    /* Must pair with html overflow-x:hidden — body also needs these so
+       that absolutely-positioned children (dropdowns, drawers) don't
+       expand the scrollable width and defeat the html-level clamp. */
+    overflow-x: hidden;
+    width: 100%;
   }
 
   /* Headings stay Cormorant for the premium editorial feel */
