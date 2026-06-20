@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Email is required" }, { status: 400 });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select("+passwordResetToken +passwordResetExpires");
 
     // Always return success to prevent email enumeration
     if (!user) {
@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
     const token   = crypto.randomBytes(32).toString("hex");
     const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
 
-    user.resetToken       = token;
-    user.resetTokenExpiry = expires;
+    user.passwordResetToken   = token;
+    user.passwordResetExpires = expires;
     await user.save();
 
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;

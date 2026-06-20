@@ -23,6 +23,7 @@ interface UserProfile {
   avatar?: string;
   isVerified: boolean;
   createdAt: string;
+  hasPassword: boolean; // false = Google/OAuth user who has never set a password
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -204,11 +205,11 @@ export default function ProfileSettingsPage() {
 
   // ── Change password ───────────────────────────────────────────
   const handleChangePassword = async () => {
-    if (!currentPw)              { toast.error("Enter your current password.");         return; }
-    if (!newPw)                  { toast.error("Enter a new password.");                return; }
-    if (newPw.length < 8)        { toast.error("New password must be 8+ characters.");  return; }
-    if (newPw !== confirmPw)     { toast.error("Passwords don't match.");               return; }
-    if (newPw === currentPw)     { toast.error("New password must differ from current."); return; }
+    if (!isOAuthUser && !currentPw) { toast.error("Enter your current password.");         return; }
+    if (!newPw)                     { toast.error("Enter a new password.");                return; }
+    if (newPw.length < 8)           { toast.error("New password must be 8+ characters.");  return; }
+    if (newPw !== confirmPw)        { toast.error("Passwords don't match.");               return; }
+    if (!isOAuthUser && newPw === currentPw) { toast.error("New password must differ from current."); return; }
 
     setSaving(true);
     try {
@@ -238,10 +239,12 @@ export default function ProfileSettingsPage() {
     );
   }
 
+  // hasPassword=false means the user signed up via Google and never set a password
+  const isOAuthUser  = profile !== null && !profile.hasPassword;
   const displayName  = name  || session?.user?.name  || "";
   const displayEmail = profile?.email || session?.user?.email || "";
   const canSaveInfo  = !saving && !!displayName.trim();
-  const canChangePw  = !saving && !!currentPw && !!newPw && newPw.length >= 8 && newPw === confirmPw;
+  const canChangePw  = !saving && (isOAuthUser ? true : !!currentPw) && !!newPw && newPw.length >= 8 && newPw === confirmPw;
 
   return (
     <div className="min-h-screen bg-cream">
@@ -435,28 +438,48 @@ export default function ProfileSettingsPage() {
         {/* ────────────────────────── SECURITY TAB ────────────────────────── */}
         {activeTab === "security" && (
           <div className="bg-white rounded-2xl border border-neutral-100 p-6 space-y-5">
+
+            {/* Google user notice */}
+            {isOAuthUser && (
+              <div className="flex items-start gap-3 rounded-xl px-4 py-3 bg-blue-50 border border-blue-100">
+                <Mail className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-blue-800">You signed in with Google</p>
+                  <p className="text-xs text-blue-600 mt-0.5 leading-snug">
+                    You don&apos;t have a password yet. Create one below so you can also sign in with your email.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div>
-              <p className="text-sm font-semibold text-neutral-900 mb-0.5">Change Password</p>
+              <p className="text-sm font-semibold text-neutral-900 mb-0.5">
+                {isOAuthUser ? "Create a Password" : "Change Password"}
+              </p>
               <p className="text-xs text-neutral-400">
-                Choose a strong password with at least 8 characters.
+                {isOAuthUser
+                  ? "Set a password to enable email + password sign-in alongside Google."
+                  : "Choose a strong password with at least 8 characters."}
               </p>
             </div>
 
             <div className="space-y-4 pt-1">
-              {/* Current password */}
-              <PasswordInput
-                label="Current Password"
-                value={currentPw}
-                onChange={setCurrentPw}
-                placeholder="Enter current password"
-                show={showCur}
-                onToggle={() => setShowCur((v) => !v)}
-              />
+              {/* Current password — hidden for OAuth users */}
+              {!isOAuthUser && (
+                <PasswordInput
+                  label="Current Password"
+                  value={currentPw}
+                  onChange={setCurrentPw}
+                  placeholder="Enter current password"
+                  show={showCur}
+                  onToggle={() => setShowCur((v) => !v)}
+                />
+              )}
 
               {/* New password */}
               <div>
                 <PasswordInput
-                  label="New Password"
+                  label={isOAuthUser ? "New Password" : "New Password"}
                   value={newPw}
                   onChange={setNewPw}
                   placeholder="Min. 8 characters"
@@ -468,10 +491,10 @@ export default function ProfileSettingsPage() {
 
               {/* Confirm password */}
               <PasswordInput
-                label="Confirm New Password"
+                label="Confirm Password"
                 value={confirmPw}
                 onChange={setConfirmPw}
-                placeholder="Repeat new password"
+                placeholder="Repeat password"
                 show={showConf}
                 onToggle={() => setShowConf((v) => !v)}
                 suffix={
@@ -484,7 +507,7 @@ export default function ProfileSettingsPage() {
               />
             </div>
 
-            {/* Change password button */}
+            {/* Submit button */}
             <div className="pt-1">
               <button
                 onClick={handleChangePassword}
@@ -494,15 +517,9 @@ export default function ProfileSettingsPage() {
                 {saving
                   ? <Loader2 className="w-4 h-4 animate-spin" />
                   : <Shield className="w-4 h-4" />}
-                Update Password
+                {isOAuthUser ? "Create Password" : "Update Password"}
               </button>
             </div>
-
-            {/* Note for Google-auth users */}
-            <p className="text-xs text-neutral-400 border-t border-neutral-100 pt-4">
-              If you signed in with Google, you may not have a password set. Use the form above
-              to create one, and enter any value in "Current Password" — the server will handle it.
-            </p>
           </div>
         )}
 

@@ -16,17 +16,17 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await User.findOne({
-      resetToken:       token,
-      resetTokenExpiry: { $gt: new Date() },
-    });
+      passwordResetToken:   token,
+      passwordResetExpires: { $gt: new Date() },
+    }).select("+passwordResetToken +passwordResetExpires");
 
     if (!user) {
       return NextResponse.json({ success: false, error: "Invalid or expired reset link" }, { status: 400 });
     }
 
-    user.password         = await bcrypt.hash(password, 12);
-    user.resetToken       = undefined;
-    user.resetTokenExpiry = undefined;
+    user.password             = await bcrypt.hash(password, 12);
+    user.passwordResetToken   = undefined;
+    user.passwordResetExpires = undefined;
     await user.save();
 
     return NextResponse.json({ success: true, message: "Password reset successfully. You can now sign in." });

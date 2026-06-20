@@ -12,12 +12,16 @@ export async function GET() {
     }
     await connectDB();
     const user = await User.findById(session.user.id)
-      .select("-password -resetToken -resetTokenExpiry")
-      .lean();
+      .select("-resetToken -resetTokenExpiry")
+      .lean() as (Record<string, unknown> & { password?: string }) | null;
     if (!user) {
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
-    return NextResponse.json({ success: true, data: user });
+    // Expose whether the user has a password (false = Google/OAuth user)
+    // but never expose the hash itself
+    const hasPassword = !!user.password;
+    const { password: _pw, ...safeUser } = user;
+    return NextResponse.json({ success: true, data: { ...safeUser, hasPassword } });
   } catch {
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
@@ -44,18 +48,26 @@ export async function PUT(req: NextRequest) {
     if (avatar)  user.avatar  = avatar;
     if (address) user.address = address;
 
-    // Password change
+    // Password change / creation
     if (newPassword) {
-      if (!currentPassword) {
-        return NextResponse.json({ success: false, error: "Current password required" }, { status: 400 });
-      }
-      const valid = await bcrypt.compare(currentPassword, user.password);
-      if (!valid) {
-        return NextResponse.json({ success: false, error: "Current password is incorrect" }, { status: 400 });
-      }
       if (newPassword.length < 8) {
         return NextResponse.json({ success: false, error: "Password must be at least 8 characters" }, { status: 400 });
       }
+      // Fetch password field explicitly (select: false by default)
+      const userWithPw = await User.findById(session.user.id).select("+password");
+      const hasPassword = !!userWithPw?.password;
+
+      if (hasPassword) {
+        // Existing password user — must verify current password first
+        if (!currentPassword) {
+          return NextResponse.json({ success: false, error: "Current password required" }, { status: 400 });
+        }
+        const valid = await bcrypt.compare(currentPassword, userWithPw!.password);
+        if (!valid) {
+          return NextResponse.json({ success: false, error: "Current password is incorrect" }, { status: 400 });
+        }
+      }
+      // Google/OAuth user with no password — allow setting one directly
       user.password = await bcrypt.hash(newPassword, 12);
     }
 
