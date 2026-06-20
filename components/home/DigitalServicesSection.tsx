@@ -1,184 +1,108 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
-import {
-  Wifi, Phone, Tv, GraduationCap, BookOpen, Sparkles,
-  ArrowRight, Zap, ShieldCheck, Clock,
-} from "lucide-react";
+import { Wifi, Phone, Tv, GraduationCap, Sparkles, ArrowRight, ChevronRight } from "lucide-react";
 
 const SERVICES = [
   {
-    label: "Data Bundles",
-    desc:  "All networks, instant delivery",
+    label: "Data",
     icon:  Wifi,
     href:  "/digital?category=data",
     color: "#d98c2a",
+    bg:    "rgba(217,140,42,0.12)",
   },
   {
-    label: "Airtime Recharge",
-    desc:  "Top up any number in seconds",
+    label: "Airtime",
     icon:  Phone,
     href:  "/digital?category=airtime",
     color: "#10b981",
+    bg:    "rgba(16,185,129,0.12)",
   },
   {
     label: "Cable TV",
-    desc:  "DStv, GOtv & Startimes",
     icon:  Tv,
     href:  "/digital?category=cable",
     color: "#6366f1",
+    bg:    "rgba(99,102,241,0.12)",
   },
   {
     label: "Exam PINs",
-    desc:  "WAEC, NECO & NABTEB",
     icon:  GraduationCap,
     href:  "/digital?category=education",
     color: "#f59e0b",
+    bg:    "rgba(245,158,11,0.12)",
   },
   {
-    label: "Educational Services",
-    desc:  "Result checkers & more",
-    icon:  BookOpen,
-    href:  "/digital?category=education",
-    color: "#ef4444",
-  },
-  {
-    label: "More Digital Deals",
-    desc:  "Hot deals & promos",
+    label: "Hot Deals",
     icon:  Sparkles,
     href:  "/digital",
-    color: "#c47020",
+    color: "#ef4444",
+    bg:    "rgba(239,68,68,0.12)",
   },
-];
-
-const PERKS = [
-  { icon: Zap,         text: "Instant delivery" },
-  { icon: ShieldCheck, text: "Secure wallet payments" },
-  { icon: Clock,       text: "24/7 availability" },
 ];
 
 export function DigitalServicesSection() {
   return (
-    <section
-      className="py-12 sm:py-16 relative overflow-hidden"
-      style={{ backgroundColor: "var(--color-footer-bg, #1a1208)" }}
-    >
-      {/* Subtle pattern overlay, matches shop hero treatment */}
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage: `repeating-linear-gradient(
-            45deg,
-            var(--color-brand-primary, #d98c2a) 0px,
-            var(--color-brand-primary, #d98c2a) 1px,
-            transparent 1px,
-            transparent 12px
-          )`,
-        }}
-      />
+    <section className="py-4 bg-white border-b border-neutral-100">
+      <div className="container-site">
 
-      <div className="relative container-site">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-10">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Zap className="w-4 h-4" style={{ color: "var(--color-brand-primary, #d98c2a)" }} />
-              <span
-                className="text-xs font-semibold uppercase tracking-[0.2em]"
-                style={{ color: "var(--color-brand-primary, #d98c2a)" }}
-              >
-                Digital Services
-              </span>
-            </div>
-            <h2 className="font-display text-2xl sm:text-3xl font-semibold text-white leading-tight">
-              Data, Airtime, Cable &amp; Exam PINs — sorted in seconds
-            </h2>
-            <p className="text-sm text-white/50 mt-2 max-w-md">
-              Buy data bundles, recharge airtime, pay your cable subscription, and grab exam PINs — all from one wallet, all on Mercy Hub.
-            </p>
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1.5">
+            <span
+              className="w-1.5 h-4 rounded-full"
+              style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+            />
+            <h2 className="text-sm font-semibold text-neutral-800">Digital Services</h2>
           </div>
-
           <Link
             href="/digital"
-            className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors flex-shrink-0"
-            style={{
-              backgroundColor: "var(--color-brand-primary, #d98c2a)",
-              color: "#fff",
-            }}
+            className="flex items-center gap-0.5 text-xs font-medium"
+            style={{ color: "var(--color-brand-primary, #d98c2a)" }}
           >
-            Browse Digital Services <ArrowRight className="w-4 h-4" />
+            See all <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
 
-        {/* Service cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-          {SERVICES.map((s, i) => {
+        {/* Service icons — horizontal scroll row like Jumia quick links */}
+        <div className="flex gap-4 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
+          {SERVICES.map((s) => {
             const Icon = s.icon;
             return (
-              <motion.div
+              <Link
                 key={s.label}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
+                href={s.href}
+                className="flex flex-col items-center gap-1.5 flex-shrink-0"
               >
-                <Link
-                  href={s.href}
-                  className="group flex flex-col h-full rounded-2xl p-4 sm:p-5 transition-all duration-200 border"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.04)",
-                    borderColor: "rgba(255,255,255,0.08)",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.08)";
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = `${s.color}55`;
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.04)";
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.08)";
-                  }}
+                {/* Icon circle */}
+                <div
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center transition-transform active:scale-95"
+                  style={{ backgroundColor: s.bg }}
                 >
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-transform duration-200 group-hover:scale-110"
-                    style={{ backgroundColor: `${s.color}22` }}
-                  >
-                    <Icon className="w-5 h-5" style={{ color: s.color }} />
-                  </div>
-                  <p className="text-sm font-semibold text-white leading-snug">{s.label}</p>
-                  <p className="text-xs text-white/40 mt-1 leading-snug">{s.desc}</p>
-                  <div
-                    className="mt-3 flex items-center gap-1 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ color: s.color }}
-                  >
-                    Buy now <ArrowRight className="w-3 h-3" />
-                  </div>
-                </Link>
-              </motion.div>
+                  <Icon className="w-6 h-6 sm:w-7 sm:h-7" style={{ color: s.color }} />
+                </div>
+                {/* Label */}
+                <span className="text-[10px] sm:text-[11px] font-medium text-neutral-600 text-center leading-tight">
+                  {s.label}
+                </span>
+              </Link>
             );
           })}
-        </div>
 
-        {/* Perks strip + mobile CTA */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 mt-8 pt-6 border-t border-white/10">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            {PERKS.map((p) => {
-              const Icon = p.icon;
-              return (
-                <div key={p.text} className="flex items-center gap-2 text-xs text-white/50">
-                  <Icon className="w-3.5 h-3.5" style={{ color: "var(--color-brand-primary, #d98c2a)" }} />
-                  {p.text}
-                </div>
-              );
-            })}
-          </div>
-
+          {/* View All pill at end of row */}
           <Link
             href="/digital"
-            className="sm:hidden inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold w-full"
-            style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)", color: "#fff" }}
+            className="flex flex-col items-center gap-1.5 flex-shrink-0"
           >
-            Browse Digital Services <ArrowRight className="w-4 h-4" />
+            <div
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center border border-dashed"
+              style={{ borderColor: "var(--color-border, #e5e5e5)", backgroundColor: "var(--color-page-bg, #fdf8f0)" }}
+            >
+              <ArrowRight className="w-5 h-5 text-neutral-400" />
+            </div>
+            <span className="text-[10px] sm:text-[11px] font-medium text-neutral-400 text-center leading-tight">
+              More
+            </span>
           </Link>
         </div>
       </div>
