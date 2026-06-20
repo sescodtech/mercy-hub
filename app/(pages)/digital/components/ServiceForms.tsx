@@ -380,7 +380,7 @@ export function DataTab({
   };
 
   return (
-    <div className="space-y-2 w-full min-w-0 max-w-full" style={{ boxSizing: "border-box" }}>
+    <div className="space-y-2" style={{ width: "100%", minWidth: 0, boxSizing: "border-box", contain: "inline-size" }}>
 
       {/* ── Phone row: network picker + number, one compact line ── */}
       <PhoneRow
@@ -413,7 +413,7 @@ export function DataTab({
               which is what was forcing the whole page to scroll sideways
               the moment MTN was selected. */}
           {!planLoad && !planError && availableTypes.length > 1 && (
-            <div className="flex gap-1.5 overflow-x-auto pb-0.5 min-w-0 max-w-full [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-1.5 overflow-x-auto pb-0.5 [&::-webkit-scrollbar]:hidden" style={{ width: "100%", minWidth: 0, contain: "inline-size" }}>
               {availableTypes.map((t) => (
                 <button
                   key={t.id}

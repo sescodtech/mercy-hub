@@ -308,7 +308,7 @@ export default function DigitalClient() {
         <div className="grid lg:grid-cols-3 gap-6 items-start">
 
           {/* Main column */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 min-w-0" style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box" }}>
             {activeTab === "overview" && (
               <OverviewTab onSelectTab={handleTabClick} onSelectPromo={selectPromo} />
             )}
