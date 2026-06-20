@@ -36,18 +36,9 @@ export default function DigitalClient() {
   const [planError,  setPlanError]  = useState("");
   const [result,     setResult]     = useState<PurchaseResult | null>(null);
   const [pendingPromoId, setPendingPromoId] = useState<string | null>(null);
-  // Set only when the user tapped a promo that has NO providerPlanId linked
-  // (an intentionally "general" promo banner — admins are allowed to leave
-  // this blank). There's nothing to auto-match, so instead of silently
-  // stranding the user on the full plan grid, we show one clear instruction
-  // banner naming the deal and telling them which plan to tap.
   const [unlinkedPromo, setUnlinkedPromo] = useState<Promo | null>(null);
-  // Controls the mobile bottom sheet — opens the instant a plan is tapped
-  // (see onPlanSelect below) so the user lands on confirm + pay immediately
-  // instead of being routed back to a general plan-selection page.
-  // sheetMounted = should the sheet exist at all; sheetOpen = its open/closed
-  // CSS transform. Splitting them lets the sheet mount closed first, then
-  // animate open on the next frame, instead of snapping open instantly.
+
+  // Mobile bottom sheet state — split into mounted + open so we can animate in
   const [sheetOpen,    setSheetOpen]    = useState(false);
   const [sheetMounted, setSheetMounted] = useState(false);
 
@@ -59,9 +50,12 @@ export default function DigitalClient() {
     setSheetOpen(false);
   }, [sheetMounted]);
 
-  // The "purchase category" is just whichever of the 4 real service tabs is active.
-  // Overview / Deals / Promos / Other aren't purchase categories themselves —
-  // selecting a deal routes the user into the matching category tab first.
+  // Opens the mobile bottom sheet — used both when user taps a plan card
+  // directly AND when a promo auto-selects a plan via pendingPromoId effect.
+  function openSheet() {
+    setSheetMounted(true);
+  }
+
   const category: Category | null = CATEGORY_TABS.includes(activeTab as Category) ? (activeTab as Category) : null;
 
   // Fetch wallet balance on mount
@@ -93,10 +87,9 @@ export default function DigitalClient() {
     setPlanLoad(false);
   }, []);
 
-  // Auto-select the matching plan once it loads, when the user arrived via a Hot Deal / Promo.
-  // Also back-fills the network selector from the matched plan — this matters when the promo
-  // itself didn't have a network set (e.g. admin picked the plan but the network field was
-  // left blank), so the UI still lands on the correct network tab once the plan resolves.
+  // Auto-select the matching plan once it loads when the user arrived via a
+  // Hot Deal / Promo card. Also auto-opens the mobile bottom sheet so the user
+  // lands directly on confirm + pay — never routed back to the product list.
   useEffect(() => {
     if (!pendingPromoId || plans.length === 0) return;
     const match = plans.find(
@@ -106,8 +99,12 @@ export default function DigitalClient() {
       setPlan(match);
       if (!network && match.network) setNetwork(match.network as Network);
       setPendingPromoId(null);
+      // Auto-open the mobile confirm sheet so user goes straight to payment
+      // without needing to re-tap the plan or scroll back to it.
+      openSheet();
     }
-  }, [plans, pendingPromoId, network]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plans, pendingPromoId]);
 
   function handleTabClick(tab: Tab) {
     setActiveTab(tab);
@@ -124,16 +121,10 @@ export default function DigitalClient() {
   }
 
   function selectPromo(promo: Promo) {
+    // Close any existing sheet immediately — a fresh promo selection always
+    // starts from the service tab, never from a stale sheet.
+    setSheetMounted(false);
     setPlan(null);
-    // Admins can intentionally leave providerPlanId blank ("general promo
-    // banner with no specific plan attached") — that's a valid promo, not a
-    // bug. But the old code treated a blank id as "nothing to wait for" and
-    // set pendingPromoId to null, which meant the auto-select effect below
-    // never even ran its guard — plan stayed null forever and the user was
-    // left stranded on the full plan grid with no visible next step.
-    // Now: track the promo's *category/network* even with no plan id, and
-    // surface a clear single-tap action to land on this exact plan once the
-    // network's plans are loaded — never a silent dead end.
     setPendingPromoId(promo.providerPlanId || null);
     setUnlinkedPromo(promo.providerPlanId ? null : promo);
 
@@ -152,17 +143,22 @@ export default function DigitalClient() {
       const promoNet = (promo.network as Network) || "";
       setNetwork(promoNet || network);
       setActiveTab("data");
-      // Skip the refetch when we're already sitting on this exact network's
-      // plans (e.g. tapping a Hot Deal inside the Data tab's own promo strip)
-      // — the pendingPromoId effect will match against the list we already have.
       const alreadyLoaded = promoNet && promoNet === network && plans.length > 0;
       if (!alreadyLoaded) {
-        // FIX: previously this only fetched plans when promo.network was set, which meant a
-        // data promo/hot deal with no network field (or one resolved purely via providerPlanId)
-        // never loaded any plans — so clicking it silently did nothing on the checkout step.
-        // Now we always fetch: scoped to the network if we have one, otherwise all data plans,
-        // and the pendingPromoId effect above will find + select the right one once they load.
         fetchPlans("data", promoNet || undefined);
+      } else if (promo.providerPlanId) {
+        // Plans already loaded — immediately try to match and open sheet
+        const match = plans.find(
+          (p) =>
+            p.providerPlanId === promo.providerPlanId ||
+            p.id === promo.providerPlanId ||
+            String(p.planId) === promo.providerPlanId
+        );
+        if (match) {
+          setPlan(match);
+          setPendingPromoId(null);
+          openSheet();
+        }
       }
     } else {
       setActiveTab("other");
@@ -244,10 +240,6 @@ export default function DigitalClient() {
     setSheetMounted(false);
   }
 
-  // Wraps the raw setPlan setter passed to every tab: the instant the user
-  // actually picks a plan (acting on the unlinked-promo instruction banner
-  // or just browsing normally), the banner is no longer relevant and should
-  // disappear rather than linger above an already-selected plan.
   function handleSetPlan(p: Plan | null) {
     setPlan(p);
     if (p) setUnlinkedPromo(null);
@@ -291,11 +283,7 @@ export default function DigitalClient() {
       {/* ── Persistent category navigation ── */}
       <CategoryTabs active={activeTab} onChange={handleTabClick} />
 
-      {/* ── Unlinked-promo banner — only shows when the promo the user just
-           tapped has no specific plan attached (an admin-allowed "general
-           promo" with providerPlanId left blank). Names the deal and gives
-           one clear next step instead of leaving them stuck on the full
-           plan grid with no explanation. ── */}
+      {/* ── Unlinked-promo banner ── */}
       {unlinkedPromo && (
         <div className="container-site px-3 sm:px-6 pt-3">
           <div
@@ -305,7 +293,7 @@ export default function DigitalClient() {
             <Gift className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#6366f1" }} />
             <div className="min-w-0">
               <p className="font-semibold text-neutral-900 leading-snug">
-                "{unlinkedPromo.title}" isn't tied to one specific plan.
+                &ldquo;{unlinkedPromo.title}&rdquo; isn&apos;t tied to one specific plan.
               </p>
               <p className="text-xs text-neutral-500 mt-0.5 leading-snug">
                 Tap the matching plan below{unlinkedPromo.network ? ` for ${unlinkedPromo.network.toUpperCase()}` : ""} to continue to checkout.
@@ -332,7 +320,12 @@ export default function DigitalClient() {
                 plans={plans} planLoad={planLoad} planError={planError}
                 plan={plan} setPlan={handleSetPlan}
                 onRetry={() => network && fetchPlans("data", network)}
-                onPlanSelect={() => setSheetMounted(true)}
+                onPlanSelect={(p) => {
+                  // User tapped a plan card directly — lock in the plan and
+                  // open the mobile confirm sheet immediately. No redirect.
+                  handleSetPlan(p);
+                  openSheet();
+                }}
                 onSelectPromo={selectPromo}
               />
             )}
@@ -343,7 +336,10 @@ export default function DigitalClient() {
                 phone={phone} setPhone={setPhone}
                 plans={plans} planLoad={planLoad}
                 plan={plan} setPlan={handleSetPlan}
-                onPlanSelect={() => setSheetMounted(true)}
+                onPlanSelect={(p) => {
+                  handleSetPlan(p);
+                  openSheet();
+                }}
               />
             )}
 
@@ -409,9 +405,11 @@ export default function DigitalClient() {
         </div>
       </div>
 
-      {/* ── Mobile confirm sheet — slides up the instant a plan is tapped,
-           so the user goes straight to phone confirmation + payment
-           without scrolling back to a general selection page. ── */}
+      {/* ── Mobile confirm sheet ──
+           Mounts and animates open the instant a plan is selected — whether
+           the user tapped a plan card directly OR arrived via a promo/deal
+           that auto-matched a plan. The sheet shows phone + payment only;
+           no duplicate plan-selection step on mobile. ── */}
       {plan && !result && (
         <div className="lg:hidden">
           <div

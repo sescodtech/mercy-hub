@@ -18,11 +18,11 @@ function PromoSkeleton({ compact }: { compact: boolean }) {
   const count = compact ? 3 : 6;
   return (
     <div className={compact
-      ? "grid grid-cols-2 sm:grid-cols-3 gap-3"
-      : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"}
+      ? "grid grid-cols-3 gap-2"
+      : "grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-3"}
     >
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="skeleton rounded-2xl h-28" />
+        <div key={i} className="skeleton rounded-xl h-24" />
       ))}
     </div>
   );
@@ -34,13 +34,9 @@ interface Props {
   limit?: number;
   onSelect: (promo: Promo) => void;
   compact?: boolean; // true = teaser strip on Overview tab
-  /** Scopes results to a single network's own promos — used inside the
-   *  MTN/Airtel/Glo/9mobile data & airtime tabs so each network only ever
-   *  sees its own Hot Deals / Promo Products, never another network's. */
+  /** Scopes results to a single network's own promos */
   network?: string;
-  /** Render nothing (instead of the dashed empty-state block) when there
-   *  are no promos. Used for the in-tab strip, which shouldn't take up
-   *  space or show a placeholder when a network simply has no promos. */
+  /** Render nothing when there are no promos */
   hideEmpty?: boolean;
 }
 
@@ -132,10 +128,12 @@ export function PromoGrid({ type, limit, onSelect, compact = false, network, hid
   }
 
   // ── Render: Promo cards ──────────────────────────────────────
+  // Always 3 columns on mobile — matches the data plan grid density.
+  // Cards use smaller padding and font on mobile so 3 fit cleanly.
   return (
     <div className={compact
-      ? "grid grid-cols-2 sm:grid-cols-3 gap-3"
-      : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"}
+      ? "grid grid-cols-3 gap-2"
+      : "grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-3"}
     >
       {promos.map((p) => {
         const PIcon = CAT_ICON[p.category] ?? Package;
@@ -143,7 +141,7 @@ export function PromoGrid({ type, limit, onSelect, compact = false, network, hid
           <button
             key={p._id}
             onClick={() => onSelect(p)}
-            className="group flex flex-col h-full text-left rounded-2xl p-4 border transition-all hover:shadow-md active:scale-[0.98]"
+            className="group flex flex-col h-full text-left rounded-xl p-2.5 sm:p-4 border transition-all hover:shadow-md active:scale-[0.98]"
             style={{
               backgroundColor: "var(--color-card-bg, #fff)",
               borderColor:     "var(--color-border, #e5e5e5)",
@@ -157,16 +155,16 @@ export function PromoGrid({ type, limit, onSelect, compact = false, network, hid
             }}
           >
             {/* Icon + badge row */}
-            <div className="flex items-start justify-between mb-2.5">
+            <div className="flex items-start justify-between mb-1.5 sm:mb-2.5">
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ backgroundColor: `${accent}18` }}
               >
-                <PIcon style={{ width: 18, height: 18, color: accent }} />
+                <PIcon style={{ width: 14, height: 14, color: accent }} className="sm:w-[18px] sm:h-[18px]" />
               </div>
               {p.badge && (
                 <span
-                  className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-full text-white flex-shrink-0"
+                  className="px-1 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wide rounded-full text-white flex-shrink-0 leading-tight"
                   style={{ backgroundColor: accent }}
                 >
                   {p.badge}
@@ -175,22 +173,22 @@ export function PromoGrid({ type, limit, onSelect, compact = false, network, hid
             </div>
 
             {/* Title + subtitle */}
-            <p className="text-sm font-semibold text-neutral-900 leading-snug">
+            <p className="text-[11px] sm:text-sm font-semibold text-neutral-900 leading-snug line-clamp-2">
               {p.title}
             </p>
             {p.subtitle && (
-              <p className="text-xs text-neutral-400 mt-0.5 leading-snug">
+              <p className="hidden sm:block text-xs text-neutral-400 mt-0.5 leading-snug">
                 {p.subtitle}
               </p>
             )}
 
             {/* CTA */}
             <div
-              className="mt-auto pt-2.5 flex items-center gap-1 text-xs font-semibold"
+              className="mt-auto pt-1.5 sm:pt-2.5 flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-semibold"
               style={{ color: accent }}
             >
-              {p.ctaLabel ?? "Buy Now"}{" "}
-              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              <span className="truncate">{p.ctaLabel ?? "Buy Now"}</span>{" "}
+              <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
             </div>
           </button>
         );
