@@ -264,37 +264,47 @@ function NetworkPromoStrip({
   if (!promos || promos.length === 0) return null; // loading or none — render nothing, no empty label
 
   return (
-    <div className="min-w-0 max-w-full">
+    <div className="min-w-0 max-w-full overflow-hidden">
       <div className="flex items-center gap-1 mb-1.5">
         <Sparkles className="w-3 h-3" style={{ color: "#ef4444" }} />
         <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Hot Deals</span>
       </div>
+      {/* Always exactly 3 grid slots — real cards padded with invisible
+          placeholders when there are fewer than 3 promos. This removes the
+          "1-item-in-a-3-column-grid" variable entirely instead of relying
+          on calc()/flex math to approximate the same result, since that's
+          the one structural difference between MTN (1 active deal) and
+          networks that render fine (3 deals, or none at all). */}
       <div className="grid grid-cols-3 gap-1.5">
-        {promos.map((p) => (
-          <button
-            key={p._id}
-            onClick={() => onSelect(p)}
-            className="flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 rounded-lg border text-center transition-all active:scale-[0.96] min-w-0 max-w-full overflow-hidden h-[64px]"
-            style={{ borderColor: "#fecaca", backgroundColor: "#fff5f5" }}
-          >
-            <span
-              className="block w-full font-bold text-[10.5px] leading-[1.1] text-neutral-900"
-              style={{
-                wordBreak: "break-word",
-                overflowWrap: "break-word",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
+        {[0, 1, 2].map((slot) => {
+          const p = promos[slot];
+          if (!p) return <div key={`empty-${slot}`} className="h-[64px] invisible" aria-hidden="true" />;
+          return (
+            <button
+              key={p._id}
+              onClick={() => onSelect(p)}
+              className="flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 rounded-lg border text-center transition-all active:scale-[0.96] min-w-0 max-w-full overflow-hidden h-[64px]"
+              style={{ borderColor: "#fecaca", backgroundColor: "#fff5f5" }}
             >
-              {p.title}
-            </span>
-            <span className="text-[10px] font-bold leading-tight" style={{ color: "#ef4444" }}>
-              {p.badge ?? "Hot"}
-            </span>
-          </button>
-        ))}
+              <span
+                className="block w-full font-bold text-[10.5px] leading-[1.1] text-neutral-900"
+                style={{
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                {p.title}
+              </span>
+              <span className="text-[10px] font-bold leading-tight" style={{ color: "#ef4444" }}>
+                {p.badge ?? "Hot"}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
