@@ -26,11 +26,14 @@ interface Order {
   orderNumber: string;
   orderStatus: string;
   paymentStatus: string;
+  paymentReference?: string;
+  paymentMethod?: string;
   items: { product: { name: string; images: { url: string }[] }; quantity: number; price: number; total: number }[];
   total: number;
   shippingAddress: { firstName: string; lastName: string; city: string; state: string };
   createdAt: string;
   trackingNumber?: string;
+  statusHistory?: { status: string; timestamp: string; note?: string }[];
 }
 
 function OrdersContent() {
@@ -41,6 +44,7 @@ function OrdersContent() {
 
   const [orders,  setOrders]  = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [filter,  setFilter]  = useState("all");
   const [expanded, setExpanded] = useState<string | null>(successOrder ?? null);
 
@@ -51,13 +55,21 @@ function OrdersContent() {
   const load = useCallback(async () => {
     if (status !== "authenticated") return;
     setLoading(true);
+    setLoadError(null);
     try {
       const params = new URLSearchParams({ limit: "20" });
       if (filter !== "all") params.set("status", filter);
-      const { data } = await axios.get(`/api/user/orders?${params}`);
-      if (data.success) setOrders(data.data);
+      // NOTE: route lives at /api/users/orders (plural "users") — previously this
+      // called the singular /api/user/orders, which 404'd silently and always
+      // left the page showing "No orders yet" even for clients with completed orders.
+      const { data } = await axios.get(`/api/users/orders?${params}`);
+      if (data.success) {
+        setOrders(data.data);
+      } else {
+        setLoadError(data.error || "Could not load your orders.");
+      }
     } catch {
-      // silent
+      setLoadError("Could not load your orders. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -114,7 +126,19 @@ function OrdersContent() {
         </div>
 
         {/* Orders */}
-        {orders.length === 0 ? (
+        {loadError ? (
+          <div className="bg-white rounded-2xl border border-red-100 py-16 text-center">
+            <XCircle className="w-12 h-12 text-red-200 mx-auto mb-4" />
+            <h3 className="font-display text-lg font-semibold text-neutral-700 mb-2">Couldn't load your orders</h3>
+            <p className="text-neutral-400 text-sm mb-6">{loadError}</p>
+            <button
+              onClick={load}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Try Again
+            </button>
+          </div>
+        ) : orders.length === 0 ? (
           <div className="bg-white rounded-2xl border border-neutral-100 py-16 text-center">
             <ShoppingBag className="w-12 h-12 text-neutral-200 mx-auto mb-4" />
             <h3 className="font-display text-lg font-semibold text-neutral-700 mb-2">No orders yet</h3>
@@ -217,6 +241,25 @@ function OrdersContent() {
                         </span>
                         {order.trackingNumber && (
                           <span><strong className="text-neutral-700">Tracking:</strong> {order.trackingNumber}</span>
+                        )}
+                      </div>
+
+                      {/* Transaction details */}
+                      <div className="pt-3 border-t border-neutral-100 flex flex-wrap gap-4 text-xs text-neutral-500">
+                        {order.paymentMethod && (
+                          <span><strong className="text-neutral-700">Payment:</strong> {order.paymentMethod === "cod" ? "Cash on Delivery" : order.paymentMethod}</span>
+                        )}
+                        <span>
+                          <strong className="text-neutral-700">Payment status:</strong>{" "}
+                          <span className={cn(
+                            order.paymentStatus === "paid" ? "text-green-600" :
+                            order.paymentStatus === "failed" ? "text-red-600" : "text-yellow-700"
+                          )}>
+                            {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                          </span>
+                        </span>
+                        {order.paymentReference && (
+                          <span><strong className="text-neutral-700">Ref:</strong> <span className="font-mono">{order.paymentReference}</span></span>
                         )}
                       </div>
                     </div>

@@ -168,6 +168,13 @@ const OrderItemSchema = new Schema({
   total:    { type: Number, required: true },
 }, { _id: false });
 
+const OrderStatusHistorySchema = new Schema({
+  status:    { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
+  note:      { type: String },
+  updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+}, { _id: false });
+
 const OrderSchema = new Schema({
   orderNumber:      { type: String, required: true, unique: true },
   user:             { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -182,6 +189,7 @@ const OrderSchema = new Schema({
     enum: ["pending","confirmed","processing","shipped","delivered","cancelled","returned"],
     default: "pending",
   },
+  statusHistory:      { type: [OrderStatusHistorySchema], default: [] },
   subtotal:           { type: Number, required: true },
   shippingCost:       { type: Number, default: 0 },
   discount:           { type: Number, default: 0 },
@@ -195,6 +203,7 @@ const OrderSchema = new Schema({
   notes:              { type: String },
   trackingNumber:     { type: String },
   estimatedDelivery:  { type: Date },
+  shippedAt:          { type: Date },
   deliveredAt:        { type: Date },
   cancelledAt:        { type: Date },
   cancellationReason: { type: String },
