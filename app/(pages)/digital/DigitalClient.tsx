@@ -14,6 +14,7 @@ import { PromoGrid } from "./components/PromoGrid";
 import { OtherTab } from "./components/OtherTab";
 import { OrderSummaryPanel } from "./components/OrderSummaryPanel";
 import { ResultModal } from "./components/ResultModal";
+import { cn } from "@/utils";
 
 const CATEGORY_TABS: Category[] = ["data", "airtime", "cable", "education"];
 
@@ -35,6 +36,22 @@ export default function DigitalClient() {
   const [planError,  setPlanError]  = useState("");
   const [result,     setResult]     = useState<PurchaseResult | null>(null);
   const [pendingPromoId, setPendingPromoId] = useState<string | null>(null);
+  // Controls the mobile bottom sheet — opens the instant a plan is tapped
+  // (see onPlanSelect below) so the user lands on confirm + pay immediately
+  // instead of being routed back to a general plan-selection page.
+  // sheetMounted = should the sheet exist at all; sheetOpen = its open/closed
+  // CSS transform. Splitting them lets the sheet mount closed first, then
+  // animate open on the next frame, instead of snapping open instantly.
+  const [sheetOpen,    setSheetOpen]    = useState(false);
+  const [sheetMounted, setSheetMounted] = useState(false);
+
+  useEffect(() => {
+    if (sheetMounted) {
+      const raf = requestAnimationFrame(() => setSheetOpen(true));
+      return () => cancelAnimationFrame(raf);
+    }
+    setSheetOpen(false);
+  }, [sheetMounted]);
 
   // The "purchase category" is just whichever of the 4 real service tabs is active.
   // Overview / Deals / Promos / Other aren't purchase categories themselves —
@@ -93,6 +110,7 @@ export default function DigitalClient() {
     setPlans([]);
     setPlanError("");
     setPendingPromoId(null);
+    setSheetMounted(false);
     if (tab === "airtime")   fetchPlans("airtime");
     if (tab === "cable")     fetchPlans("cable");
     if (tab === "education") fetchPlans("education");
@@ -199,6 +217,7 @@ export default function DigitalClient() {
     setPlan(null);
     setPhone("");
     setSmartcard("");
+    setSheetMounted(false);
   }
 
   const canPurchase =
@@ -213,28 +232,25 @@ export default function DigitalClient() {
 
       {/* ── Header ── */}
       <div className="bg-white border-b border-neutral-100">
-        <div className="container-site px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="container-site px-3 sm:px-6 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => router.back()}
-              className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-500 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-500 transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-[18px] h-[18px]" />
             </button>
-            <div>
-              <h1 className="font-semibold text-neutral-900 text-lg leading-none">Digital Services</h1>
-              <p className="text-xs text-neutral-400 mt-0.5">Data · Airtime · Cable TV · Exam PINs &amp; more</p>
-            </div>
+            <h1 className="font-semibold text-neutral-900 text-base leading-none">Digital Services</h1>
           </div>
 
           {/* Wallet Balance */}
           <Link
             href="/digital/wallet"
-            className="flex items-center gap-2 rounded-xl px-3 py-2 border transition-colors"
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 border transition-colors"
             style={{ backgroundColor: "rgba(217,140,42,0.1)", borderColor: "rgba(217,140,42,0.2)" }}
           >
-            <Wallet className="w-4 h-4" style={{ color: "#d98c2a" }} />
-            <span className="text-sm font-semibold" style={{ color: "#d98c2a" }}>{fmt(walletBal)}</span>
+            <Wallet className="w-3.5 h-3.5" style={{ color: "#d98c2a" }} />
+            <span className="text-xs font-semibold" style={{ color: "#d98c2a" }}>{fmt(walletBal)}</span>
           </Link>
         </div>
       </div>
@@ -243,7 +259,7 @@ export default function DigitalClient() {
       <CategoryTabs active={activeTab} onChange={handleTabClick} />
 
       {/* ── Content ── */}
-      <div className="container-site px-4 sm:px-6 py-6 sm:py-8">
+      <div className="container-site px-3 sm:px-6 py-3 sm:py-8">
         <div className="grid lg:grid-cols-3 gap-6 items-start">
 
           {/* Main column */}
@@ -259,6 +275,7 @@ export default function DigitalClient() {
                 plans={plans} planLoad={planLoad} planError={planError}
                 plan={plan} setPlan={setPlan}
                 onRetry={() => network && fetchPlans("data", network)}
+                onPlanSelect={() => setSheetMounted(true)}
               />
             )}
 
@@ -268,6 +285,7 @@ export default function DigitalClient() {
                 phone={phone} setPhone={setPhone}
                 plans={plans} planLoad={planLoad}
                 plan={plan} setPlan={setPlan}
+                onPlanSelect={() => setSheetMounted(true)}
               />
             )}
 
@@ -286,9 +304,9 @@ export default function DigitalClient() {
 
             {activeTab === "deals" && (
               <div>
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="w-4 h-4" style={{ color: "#ef4444" }} />
-                  <h2 className="font-display text-lg font-semibold text-neutral-900">Hot Deals</h2>
+                  <h2 className="font-display text-base font-semibold text-neutral-900">Hot Deals</h2>
                 </div>
                 <PromoGrid type="deal" onSelect={selectPromo} />
               </div>
@@ -296,9 +314,9 @@ export default function DigitalClient() {
 
             {activeTab === "promos" && (
               <div>
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-3">
                   <Gift className="w-4 h-4" style={{ color: "#6366f1" }} />
-                  <h2 className="font-display text-lg font-semibold text-neutral-900">Promo Products</h2>
+                  <h2 className="font-display text-base font-semibold text-neutral-900">Promo Products</h2>
                 </div>
                 <PromoGrid type="promo" onSelect={selectPromo} />
               </div>
@@ -307,12 +325,13 @@ export default function DigitalClient() {
             {activeTab === "other" && <OtherTab />}
           </div>
 
-          {/* Order summary column */}
-          <div className="lg:col-span-1">
+          {/* Order summary column — desktop only; mobile uses the bottom sheet */}
+          <div className="hidden lg:block lg:col-span-1">
             {plan ? (
               <div className="lg:sticky lg:top-24">
                 <OrderSummaryPanel
                   plan={plan}
+                  phone={phone}
                   payMethod={payMethod} setPayMethod={setPayMethod}
                   walletBal={walletBal}
                   loading={loading}
@@ -322,7 +341,7 @@ export default function DigitalClient() {
               </div>
             ) : (
               <div
-                className="hidden lg:block lg:sticky lg:top-24 rounded-2xl border border-dashed p-6 text-center text-sm text-neutral-400"
+                className="lg:sticky lg:top-24 rounded-2xl border border-dashed p-6 text-center text-sm text-neutral-400"
                 style={{ borderColor: "var(--color-border, #e5e5e5)" }}
               >
                 Select a plan to see your order summary here.
@@ -331,6 +350,42 @@ export default function DigitalClient() {
           </div>
         </div>
       </div>
+
+      {/* ── Mobile confirm sheet — slides up the instant a plan is tapped,
+           so the user goes straight to phone confirmation + payment
+           without scrolling back to a general selection page. ── */}
+      {plan && !result && (
+        <div className="lg:hidden">
+          <div
+            className={cn(
+              "fixed inset-0 z-40 bg-black/40 transition-opacity",
+              sheetOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            )}
+            onClick={() => setSheetMounted(false)}
+          />
+          <div
+            className={cn(
+              "fixed left-0 right-0 bottom-0 z-50 rounded-t-2xl transition-transform duration-200 max-h-[88vh] overflow-y-auto",
+              sheetOpen ? "translate-y-0" : "translate-y-full"
+            )}
+            style={{ backgroundColor: "var(--color-card-bg, #fff)" }}
+          >
+            <div className="flex justify-center pt-2 pb-1">
+              <span className="w-9 h-1 rounded-full bg-neutral-300" />
+            </div>
+            <OrderSummaryPanel
+              plan={plan}
+              phone={phone}
+              payMethod={payMethod} setPayMethod={setPayMethod}
+              walletBal={walletBal}
+              loading={loading}
+              canPurchase={canPurchase}
+              onPurchase={handlePurchase}
+              onClose={() => setSheetMounted(false)}
+            />
+          </div>
+        </div>
+      )}
 
       <ResultModal result={result} onClose={closeResult} />
     </div>

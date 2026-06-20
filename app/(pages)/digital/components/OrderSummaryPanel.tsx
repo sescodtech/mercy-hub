@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Wallet, ShieldCheck, Loader2 } from "lucide-react";
+import { Wallet, ShieldCheck, Loader2, X } from "lucide-react";
 import { fmt } from "../types";
 import type { Plan, PayMethod } from "../types";
 
@@ -13,16 +13,51 @@ interface Props {
   loading: boolean;
   canPurchase: boolean;
   onPurchase: () => void;
+  /** Phone number being topped up / recharged — shown for quick confirmation
+   *  before payment, so the user doesn't have to scroll back up to check it. */
+  phone?: string;
+  /** Renders a close (×) button — used when this panel is shown inside the
+   *  mobile bottom sheet, where the user can dismiss without purchasing. */
+  onClose?: () => void;
 }
 
-export function OrderSummaryPanel({ plan, payMethod, setPayMethod, walletBal, loading, canPurchase, onPurchase }: Props) {
+export function OrderSummaryPanel({
+  plan, payMethod, setPayMethod, walletBal, loading, canPurchase, onPurchase, phone, onClose,
+}: Props) {
   return (
     <div className="bg-white rounded-2xl border border-neutral-100 p-5">
-      <h3 className="font-medium text-neutral-700 mb-3 text-sm">Payment Method</h3>
-      <div className="grid grid-cols-2 gap-3 mb-5">
+      {onClose && (
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-neutral-900 text-sm">Confirm Purchase</h3>
+          <button onClick={onClose} className="p-1 rounded-lg text-neutral-400 hover:bg-neutral-100" aria-label="Close">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Selected plan + phone — visible at a glance, no scrolling needed */}
+      <div className="rounded-xl bg-neutral-50 p-3 mb-4 space-y-1.5">
+        <div className="flex justify-between text-sm">
+          <span className="text-neutral-500">Plan</span>
+          <span className="font-semibold text-neutral-900 text-right">{plan.name}</span>
+        </div>
+        {phone && (
+          <div className="flex justify-between text-sm">
+            <span className="text-neutral-500">Phone</span>
+            <span className="font-semibold text-neutral-900 font-mono">{phone}</span>
+          </div>
+        )}
+        <div className="flex justify-between text-sm pt-1.5 border-t border-neutral-200">
+          <span className="text-neutral-500">Amount</span>
+          <span className="font-bold" style={{ color: "#d98c2a" }}>{fmt(plan.price)}</span>
+        </div>
+      </div>
+
+      <h3 className="font-medium text-neutral-700 mb-2 text-xs uppercase tracking-wide">Payment Method</h3>
+      <div className="grid grid-cols-2 gap-2.5 mb-4">
         <button
           onClick={() => setPayMethod("wallet")}
-          className="p-3 rounded-xl border-2 text-left transition-all"
+          className="p-2.5 rounded-xl border-2 text-left transition-all"
           style={{
             borderColor: payMethod === "wallet" ? "#d98c2a" : "#e5e5e5",
             backgroundColor: payMethod === "wallet" ? "rgba(217,140,42,0.08)" : "transparent",
@@ -34,7 +69,7 @@ export function OrderSummaryPanel({ plan, payMethod, setPayMethod, walletBal, lo
         </button>
         <button
           onClick={() => setPayMethod("paystack")}
-          className="p-3 rounded-xl border-2 text-left transition-all"
+          className="p-2.5 rounded-xl border-2 text-left transition-all"
           style={{
             borderColor: payMethod === "paystack" ? "#d98c2a" : "#e5e5e5",
             backgroundColor: payMethod === "paystack" ? "rgba(217,140,42,0.08)" : "transparent",
@@ -52,17 +87,6 @@ export function OrderSummaryPanel({ plan, payMethod, setPayMethod, walletBal, lo
           <Link href="/digital/wallet" className="underline font-medium">Top up wallet</Link>
         </div>
       )}
-
-      <div className="border-t border-neutral-100 pt-4 mb-4">
-        <div className="flex justify-between text-sm text-neutral-600 mb-1">
-          <span>Plan</span>
-          <span className="font-medium text-neutral-900 text-right">{plan.name}</span>
-        </div>
-        <div className="flex justify-between text-sm font-bold mt-2">
-          <span>Total</span>
-          <span style={{ color: "#d98c2a" }}>{fmt(plan.price)}</span>
-        </div>
-      </div>
 
       <button
         onClick={onPurchase}

@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { RefreshCw, Search, Check, X, PackageSearch } from "lucide-react";
-import { NETWORKS, CABLE_PROVIDERS, fmt } from "../types";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { RefreshCw, Search, X, PackageSearch, ChevronDown } from "lucide-react";
+import { NETWORKS, CABLE_PROVIDERS, fmt, detectNetwork } from "../types";
 import type { Network, Plan } from "../types";
 import { cn } from "@/utils";
 
@@ -112,99 +112,130 @@ const PLAN_TYPE_TABS = [
 // ═══════════════════════════════════════════════════════════
 function DataPlanSkeleton() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="rounded-xl bg-neutral-100 animate-pulse h-[92px] sm:h-[100px]" />
+    <div className="grid grid-cols-3 gap-1.5">
+      {Array.from({ length: 9 }).map((_, i) => (
+        <div key={i} className="rounded-lg bg-neutral-100 animate-pulse h-[58px]" />
       ))}
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════
-//  NETWORK SELECTOR  — OPay/PalmPay-style logo chip
+//  NETWORK PICKER  — OPay-style compact row: [logo ▾] | number
 // ═══════════════════════════════════════════════════════════
-function NetworkSelector({
+function NetworkPicker({
   value, onChange,
 }: {
   value: Network | "";
   onChange: (n: Network) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+
+  const brand = value ? NET_BRAND[value] : null;
+  const Logo  = value ? NET_LOGO[value]  : null;
+
   return (
-    <div className="grid grid-cols-4 gap-2">
-      {NETWORKS.map(({ id, label }) => {
-        const brand    = NET_BRAND[id];
-        const Logo     = NET_LOGO[id];
-        const selected = value === id;
-        return (
-          <button
-            key={id}
-            onClick={() => onChange(id)}
-            className="relative flex flex-col items-center gap-1.5 py-2.5 rounded-xl border transition-all"
-            style={{
-              borderColor:     selected ? brand.color : "var(--color-border, #e5e5e5)",
-              backgroundColor: selected ? brand.bg     : "var(--color-card-bg, #fff)",
-            }}
-          >
-            <Logo size={28} />
-            <span
-              className="text-[10px] font-semibold"
-              style={{ color: selected ? brand.text : "var(--color-text-secondary, #737373)" }}
-            >
-              {label}
-            </span>
-            {selected && (
-              <span
-                className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: brand.color }}
+    <div className="relative flex-shrink-0" ref={ref}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1 pr-1.5 py-1 rounded-lg"
+        aria-label="Choose network"
+      >
+        {Logo ? <Logo size={26} /> : (
+          <span className="w-[26px] h-[26px] rounded-full bg-neutral-200 flex items-center justify-center">
+            <Search className="w-3 h-3 text-neutral-400" />
+          </span>
+        )}
+        <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
+      </button>
+
+      {open && (
+        <div
+          className="absolute left-0 top-full mt-1.5 z-30 rounded-xl border shadow-lg p-2 grid grid-cols-4 gap-1.5 w-[220px]"
+          style={{ backgroundColor: "var(--color-card-bg, #fff)", borderColor: "var(--color-border, #e5e5e5)" }}
+        >
+          {NETWORKS.map(({ id, label }) => {
+            const b = NET_BRAND[id];
+            const L = NET_LOGO[id];
+            const selected = value === id;
+            return (
+              <button
+                key={id}
+                onClick={() => { onChange(id); setOpen(false); }}
+                className="flex flex-col items-center gap-1 py-1.5 rounded-lg"
+                style={{ backgroundColor: selected ? b.bg : "transparent" }}
               >
-                <Check className="w-2 h-2 text-white" strokeWidth={3.5} />
-              </span>
-            )}
-          </button>
-        );
-      })}
+                <L size={24} />
+                <span className="text-[9px] font-semibold" style={{ color: selected ? b.text : "#737373" }}>
+                  {label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════
-//  PHONE INPUT with NG flag prefix
+//  PHONE ROW — OPay-style: [Network ▾] | phone number
+//  Detects the network from the digits as the user types and
+//  reports it upward; manual picks always take precedence and
+//  are never overridden by a later detection.
 // ═══════════════════════════════════════════════════════════
-function PhoneInput({
-  value, onChange, accentColor,
+function PhoneRow({
+  value, onChange, network, onNetworkChange, onNetworkDetected,
 }: {
   value: string;
   onChange: (v: string) => void;
-  accentColor?: string;
+  network: Network | "";
+  onNetworkChange: (n: Network) => void;
+  onNetworkDetected?: (n: Network) => void;
 }) {
+  const manualPick = useRef(false);
+
   return (
-    <div>
-      <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">
-        Phone Number
-      </label>
-      <div
-        className="flex items-center rounded-xl border-2 overflow-hidden transition-all"
-        style={{ borderColor: value ? (accentColor ?? "#d98c2a") : "#e5e5e5" }}
-      >
-        <div className="flex items-center gap-1.5 px-3 py-2.5 border-r border-neutral-200 bg-neutral-50 flex-shrink-0">
-          <span className="text-sm leading-none">🇳🇬</span>
-          <span className="text-xs font-semibold text-neutral-500">+234</span>
-        </div>
-        <input
-          type="tel"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="080 1234 5678"
-          maxLength={11}
-          className="flex-1 px-3 py-2.5 text-sm focus:outline-none bg-transparent"
-        />
-      </div>
+    <div
+      className="flex items-center gap-2 rounded-xl border px-2.5 py-2"
+      style={{ backgroundColor: "var(--color-card-bg, #fff)", borderColor: "var(--color-border, #e5e5e5)" }}
+    >
+      <NetworkPicker
+        value={network}
+        onChange={(n) => { manualPick.current = true; onNetworkChange(n); }}
+      />
+      <span className="w-px h-5 bg-neutral-200 flex-shrink-0" />
+      <input
+        type="tel"
+        value={value}
+        onChange={(e) => {
+          const v = e.target.value;
+          onChange(v);
+          if (!manualPick.current) {
+            const detected = detectNetwork(v);
+            if (detected) onNetworkDetected?.(detected);
+          }
+        }}
+        placeholder="081 3631 7465"
+        maxLength={11}
+        className="flex-1 min-w-0 text-[15px] font-medium focus:outline-none bg-transparent"
+      />
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════
-//  DATA BUNDLES TAB  — fintech purchase flow (network → plan)
+//  DATA BUNDLES TAB  — compact OPay-density layout
 // ═══════════════════════════════════════════════════════════
 interface DataProps extends BaseProps {
   network:         Network | "";
@@ -212,6 +243,9 @@ interface DataProps extends BaseProps {
   phone:           string;
   setPhone:        (v: string) => void;
   onRetry:         () => void;
+  /** Fired the instant a plan is tapped — lets the parent jump straight
+   *  to phone confirmation + payment instead of staying on this list. */
+  onPlanSelect?:   (p: Plan) => void;
 }
 
 // Pull a clean "10GB" / "1.5GB" token out of a plan name; fall back to the
@@ -226,11 +260,10 @@ function planSizeLabel(name: string) {
 export function DataTab({
   network, onNetworkChange, phone, setPhone,
   plans, planLoad, planError,
-  plan, setPlan, onRetry,
+  plan, setPlan, onRetry, onPlanSelect,
 }: DataProps) {
-  const [typeFilter,   setTypeFilter]   = useState<string>("all");
-  const [searchOpen,   setSearchOpen]   = useState(false);
-  const [search,       setSearch]       = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [search,     setSearch]     = useState("");
 
   const brand = network ? NET_BRAND[network as Network] : null;
 
@@ -252,181 +285,131 @@ export function DataTab({
   const handleNetworkChange = (n: Network) => {
     setTypeFilter("all");
     setSearch("");
-    setSearchOpen(false);
     onNetworkChange(n);
   };
 
-  return (
-    <div className="space-y-3">
+  const pickPlan = (p: Plan) => {
+    setPlan(p);
+    onPlanSelect?.(p);
+  };
 
-      {/* ── Step 1 — Select Network ── */}
-      <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
-        <div className="flex items-center gap-1.5 mb-3">
-          <span
-            className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
-            style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
-          >
-            1
-          </span>
-          <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide">Select Network</p>
-        </div>
-        <NetworkSelector value={network} onChange={handleNetworkChange} />
-      </div>
+  return (
+    <div className="space-y-2">
+
+      {/* ── Phone row: network picker + number, one compact line ── */}
+      <PhoneRow
+        value={phone}
+        onChange={setPhone}
+        network={network}
+        onNetworkChange={handleNetworkChange}
+        onNetworkDetected={handleNetworkChange}
+      />
 
       {network && (
         <>
-          {/* ── Phone number ── */}
-          <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
-            <PhoneInput value={phone} onChange={setPhone} accentColor={brand?.color} />
-          </div>
-
-          {/* ── Step 2 — Select Plan ── */}
-          <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="flex items-center gap-1.5">
-                <span
-                  className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
-                  style={{ backgroundColor: brand?.color ?? "var(--color-brand-primary, #d98c2a)" }}
-                >
-                  2
-                </span>
-                <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide">
-                  Available Plans
-                </p>
-              </div>
-
-              {!planLoad && !planError && plans.length > 5 && (
+          {/* Category pills — small, horizontal, OPay-style */}
+          {!planLoad && !planError && availableTypes.length > 1 && (
+            <div className="flex gap-1.5 overflow-x-auto pb-0.5 [&::-webkit-scrollbar]:hidden">
+              {availableTypes.map((t) => (
                 <button
-                  onClick={() => setSearchOpen((v) => !v)}
-                  className="p-1.5 rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors flex-shrink-0"
-                  aria-label="Search plans"
+                  key={t.id}
+                  onClick={() => setTypeFilter(t.id)}
+                  className={cn(
+                    "flex-shrink-0 px-2.5 py-1 rounded-full text-[10.5px] font-semibold border transition-all whitespace-nowrap",
+                    typeFilter === t.id
+                      ? "text-white border-transparent"
+                      : "border-neutral-200 text-neutral-500 bg-white"
+                  )}
+                  style={typeFilter === t.id ? { backgroundColor: brand?.color, borderColor: brand?.color } : {}}
                 >
-                  <Search className="w-3.5 h-3.5" />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Search — only when there's enough plans to need it */}
+          {!planLoad && !planError && plans.length > 8 && (
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search size or validity…"
+                className="w-full pl-8 pr-8 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400 transition-colors bg-neutral-50"
+              />
+              {search && (
+                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400">
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
+          )}
 
-            {/* Search — tucked away, only opens on demand to keep the page calm */}
-            {searchOpen && (
-              <div className="relative mb-3">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
-                <input
-                  autoFocus
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search size or validity…"
-                  className="w-full pl-9 pr-9 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-neutral-400 transition-colors bg-neutral-50"
-                />
-                {search && (
+          {/* Loading */}
+          {planLoad && <DataPlanSkeleton />}
+
+          {/* Error */}
+          {planError && !planLoad && (
+            <div className="text-center py-8">
+              <p className="text-xs text-red-400 mb-2.5">{planError}</p>
+              <button
+                onClick={onRetry}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+              >
+                <RefreshCw className="w-3 h-3" /> Retry
+              </button>
+            </div>
+          )}
+
+          {/* No results after filter/search */}
+          {!planLoad && !planError && filtered.length === 0 && plans.length > 0 && (
+            <div className="text-center py-8 text-xs text-neutral-400">
+              <PackageSearch className="w-6 h-6 mx-auto mb-1.5 text-neutral-300" />
+              No plans match.{" "}
+              <button onClick={() => { setTypeFilter("all"); setSearch(""); }} className="underline hover:text-neutral-600">
+                Clear filter
+              </button>
+            </div>
+          )}
+
+          {/* ── PLAN GRID — always 3 columns, compact cards ── */}
+          {!planLoad && !planError && filtered.length > 0 && (
+            <div className="grid grid-cols-3 gap-1.5">
+              {filtered.map((p) => {
+                const isSelected = plan?.id === p.id;
+                const size = planSizeLabel(p.name);
+                return (
                   <button
-                    onClick={() => setSearch("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                    key={p.id}
+                    onClick={() => pickPlan(p)}
+                    className="flex flex-col items-center gap-0.5 px-1.5 py-2 rounded-lg border text-center transition-all active:scale-[0.96]"
+                    style={{
+                      borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "var(--color-border, #e5e5e5)",
+                      backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "var(--color-card-bg, #fff)",
+                    }}
                   >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Plan type filter pills — only shown when there's an actual choice to make */}
-            {!planLoad && !planError && availableTypes.length > 1 && (
-              <div className="flex gap-1.5 overflow-x-auto pb-3 -mx-0.5 px-0.5 [&::-webkit-scrollbar]:hidden">
-                {availableTypes.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setTypeFilter(t.id)}
-                    className={cn(
-                      "flex-shrink-0 px-2.5 py-1 rounded-full text-[10.5px] font-semibold border transition-all whitespace-nowrap",
-                      typeFilter === t.id
-                        ? "text-white border-transparent"
-                        : "border-neutral-200 text-neutral-500 bg-white"
-                    )}
-                    style={typeFilter === t.id ? { backgroundColor: brand?.color, borderColor: brand?.color } : {}}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Loading */}
-            {planLoad && <DataPlanSkeleton />}
-
-            {/* Error */}
-            {planError && !planLoad && (
-              <div className="text-center py-10">
-                <p className="text-sm text-red-400 mb-3">{planError}</p>
-                <button
-                  onClick={onRetry}
-                  className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" /> Retry
-                </button>
-              </div>
-            )}
-
-            {/* No results after filter/search */}
-            {!planLoad && !planError && filtered.length === 0 && plans.length > 0 && (
-              <div className="text-center py-10 text-sm text-neutral-400">
-                <PackageSearch className="w-7 h-7 mx-auto mb-2 text-neutral-300" />
-                No plans match.{" "}
-                <button
-                  onClick={() => { setTypeFilter("all"); setSearch(""); }}
-                  className="underline hover:text-neutral-600"
-                >
-                  Clear filter
-                </button>
-              </div>
-            )}
-
-            {/* ── PLAN GRID — compact cards: size · validity · price · select ── */}
-            {!planLoad && !planError && filtered.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
-                {filtered.map((p) => {
-                  const isSelected = plan?.id === p.id;
-                  const size = planSizeLabel(p.name);
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => setPlan(isSelected ? null : p)}
-                      className="flex flex-col items-start gap-1 p-3 rounded-xl border text-left transition-all active:scale-[0.97]"
-                      style={{
-                        borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "var(--color-border, #e5e5e5)",
-                        backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "var(--color-card-bg, #fff)",
-                      }}
+                    <span
+                      className="font-bold text-[13px] leading-tight truncate w-full"
+                      style={{ color: isSelected ? (brand?.text ?? "#665200") : "#171717" }}
                     >
-                      <div className="flex items-center justify-between w-full gap-1">
-                        <span
-                          className="font-bold text-[15px] sm:text-base leading-tight truncate"
-                          style={{ color: isSelected ? (brand?.text ?? "#665200") : "#171717" }}
-                        >
-                          {size}
-                        </span>
-                        {isSelected && (
-                          <span
-                            className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
-                            style={{ backgroundColor: brand?.color ?? "#d98c2a" }}
-                          >
-                            <Check className="w-2.5 h-2.5 text-white" strokeWidth={3.5} />
-                          </span>
-                        )}
-                      </div>
-                      {p.validity && (
-                        <span className="text-[11px] text-neutral-400 leading-none">{p.validity}</span>
-                      )}
-                      <span
-                        className="text-[13px] font-bold mt-1"
-                        style={{ color: brand?.color ?? "#d98c2a" }}
-                      >
-                        {fmt(p.price)}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                      {size}
+                    </span>
+                    {p.validity && (
+                      <span className="text-[9.5px] text-neutral-400 leading-none truncate w-full">{p.validity}</span>
+                    )}
+                    <span
+                      className="text-[11px] font-bold leading-tight"
+                      style={{ color: brand?.color ?? "#d98c2a" }}
+                    >
+                      {fmt(p.price)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </>
       )}
     </div>
@@ -441,74 +424,56 @@ interface AirtimeProps extends BaseProps {
   onNetworkChange: (n: Network) => void;
   phone:           string;
   setPhone:        (v: string) => void;
+  onPlanSelect?:   (p: Plan) => void;
 }
 
 export function AirtimeTab({
   network, onNetworkChange, phone, setPhone,
-  plans, planLoad, plan, setPlan,
+  plans, planLoad, plan, setPlan, onPlanSelect,
 }: AirtimeProps) {
   const brand = network ? NET_BRAND[network as Network] : null;
 
+  const pickPlan = (p: Plan) => {
+    setPlan(p);
+    onPlanSelect?.(p);
+  };
+
   return (
-    <div className="space-y-3">
-      <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
-        <div className="flex items-center gap-1.5 mb-3">
-          <span
-            className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
-            style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
-          >
-            1
-          </span>
-          <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide">Select Network</p>
-        </div>
-        <NetworkSelector value={network} onChange={onNetworkChange} />
-      </div>
+    <div className="space-y-2">
+      <PhoneRow
+        value={phone}
+        onChange={setPhone}
+        network={network}
+        onNetworkChange={onNetworkChange}
+        onNetworkDetected={onNetworkChange}
+      />
 
       {network && (
-        <>
-          <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
-            <PhoneInput value={phone} onChange={setPhone} accentColor={brand?.color} />
-          </div>
-
-          <div className="bg-white rounded-2xl border border-neutral-100 p-3.5 sm:p-4 shadow-sm">
-            <div className="flex items-center gap-1.5 mb-3">
-              <span
-                className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
-                style={{ backgroundColor: brand?.color ?? "var(--color-brand-primary, #d98c2a)" }}
-              >
-                2
-              </span>
-              <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide">Select Amount</p>
-            </div>
-            {planLoad ? (
-              <div className="grid grid-cols-3 gap-2.5">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="bg-neutral-100 animate-pulse rounded-xl h-12" />
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-2.5">
-                {plans.map((p) => {
-                  const selected = plan?.id === p.id;
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => setPlan(selected ? null : p)}
-                      className="py-3 rounded-xl text-center border font-bold text-sm transition-all active:scale-[0.97]"
-                      style={{
-                        borderColor:     selected ? (brand?.color ?? "#d98c2a") : "var(--color-border, #e5e5e5)",
-                        backgroundColor: selected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "var(--color-card-bg, #fff)",
-                        color:           selected ? (brand?.text ?? "#d98c2a") : "#404040",
-                      }}
-                    >
-                      {fmt(p.price)}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </>
+        <div className="grid grid-cols-3 gap-1.5">
+          {planLoad ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-neutral-100 animate-pulse rounded-lg h-12" />
+            ))
+          ) : (
+            plans.map((p) => {
+              const selected = plan?.id === p.id;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => pickPlan(p)}
+                  className="py-2.5 rounded-lg text-center border font-bold text-[13px] transition-all active:scale-[0.96]"
+                  style={{
+                    borderColor:     selected ? (brand?.color ?? "#d98c2a") : "var(--color-border, #e5e5e5)",
+                    backgroundColor: selected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "var(--color-card-bg, #fff)",
+                    color:           selected ? (brand?.text ?? "#d98c2a") : "#404040",
+                  }}
+                >
+                  {fmt(p.price)}
+                </button>
+              );
+            })
+          )}
+        </div>
       )}
     </div>
   );

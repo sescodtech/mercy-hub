@@ -26,8 +26,8 @@ export function CategoryTabs({ active, onChange }: Props) {
       className="sticky top-0 z-20 border-b"
       style={{ backgroundColor: "var(--color-card-bg, #fff)", borderColor: "var(--color-border, #e5e5e5)" }}
     >
-      <div className="container-site px-4 sm:px-6">
-        <div className="flex gap-1.5 overflow-x-auto py-2.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div className="container-site px-3 sm:px-6">
+        <div className="flex gap-1 overflow-x-auto py-1.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {TABS.map((t) => {
             const Icon = t.icon;
             const isActive = active === t.id;
@@ -36,7 +36,7 @@ export function CategoryTabs({ active, onChange }: Props) {
                 key={t.id}
                 onClick={() => onChange(t.id)}
                 className={cn(
-                  "flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap"
+                  "flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all whitespace-nowrap"
                 )}
                 style={
                   isActive
@@ -52,7 +52,7 @@ export function CategoryTabs({ active, onChange }: Props) {
                       }
                 }
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-3 h-3" />
                 {t.label}
               </button>
             );
