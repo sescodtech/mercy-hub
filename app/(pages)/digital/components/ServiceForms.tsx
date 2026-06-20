@@ -264,7 +264,7 @@ function NetworkPromoStrip({
   if (!promos || promos.length === 0) return null; // loading or none — render nothing, no empty label
 
   return (
-    <div>
+    <div className="min-w-0 max-w-full">
       <div className="flex items-center gap-1 mb-1.5">
         <Sparkles className="w-3 h-3" style={{ color: "#ef4444" }} />
         <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Hot Deals</span>
@@ -354,7 +354,7 @@ export function DataTab({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 min-w-0 max-w-full overflow-x-hidden">
 
       {/* ── Phone row: network picker + number, one compact line ── */}
       <PhoneRow
@@ -376,9 +376,18 @@ export function DataTab({
 
       {network && (
         <>
-          {/* Category pills — small, horizontal, OPay-style */}
+          {/* Category pills — small, horizontal, OPay-style.
+              MTN is the only network whose provider data has more than one
+              plan type (SME/SME2/Corporate/Awoof/Talk More/Data Share, vs.
+              everyone else falling back to plain "gifting") — so this row
+              only ever renders for MTN. min-w-0 + max-w-full on the
+              scroll container itself (not just its children) is required
+              here: iOS Safari can still let a flex row's natural content
+              width leak into a Grid/Flex ancestor's layout otherwise,
+              which is what was forcing the whole page to scroll sideways
+              the moment MTN was selected. */}
           {!planLoad && !planError && availableTypes.length > 1 && (
-            <div className="flex gap-1.5 overflow-x-auto pb-0.5 [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-1.5 overflow-x-auto pb-0.5 min-w-0 max-w-full [&::-webkit-scrollbar]:hidden">
               {availableTypes.map((t) => (
                 <button
                   key={t.id}

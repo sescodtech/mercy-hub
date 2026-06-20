@@ -36,6 +36,12 @@ export default function DigitalClient() {
   const [planError,  setPlanError]  = useState("");
   const [result,     setResult]     = useState<PurchaseResult | null>(null);
   const [pendingPromoId, setPendingPromoId] = useState<string | null>(null);
+  // Set only when the user tapped a promo that has NO providerPlanId linked
+  // (an intentionally "general" promo banner — admins are allowed to leave
+  // this blank). There's nothing to auto-match, so instead of silently
+  // stranding the user on the full plan grid, we show one clear instruction
+  // banner naming the deal and telling them which plan to tap.
+  const [unlinkedPromo, setUnlinkedPromo] = useState<Promo | null>(null);
   // Controls the mobile bottom sheet — opens the instant a plan is tapped
   // (see onPlanSelect below) so the user lands on confirm + pay immediately
   // instead of being routed back to a general plan-selection page.
@@ -110,6 +116,7 @@ export default function DigitalClient() {
     setPlans([]);
     setPlanError("");
     setPendingPromoId(null);
+    setUnlinkedPromo(null);
     setSheetMounted(false);
     if (tab === "airtime")   fetchPlans("airtime");
     if (tab === "cable")     fetchPlans("cable");
@@ -118,7 +125,17 @@ export default function DigitalClient() {
 
   function selectPromo(promo: Promo) {
     setPlan(null);
+    // Admins can intentionally leave providerPlanId blank ("general promo
+    // banner with no specific plan attached") — that's a valid promo, not a
+    // bug. But the old code treated a blank id as "nothing to wait for" and
+    // set pendingPromoId to null, which meant the auto-select effect below
+    // never even ran its guard — plan stayed null forever and the user was
+    // left stranded on the full plan grid with no visible next step.
+    // Now: track the promo's *category/network* even with no plan id, and
+    // surface a clear single-tap action to land on this exact plan once the
+    // network's plans are loaded — never a silent dead end.
     setPendingPromoId(promo.providerPlanId || null);
+    setUnlinkedPromo(promo.providerPlanId ? null : promo);
 
     if (promo.category === "cable") {
       setCableProv(promo.network || "dstv");
@@ -227,6 +244,15 @@ export default function DigitalClient() {
     setSheetMounted(false);
   }
 
+  // Wraps the raw setPlan setter passed to every tab: the instant the user
+  // actually picks a plan (acting on the unlinked-promo instruction banner
+  // or just browsing normally), the banner is no longer relevant and should
+  // disappear rather than linger above an already-selected plan.
+  function handleSetPlan(p: Plan | null) {
+    setPlan(p);
+    if (p) setUnlinkedPromo(null);
+  }
+
   const canPurchase =
     !!plan &&
     !loading &&
@@ -235,7 +261,7 @@ export default function DigitalClient() {
     !(category === "cable" && !smartcard);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--color-page-bg)" }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "var(--color-page-bg)" }}>
 
       {/* ── Header ── */}
       <div className="bg-white border-b border-neutral-100">
@@ -265,6 +291,30 @@ export default function DigitalClient() {
       {/* ── Persistent category navigation ── */}
       <CategoryTabs active={activeTab} onChange={handleTabClick} />
 
+      {/* ── Unlinked-promo banner — only shows when the promo the user just
+           tapped has no specific plan attached (an admin-allowed "general
+           promo" with providerPlanId left blank). Names the deal and gives
+           one clear next step instead of leaving them stuck on the full
+           plan grid with no explanation. ── */}
+      {unlinkedPromo && (
+        <div className="container-site px-3 sm:px-6 pt-3">
+          <div
+            className="rounded-xl px-3.5 py-2.5 flex items-start gap-2.5 text-sm"
+            style={{ backgroundColor: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.25)" }}
+          >
+            <Gift className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#6366f1" }} />
+            <div className="min-w-0">
+              <p className="font-semibold text-neutral-900 leading-snug">
+                "{unlinkedPromo.title}" isn't tied to one specific plan.
+              </p>
+              <p className="text-xs text-neutral-500 mt-0.5 leading-snug">
+                Tap the matching plan below{unlinkedPromo.network ? ` for ${unlinkedPromo.network.toUpperCase()}` : ""} to continue to checkout.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Content ── */}
       <div className="container-site px-3 sm:px-6 py-3 sm:py-8">
         <div className="grid lg:grid-cols-3 gap-6 items-start">
@@ -280,7 +330,7 @@ export default function DigitalClient() {
                 network={network} onNetworkChange={handleDataNetworkChange}
                 phone={phone} setPhone={setPhone}
                 plans={plans} planLoad={planLoad} planError={planError}
-                plan={plan} setPlan={setPlan}
+                plan={plan} setPlan={handleSetPlan}
                 onRetry={() => network && fetchPlans("data", network)}
                 onPlanSelect={() => setSheetMounted(true)}
                 onSelectPromo={selectPromo}
@@ -292,7 +342,7 @@ export default function DigitalClient() {
                 network={network} onNetworkChange={handleAirtimeNetworkChange}
                 phone={phone} setPhone={setPhone}
                 plans={plans} planLoad={planLoad}
-                plan={plan} setPlan={setPlan}
+                plan={plan} setPlan={handleSetPlan}
                 onPlanSelect={() => setSheetMounted(true)}
               />
             )}
@@ -302,12 +352,12 @@ export default function DigitalClient() {
                 cableProv={cableProv} setCableProv={setCableProv}
                 smartcard={smartcard} setSmartcard={setSmartcard}
                 plans={plans} planLoad={planLoad}
-                plan={plan} setPlan={setPlan}
+                plan={plan} setPlan={handleSetPlan}
               />
             )}
 
             {activeTab === "education" && (
-              <EducationTab plans={plans} planLoad={planLoad} plan={plan} setPlan={setPlan} />
+              <EducationTab plans={plans} planLoad={planLoad} plan={plan} setPlan={handleSetPlan} />
             )}
 
             {activeTab === "deals" && (
