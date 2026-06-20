@@ -35,16 +35,20 @@ export function OrderSummaryPanel({
         </div>
       )}
 
-      {/* Selected plan + phone — visible at a glance, no scrolling needed */}
+      {/* Selected plan + phone — visible at a glance, no scrolling needed.
+          min-w-0 + truncate on the value side stops long, space-less plan
+          names (seen mostly on MTN, e.g. "TALKMOREN400FOR7DAYS") from
+          forcing this row — and the fixed-width sheet/panel around it —
+          wider than the viewport. */}
       <div className="rounded-xl bg-neutral-50 p-3 mb-4 space-y-1.5">
-        <div className="flex justify-between text-sm">
-          <span className="text-neutral-500">Plan</span>
-          <span className="font-semibold text-neutral-900 text-right">{plan.name}</span>
+        <div className="flex justify-between gap-2 text-sm">
+          <span className="text-neutral-500 flex-shrink-0">Plan</span>
+          <span className="font-semibold text-neutral-900 text-right truncate min-w-0">{plan.name}</span>
         </div>
         {phone && (
-          <div className="flex justify-between text-sm">
-            <span className="text-neutral-500">Phone</span>
-            <span className="font-semibold text-neutral-900 font-mono">{phone}</span>
+          <div className="flex justify-between gap-2 text-sm">
+            <span className="text-neutral-500 flex-shrink-0">Phone</span>
+            <span className="font-semibold text-neutral-900 font-mono truncate min-w-0">{phone}</span>
           </div>
         )}
         <div className="flex justify-between text-sm pt-1.5 border-t border-neutral-200">

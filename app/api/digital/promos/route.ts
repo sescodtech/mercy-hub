@@ -17,7 +17,8 @@ export async function GET(req: NextRequest) {
     await connectDB();
 
     const { searchParams } = new URL(req.url);
-    const type = searchParams.get("type"); // "deal" | "promo" | null
+    const type    = searchParams.get("type");    // "deal" | "promo" | null
+    const network = searchParams.get("network"); // "mtn" | "airtel" | "glo" | "9mobile" | null
 
     const now = new Date();
 
@@ -44,6 +45,15 @@ export async function GET(req: NextRequest) {
 
     if (type === "deal" || type === "promo") {
       query.type = type;
+    }
+
+    // Network isolation: when a network is passed (MTN/Airtel/Glo/9mobile tab),
+    // only return that network's own promos. Cable/education promos have no
+    // network field and are routed through other tabs, so they're excluded
+    // automatically here — this filter is only ever applied from data/airtime
+    // network tabs in the first place.
+    if (network) {
+      query.network = network;
     }
 
     const promos = await DigitalPromo.find(query)

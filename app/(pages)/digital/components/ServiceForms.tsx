@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
-import { RefreshCw, Search, X, PackageSearch, ChevronDown } from "lucide-react";
+import { RefreshCw, Search, X, PackageSearch, ChevronDown, Sparkles } from "lucide-react";
 import { NETWORKS, CABLE_PROVIDERS, fmt, detectNetwork } from "../types";
-import type { Network, Plan } from "../types";
+import type { Network, Plan, Promo } from "../types";
 import { cn } from "@/utils";
 
 // ═══════════════════════════════════════════════════════════
@@ -235,6 +235,62 @@ function PhoneRow({
 }
 
 // ═══════════════════════════════════════════════════════════
+//  NETWORK PROMO STRIP — compact "HOT DEALS" row scoped to the
+//  currently selected network, shown inside the Data tab. Fetches
+//  its own promos (not via PromoGrid) so it can decide whether to
+//  render the label at all — no header sitting above an empty grid.
+// ═══════════════════════════════════════════════════════════
+function NetworkPromoStrip({
+  network, onSelect,
+}: {
+  network: Network;
+  onSelect: (promo: Promo) => void;
+}) {
+  const [promos, setPromos] = useState<Promo[] | null>(null); // null = still loading
+
+  useEffect(() => {
+    let alive = true;
+    setPromos(null);
+    fetch(`/api/digital/promos?type=deal&network=${network}`)
+      .then((r) => r.json())
+      .then((d: { success: boolean; data?: Promo[] }) => {
+        if (!alive) return;
+        setPromos(d.success ? (d.data ?? []).slice(0, 3) : []);
+      })
+      .catch(() => { if (alive) setPromos([]); });
+    return () => { alive = false; };
+  }, [network]);
+
+  if (!promos || promos.length === 0) return null; // loading or none — render nothing, no empty label
+
+  return (
+    <div>
+      <div className="flex items-center gap-1 mb-1.5">
+        <Sparkles className="w-3 h-3" style={{ color: "#ef4444" }} />
+        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Hot Deals</span>
+      </div>
+      <div className="grid grid-cols-3 gap-1.5">
+        {promos.map((p) => (
+          <button
+            key={p._id}
+            onClick={() => onSelect(p)}
+            className="flex flex-col items-center justify-center gap-0.5 px-1.5 py-2 rounded-lg border text-center transition-all active:scale-[0.96] min-w-0 overflow-hidden"
+            style={{ borderColor: "#fecaca", backgroundColor: "#fff5f5" }}
+          >
+            <span className="block max-w-full font-bold text-[12px] leading-tight truncate text-neutral-900">
+              {p.title}
+            </span>
+            <span className="text-[10px] font-bold leading-tight" style={{ color: "#ef4444" }}>
+              {p.badge ?? "Hot"}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
 //  DATA BUNDLES TAB  — compact OPay-density layout
 // ═══════════════════════════════════════════════════════════
 interface DataProps extends BaseProps {
@@ -246,6 +302,10 @@ interface DataProps extends BaseProps {
   /** Fired the instant a plan is tapped — lets the parent jump straight
    *  to phone confirmation + payment instead of staying on this list. */
   onPlanSelect?:   (p: Plan) => void;
+  /** Fired when a network-scoped Hot Deal/Promo card is tapped inside this
+   *  tab — routes through the same direct-purchase flow as the Deals/Promos
+   *  tabs, just without leaving the Data tab or losing the network. */
+  onSelectPromo?:  (promo: Promo) => void;
 }
 
 // Pull a clean "10GB" / "1.5GB" token out of a plan name; fall back to the
@@ -260,7 +320,7 @@ function planSizeLabel(name: string) {
 export function DataTab({
   network, onNetworkChange, phone, setPhone,
   plans, planLoad, planError,
-  plan, setPlan, onRetry, onPlanSelect,
+  plan, setPlan, onRetry, onPlanSelect, onSelectPromo,
 }: DataProps) {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [search,     setSearch]     = useState("");
@@ -304,6 +364,15 @@ export function DataTab({
         onNetworkChange={handleNetworkChange}
         onNetworkDetected={handleNetworkChange}
       />
+
+      {/* ── Network-scoped Hot Deals — only this network's own promos.
+           Compact strip, not a banner; tapping a card routes straight into
+           the same direct-purchase flow as the dedicated Deals/Promos tabs.
+           Renders nothing if this network has no active promos (the wrapper
+           below stays invisible too — no empty label sitting above nothing). ── */}
+      {network && onSelectPromo && (
+        <NetworkPromoStrip network={network} onSelect={onSelectPromo} />
+      )}
 
       {network && (
         <>

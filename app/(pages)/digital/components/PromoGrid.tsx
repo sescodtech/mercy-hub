@@ -34,10 +34,18 @@ interface Props {
   limit?: number;
   onSelect: (promo: Promo) => void;
   compact?: boolean; // true = teaser strip on Overview tab
+  /** Scopes results to a single network's own promos — used inside the
+   *  MTN/Airtel/Glo/9mobile data & airtime tabs so each network only ever
+   *  sees its own Hot Deals / Promo Products, never another network's. */
+  network?: string;
+  /** Render nothing (instead of the dashed empty-state block) when there
+   *  are no promos. Used for the in-tab strip, which shouldn't take up
+   *  space or show a placeholder when a network simply has no promos. */
+  hideEmpty?: boolean;
 }
 
 // ─── Component ───────────────────────────────────────────────
-export function PromoGrid({ type, limit, onSelect, compact = false }: Props) {
+export function PromoGrid({ type, limit, onSelect, compact = false, network, hideEmpty = false }: Props) {
   const [promos,  setPromos]  = useState<Promo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
@@ -54,7 +62,10 @@ export function PromoGrid({ type, limit, onSelect, compact = false }: Props) {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/digital/promos?type=${type}`)
+    const q = new URLSearchParams({ type });
+    if (network) q.set("network", network);
+
+    fetch(`/api/digital/promos?${q.toString()}`)
       .then((r) => {
         if (!r.ok) throw new Error(`Server returned ${r.status}`);
         return r.json();
@@ -79,7 +90,7 @@ export function PromoGrid({ type, limit, onSelect, compact = false }: Props) {
       .finally(() => { if (alive) setLoading(false); });
 
     return () => { alive = false; };
-  }, [type, limit]);
+  }, [type, limit, network]);
 
   useEffect(() => {
     const cleanup = load();
@@ -87,10 +98,11 @@ export function PromoGrid({ type, limit, onSelect, compact = false }: Props) {
   }, [load]);
 
   // ── Render: Loading ──────────────────────────────────────────
-  if (loading) return <PromoSkeleton compact={compact} />;
+  if (loading) return hideEmpty ? null : <PromoSkeleton compact={compact} />;
 
   // ── Render: Error ────────────────────────────────────────────
   if (error) {
+    if (hideEmpty) return null;
     return (
       <div className="text-center py-10 rounded-2xl border border-dashed border-red-200 bg-red-50">
         <AlertCircle className="w-7 h-7 mx-auto mb-2 text-red-400" />
@@ -107,6 +119,7 @@ export function PromoGrid({ type, limit, onSelect, compact = false }: Props) {
 
   // ── Render: Empty ────────────────────────────────────────────
   if (promos.length === 0) {
+    if (hideEmpty) return null;
     return (
       <div
         className="text-center py-10 rounded-2xl border border-dashed"

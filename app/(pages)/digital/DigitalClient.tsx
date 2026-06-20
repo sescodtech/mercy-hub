@@ -132,14 +132,21 @@ export default function DigitalClient() {
       setActiveTab("airtime");
       fetchPlans("airtime");
     } else if (promo.category === "data") {
-      setNetwork((promo.network as Network) || "");
+      const promoNet = (promo.network as Network) || "";
+      setNetwork(promoNet || network);
       setActiveTab("data");
-      // FIX: previously this only fetched plans when promo.network was set, which meant a
-      // data promo/hot deal with no network field (or one resolved purely via providerPlanId)
-      // never loaded any plans — so clicking it silently did nothing on the checkout step.
-      // Now we always fetch: scoped to the network if we have one, otherwise all data plans,
-      // and the pendingPromoId effect above will find + select the right one once they load.
-      fetchPlans("data", promo.network || undefined);
+      // Skip the refetch when we're already sitting on this exact network's
+      // plans (e.g. tapping a Hot Deal inside the Data tab's own promo strip)
+      // — the pendingPromoId effect will match against the list we already have.
+      const alreadyLoaded = promoNet && promoNet === network && plans.length > 0;
+      if (!alreadyLoaded) {
+        // FIX: previously this only fetched plans when promo.network was set, which meant a
+        // data promo/hot deal with no network field (or one resolved purely via providerPlanId)
+        // never loaded any plans — so clicking it silently did nothing on the checkout step.
+        // Now we always fetch: scoped to the network if we have one, otherwise all data plans,
+        // and the pendingPromoId effect above will find + select the right one once they load.
+        fetchPlans("data", promoNet || undefined);
+      }
     } else {
       setActiveTab("other");
     }
@@ -276,6 +283,7 @@ export default function DigitalClient() {
                 plan={plan} setPlan={setPlan}
                 onRetry={() => network && fetchPlans("data", network)}
                 onPlanSelect={() => setSheetMounted(true)}
+                onSelectPromo={selectPromo}
               />
             )}
 
@@ -365,7 +373,7 @@ export default function DigitalClient() {
           />
           <div
             className={cn(
-              "fixed left-0 right-0 bottom-0 z-50 rounded-t-2xl transition-transform duration-200 max-h-[88vh] overflow-y-auto",
+              "fixed left-0 right-0 bottom-0 z-50 rounded-t-2xl transition-transform duration-200 max-h-[88vh] overflow-y-auto max-w-full overflow-x-hidden",
               sheetOpen ? "translate-y-0" : "translate-y-full"
             )}
             style={{ backgroundColor: "var(--color-card-bg, #fff)" }}
