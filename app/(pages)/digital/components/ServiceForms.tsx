@@ -114,7 +114,7 @@ function DataPlanSkeleton() {
   return (
     <div className="grid grid-cols-3 gap-1.5">
       {Array.from({ length: 9 }).map((_, i) => (
-        <div key={i} className="rounded-lg bg-neutral-100 animate-pulse h-[58px]" />
+        <div key={i} className="rounded-lg bg-neutral-100 animate-pulse h-[64px]" />
       ))}
     </div>
   );
@@ -274,10 +274,20 @@ function NetworkPromoStrip({
           <button
             key={p._id}
             onClick={() => onSelect(p)}
-            className="flex flex-col items-center justify-center gap-0.5 px-1.5 py-2 rounded-lg border text-center transition-all active:scale-[0.96] min-w-0 overflow-hidden"
+            className="flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 rounded-lg border text-center transition-all active:scale-[0.96] min-w-0 max-w-full overflow-hidden h-[64px]"
             style={{ borderColor: "#fecaca", backgroundColor: "#fff5f5" }}
           >
-            <span className="block max-w-full font-bold text-[12px] leading-tight truncate text-neutral-900">
+            <span
+              className="block w-full font-bold text-[10.5px] leading-[1.1] text-neutral-900"
+              style={{
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
               {p.title}
             </span>
             <span className="text-[10px] font-bold leading-tight" style={{ color: "#ef4444" }}>
@@ -452,7 +462,12 @@ export function DataTab({
             </div>
           )}
 
-          {/* ── PLAN GRID — always 3 columns, compact cards ── */}
+          {/* ── PLAN GRID — always 3 columns, compact cards.
+               Long MTN labels (TALKMOREN400FOR7DAYS, 50030DAYSMB, etc.)
+               now WRAP onto 2 lines instead of truncating/clipping — a
+               fixed card height keeps every card the same size whether
+               the label is short ("1GB") or long, so the grid never loses
+               its 3rd column the way truncate + break-all combo did. ── */}
           {!planLoad && !planError && filtered.length > 0 && (
             <div className="grid grid-cols-3 gap-1.5 [&>*]:min-w-0">
               {filtered.map((p) => {
@@ -462,26 +477,31 @@ export function DataTab({
                   <button
                     key={p.id}
                     onClick={() => pickPlan(p)}
-                    className="flex flex-col items-center gap-0.5 px-1.5 py-2 rounded-lg border text-center transition-all active:scale-[0.96] min-w-0 overflow-hidden"
+                    className="flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 rounded-lg border text-center transition-all active:scale-[0.96] min-w-0 max-w-full overflow-hidden h-[64px]"
                     style={{
                       borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "var(--color-border, #e5e5e5)",
                       backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "var(--color-card-bg, #fff)",
                     }}
                   >
                     <span
-                      className="block max-w-full font-bold text-[13px] leading-tight truncate"
+                      className="block w-full font-bold text-[10.5px] leading-[1.1]"
                       style={{
                         color: isSelected ? (brand?.text ?? "#665200") : "#171717",
-                        wordBreak: "break-all",
+                        wordBreak: "break-word",
+                        overflowWrap: "break-word",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
                       }}
                     >
                       {size}
                     </span>
                     {p.validity && (
-                      <span className="block max-w-full text-[9.5px] text-neutral-400 leading-none truncate">{p.validity}</span>
+                      <span className="block max-w-full text-[8.5px] text-neutral-400 leading-none truncate">{p.validity}</span>
                     )}
                     <span
-                      className="text-[11px] font-bold leading-tight"
+                      className="text-[10px] font-bold leading-tight"
                       style={{ color: brand?.color ?? "#d98c2a" }}
                     >
                       {fmt(p.price)}
