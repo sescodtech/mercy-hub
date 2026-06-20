@@ -112,7 +112,7 @@ const PLAN_TYPE_TABS = [
 // ═══════════════════════════════════════════════════════════
 function DataPlanSkeleton() {
   return (
-    <div className="grid grid-cols-3 gap-1.5">
+    <div className="grid grid-cols-3 gap-1.5" style={{ width: "100%", boxSizing: "border-box" }}>
       {Array.from({ length: 9 }).map((_, i) => (
         <div key={i} className="rounded-lg bg-neutral-100 animate-pulse h-[64px]" />
       ))}
@@ -207,7 +207,7 @@ function PhoneRow({
 
   return (
     <div
-      className="flex items-center gap-2 rounded-xl border px-2.5 py-2"
+      className="flex items-center gap-2 rounded-xl border px-2.5 py-2 w-full min-w-0 box-border"
       style={{ backgroundColor: "var(--color-card-bg, #fff)", borderColor: "var(--color-border, #e5e5e5)" }}
     >
       <NetworkPicker
@@ -228,7 +228,7 @@ function PhoneRow({
         }}
         placeholder="081 3631 7465"
         maxLength={11}
-        className="flex-1 min-w-0 text-[15px] font-medium focus:outline-none bg-transparent"
+        className="flex-1 min-w-0 w-0 text-[15px] font-medium focus:outline-none bg-transparent"
       />
     </div>
   );
@@ -264,7 +264,7 @@ function NetworkPromoStrip({
   if (!promos || promos.length === 0) return null; // loading or none — render nothing, no empty label
 
   return (
-    <div className="min-w-0 max-w-full overflow-hidden">
+    <div className="w-full min-w-0" style={{ boxSizing: "border-box" }}>
       <div className="flex items-center gap-1 mb-1.5">
         <Sparkles className="w-3 h-3" style={{ color: "#ef4444" }} />
         <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Hot Deals</span>
@@ -275,7 +275,7 @@ function NetworkPromoStrip({
           on calc()/flex math to approximate the same result, since that's
           the one structural difference between MTN (1 active deal) and
           networks that render fine (3 deals, or none at all). */}
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="grid grid-cols-3 gap-1.5" style={{ width: "100%", boxSizing: "border-box" }}>
         {[0, 1, 2].map((slot) => {
           const p = promos[slot];
           if (!p) return <div key={`empty-${slot}`} className="h-[64px] invisible" aria-hidden="true" />;
@@ -380,7 +380,7 @@ export function DataTab({
   };
 
   return (
-    <div className="space-y-2 min-w-0 max-w-full overflow-x-hidden">
+    <div className="space-y-2 w-full min-w-0 max-w-full" style={{ boxSizing: "border-box" }}>
 
       {/* ── Phone row: network picker + number, one compact line ── */}
       <PhoneRow
@@ -491,7 +491,7 @@ export function DataTab({
                looking "fixed" in every static read of the CSS. Plain block
                layout has no such quirk — width is genuinely respected. ── */}
           {!planLoad && !planError && filtered.length > 0 && (
-            <div className="grid grid-cols-3 gap-1.5 [&>*]:min-w-0">
+            <div className="grid grid-cols-3 gap-1.5 [&>*]:min-w-0" style={{ width: "100%", boxSizing: "border-box" }}>
               {filtered.map((p) => {
                 const isSelected = plan?.id === p.id;
                 const size = planSizeLabel(p.name);
@@ -570,7 +570,7 @@ export function AirtimeTab({
       />
 
       {network && (
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-3 gap-1.5" style={{ width: "100%", boxSizing: "border-box" }}>
           {planLoad ? (
             Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="bg-neutral-100 animate-pulse rounded-lg h-12" />
