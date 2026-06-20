@@ -287,14 +287,12 @@ function NetworkPromoStrip({
               style={{ borderColor: "#fecaca", backgroundColor: "#fff5f5" }}
             >
               <span
-                className="block w-full font-bold text-[10.5px] leading-[1.1] text-neutral-900"
+                className="block w-full max-w-full font-bold text-[10.5px] text-neutral-900"
                 style={{
-                  wordBreak: "break-word",
-                  overflowWrap: "break-word",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
+                  wordBreak: "break-all",
                   overflow: "hidden",
+                  maxHeight: "23px", // ~2 lines at 10.5px / line-height 1.1
+                  lineHeight: 1.1,
                 }}
               >
                 {p.title}
@@ -483,13 +481,15 @@ export function DataTab({
           {/* ── PLAN GRID — always 3 columns, compact cards.
                planSizeLabel() shortens the worst offenders (Talk More
                plans -> "₦400 Talk") before they ever reach this markup.
-               For anything still long, word-break: break-all forces a hard
-               split at ANY character (not just word boundaries) — that's
-               required here because overflow-wrap/break-word only breaks
-               at "soft" points and otherwise lets a single unbroken run of
-               letters/digits stay on one line, which is what was pushing
-               the 3rd column out of view. Fixed card height keeps every
-               card the same size regardless of network or label length. ── */}
+               The size label uses a plain block + max-height clamp, NOT
+               display:-webkit-box + -webkit-line-clamp — that combo is a
+               known WebKit quirk where a flex/grid ITEM containing a
+               -webkit-box child can still report its UNCLAMPED natural
+               (single-line) width for sizing purposes even though the text
+               visually wraps and clips. That's what was forcing MTN's
+               grid wider than the viewport on real Safari/iPhone while
+               looking "fixed" in every static read of the CSS. Plain block
+               layout has no such quirk — width is genuinely respected. ── */}
           {!planLoad && !planError && filtered.length > 0 && (
             <div className="grid grid-cols-3 gap-1.5 [&>*]:min-w-0">
               {filtered.map((p) => {
@@ -506,14 +506,13 @@ export function DataTab({
                     }}
                   >
                     <span
-                      className="block w-full font-bold text-[10.5px] leading-[1.1]"
+                      className="block w-full max-w-full font-bold text-[10.5px]"
                       style={{
                         color: isSelected ? (brand?.text ?? "#665200") : "#171717",
                         wordBreak: "break-all",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
                         overflow: "hidden",
+                        maxHeight: "23px", // ~2 lines at 10.5px / line-height 1.1
+                        lineHeight: 1.1,
                       }}
                     >
                       {size}
