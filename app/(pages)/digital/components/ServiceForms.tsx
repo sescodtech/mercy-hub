@@ -376,7 +376,7 @@ export function DataTab({
 
           {/* ── PLAN GRID — always 3 columns, compact cards ── */}
           {!planLoad && !planError && filtered.length > 0 && (
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-3 gap-1.5 [&>*]:min-w-0">
               {filtered.map((p) => {
                 const isSelected = plan?.id === p.id;
                 const size = planSizeLabel(p.name);
@@ -384,20 +384,23 @@ export function DataTab({
                   <button
                     key={p.id}
                     onClick={() => pickPlan(p)}
-                    className="flex flex-col items-center gap-0.5 px-1.5 py-2 rounded-lg border text-center transition-all active:scale-[0.96]"
+                    className="flex flex-col items-center gap-0.5 px-1.5 py-2 rounded-lg border text-center transition-all active:scale-[0.96] min-w-0 overflow-hidden"
                     style={{
                       borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "var(--color-border, #e5e5e5)",
                       backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "var(--color-card-bg, #fff)",
                     }}
                   >
                     <span
-                      className="font-bold text-[13px] leading-tight truncate w-full"
-                      style={{ color: isSelected ? (brand?.text ?? "#665200") : "#171717" }}
+                      className="block max-w-full font-bold text-[13px] leading-tight truncate"
+                      style={{
+                        color: isSelected ? (brand?.text ?? "#665200") : "#171717",
+                        wordBreak: "break-all",
+                      }}
                     >
                       {size}
                     </span>
                     {p.validity && (
-                      <span className="text-[9.5px] text-neutral-400 leading-none truncate w-full">{p.validity}</span>
+                      <span className="block max-w-full text-[9.5px] text-neutral-400 leading-none truncate">{p.validity}</span>
                     )}
                     <span
                       className="text-[11px] font-bold leading-tight"
