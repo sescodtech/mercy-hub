@@ -25,16 +25,16 @@ export async function FeaturedProducts() {
   if (products.length === 0) return null;
 
   return (
-    <section className="py-10 bg-white">
+    <section className="py-5 bg-white">
       <div className="container-site">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.15em] mb-1" style={{ color: "var(--color-brand-primary, #d98c2a)" }}>
               Handpicked
             </p>
-            <h2 className="font-display text-2xl font-semibold text-neutral-900">
+            <h2 className="font-display text-lg font-semibold text-neutral-900">
               Featured Products
             </h2>
           </div>
@@ -42,7 +42,7 @@ export async function FeaturedProducts() {
         </div>
 
         {/* Grid — 2 cols mobile, 3 tablet, 4 desktop, 5 wide */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
           {products.map((product, i) => (
             <ProductCard key={product._id} product={product} index={i} />
           ))}

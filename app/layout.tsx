@@ -9,6 +9,7 @@ import { Toaster } from "react-hot-toast";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { AnnouncementBanners } from "@/components/ui/AnnouncementBanner";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
+import { IOSInstallBanner } from "@/components/pwa/IOSInstallBanner";
 
 // ── Display / editorial font — headings, section titles ─────
 const cormorant = Cormorant_Garamond({
@@ -91,6 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-screen bg-cream antialiased">
         <ServiceWorkerRegistration />
+        <IOSInstallBanner />
         <Providers>
           <Navbar />
           <AnnouncementBanners />

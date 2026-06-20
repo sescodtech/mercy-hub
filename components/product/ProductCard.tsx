@@ -59,7 +59,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       <Link href={`/product/${product.slug}`} className="block">
 
         {/* ── Image container ── */}
-        <div className="relative overflow-hidden bg-neutral-50" style={{ aspectRatio: "1 / 1" }}>
+        <div className="relative overflow-hidden bg-neutral-50" style={{ aspectRatio: "4 / 5" }}>
 
           {/* Top-left badges */}
           <div className="absolute top-1.5 left-1.5 z-10 flex flex-col gap-1">
@@ -158,7 +158,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
 
         {/* ── Product info ── */}
-        <div className="p-2 sm:p-2.5">
+        <div className="p-1.5 sm:p-2">
 
           {/* Category label */}
           {typeof product.category === "object" && product.category?.name && (
@@ -172,7 +172,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
           {/* Product name — 2-line clamp, smaller on mobile */}
           <h3
-            className="text-xs sm:text-sm font-medium line-clamp-2 leading-snug mb-1.5 transition-colors duration-150"
+            className="text-[10px] sm:text-xs font-medium line-clamp-2 leading-snug mb-1 transition-colors duration-150"
             style={{
               fontFamily: "var(--font-body)",
               color: "var(--color-text-primary, #1a1208)",
@@ -215,7 +215,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           <div className="flex items-center justify-between gap-1 flex-wrap">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span
-                className="text-sm sm:text-[15px] font-bold leading-none"
+                className="text-[11px] sm:text-sm font-bold leading-none"
                 style={{
                   fontVariantNumeric: "tabular-nums",
                   letterSpacing: "-0.02em",
