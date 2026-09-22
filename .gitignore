@@ -8,3 +8,5 @@ out
 
 # Local database backups
 backups/
+*.tsbuildinfo
+.vercel
