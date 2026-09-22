@@ -78,7 +78,7 @@ export function OverviewTab({ onSelectTab, onSelectPromo }: Props) {
       {/* Recent orders */}
       <div className="bg-white rounded-2xl border border-neutral-100 p-4 flex items-center justify-between" style={{ borderColor: "var(--color-border, #e5e5e5)" }}>
         <p className="text-sm font-medium text-neutral-700">Recent Orders</p>
-        <Link href="/dashboard/digital-orders" className="text-xs flex items-center gap-1 hover:underline" style={{ color: "var(--color-brand-primary, #d98c2a)" }}>
+        <Link href="/dashboard/digital-orders" className="text-xs flex items-center gap-1 hover:underline" style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }}>
           View all <ChevronRight className="w-3 h-3" />
         </Link>
       </div>

@@ -44,7 +44,7 @@ export function CategorySection() {
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-neutral-800">Shop by Category</h2>
-          <Link href="/shop" className="text-xs font-medium" style={{ color: "var(--color-brand-primary, #d98c2a)" }}>
+          <Link href="/shop" className="text-xs font-medium" style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }}>
             See all
           </Link>
         </div>

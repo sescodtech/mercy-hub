@@ -5,3 +5,6 @@ node_modules
 *.log 
 out
 .env 
+
+# Local database backups
+backups/

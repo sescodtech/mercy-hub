@@ -68,7 +68,7 @@ export default function AdminCustomersPage() {
             <h1 className="text-xl font-semibold text-neutral-900">Customers</h1>
             <p className="text-sm text-neutral-400">{pagination.total} total customers</p>
           </div>
-          <Link href="/admin" className="text-sm text-[#d98c2a]">← Dashboard</Link>
+          <Link href="/admin" className="text-sm text-[var(--color-brand-primary)]">← Dashboard</Link>
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export default function AdminCustomersPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: "Total Customers", value: pagination.total, icon: Users, color: "text-purple-600", bg: "bg-purple-50" },
-            { label: "Total Revenue",   value: customers.length ? formatPrice(customers.reduce((s, c) => s + c.totalSpent, 0)) : "—", icon: TrendingUp, color: "text-[#d98c2a]", bg: "bg-[#d98c2a]/10" },
+            { label: "Total Revenue",   value: customers.length ? formatPrice(customers.reduce((s, c) => s + c.totalSpent, 0)) : "—", icon: TrendingUp, color: "text-[var(--color-brand-primary)]", bg: "bg-[var(--color-brand-primary-10)]" },
             { label: "Total Orders",    value: customers.reduce((s, c) => s + c.orderCount, 0), icon: ShoppingBag, color: "text-blue-600", bg: "bg-blue-50" },
             { label: "Top Spender",     value: topSpender?.name?.split(" ")[0] ?? "—", icon: TrendingUp, color: "text-green-600", bg: "bg-green-50" },
           ].map(({ label, value, icon: Icon, color, bg }) => (
@@ -101,7 +101,7 @@ export default function AdminCustomersPage() {
               placeholder="Search by name or email…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[#d98c2a]"
+              className="w-full pl-9 pr-4 py-2.5 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[var(--color-brand-primary)]"
             />
           </div>
           <div className="flex items-center gap-2 bg-white border border-neutral-200 rounded-lg px-3 py-2">
@@ -150,8 +150,8 @@ export default function AdminCustomersPage() {
                     {/* Avatar + name */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#d98c2a]/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs font-semibold text-[#d98c2a]">
+                        <div className="w-8 h-8 rounded-full bg-[var(--color-brand-primary-10)] flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-semibold text-[var(--color-brand-primary)]">
                             {c.name?.charAt(0)?.toUpperCase() ?? "?"}
                           </span>
                         </div>
@@ -187,7 +187,7 @@ export default function AdminCustomersPage() {
 
                     {/* Spent */}
                     <td className="px-5 py-4">
-                      <span className={cn("font-semibold", c.totalSpent > 0 ? "text-[#d98c2a]" : "text-neutral-400")}>
+                      <span className={cn("font-semibold", c.totalSpent > 0 ? "text-[var(--color-brand-primary)]" : "text-neutral-400")}>
                         {c.totalSpent > 0 ? formatPrice(c.totalSpent) : "—"}
                       </span>
                     </td>
@@ -232,7 +232,7 @@ export default function AdminCustomersPage() {
                 <button
                   onClick={() => setPage((p) => p - 1)}
                   disabled={!pagination.hasPrev}
-                  className="w-8 h-8 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-500 hover:border-[#d98c2a] hover:text-[#d98c2a] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="w-8 h-8 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-500 hover:border-[var(--color-brand-primary)] hover:text-[var(--color-brand-primary)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -242,7 +242,7 @@ export default function AdminCustomersPage() {
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={!pagination.hasNext}
-                  className="w-8 h-8 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-500 hover:border-[#d98c2a] hover:text-[#d98c2a] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="w-8 h-8 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-500 hover:border-[var(--color-brand-primary)] hover:text-[var(--color-brand-primary)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

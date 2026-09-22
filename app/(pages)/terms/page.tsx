@@ -35,7 +35,7 @@ export default function TermsPage() {
           <p>Mercy Home Essentials shall not be liable for any indirect, incidental, or consequential damages arising from the use of our products or services.</p>
 
           <h2>8. Contact</h2>
-          <p>For questions about these terms, please <Link href="/contact" className="text-[#d98c2a]">contact us</Link>.</p>
+          <p>For questions about these terms, please <Link href="/contact" className="text-[var(--color-brand-primary)]">contact us</Link>.</p>
         </div>
       </div>
     </div>

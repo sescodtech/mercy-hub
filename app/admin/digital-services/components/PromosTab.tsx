@@ -155,13 +155,13 @@ export function PromosTab() {
         </div>
         <div className="flex gap-1">
           <button onClick={() => setEditing({ ...EMPTY, type })}
-            className="flex items-center gap-2 bg-[#c47020] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#a3551c]">
+            className="flex items-center gap-2 bg-[var(--color-brand-accent)] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#a3551c]">
             <Plus className="w-4 h-4" /> Add {type === "deal" ? "Deal" : "Promo Product"}
           </button>
           {/* Plan selection button - only show when creating/editing a promo */}
           {editing && (
             <button onClick={handleOpenPlanSelection}
-              className="flex items-center gap-2 bg-[#d98c2a] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#b87020]">
+              className="flex items-center gap-2 bg-[var(--color-brand-primary)] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#b87020]">
               <Search className="w-4 h-4" /> Select from Plans
             </button>
           )}
@@ -180,22 +180,22 @@ export function PromosTab() {
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">Title *</label>
               <input value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" placeholder="e.g. 2GB MTN — Weekend Special" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" placeholder="e.g. 2GB MTN — Weekend Special" />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">Badge</label>
               <input value={editing.badge} onChange={(e) => setEditing({ ...editing, badge: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" placeholder="e.g. Hot, Limited Time" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" placeholder="e.g. Hot, Limited Time" />
             </div>
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-neutral-500 mb-1">Subtitle</label>
               <input value={editing.subtitle} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" placeholder="Short supporting line" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" placeholder="Short supporting line" />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">Category *</label>
               <select value={editing.category} onChange={(e) => setEditing({ ...editing, category: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]">
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]">
                 <option value="data">Data</option>
                 <option value="airtime">Airtime</option>
                 <option value="cable">Cable TV</option>
@@ -206,12 +206,12 @@ export function PromosTab() {
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">Network / Provider</label>
               <input value={editing.network} onChange={(e) => setEditing({ ...editing, network: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" placeholder="mtn / airtel / dstv… (if applicable)" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" placeholder="mtn / airtel / dstv… (if applicable)" />
             </div>
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-neutral-500 mb-1">Provider Plan ID</label>
               <input value={editing.providerPlanId} onChange={(e) => setEditing({ ...editing, providerPlanId: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" placeholder="Optional — links this card to a real plan so price is always live and accurate" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" placeholder="Optional — links this card to a real plan so price is always live and accurate" />
               <p className="text-xs text-neutral-400 mt-1">
                 Find the exact plan ID from the Plans &amp; Pricing tab. Leave blank for a general promo banner with no specific plan attached.
               </p>
@@ -219,12 +219,12 @@ export function PromosTab() {
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">CTA Label</label>
               <input value={editing.ctaLabel} onChange={(e) => setEditing({ ...editing, ctaLabel: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" placeholder="Buy Now (default)" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" placeholder="Buy Now (default)" />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">Sort Order</label>
               <input type="number" value={editing.sortOrder} onChange={(e) => setEditing({ ...editing, sortOrder: Number(e.target.value) })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" />
             </div>
           </div>
 
@@ -236,7 +236,7 @@ export function PromosTab() {
             <div className="flex gap-2">
               <button onClick={() => setEditing(null)} className="px-4 py-2 rounded-xl text-sm font-medium text-neutral-600 hover:bg-neutral-50">Cancel</button>
               <button onClick={save} disabled={saving || !editing.title}
-                className="flex items-center gap-2 bg-[#c47020] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#a3551c] disabled:opacity-50">
+                className="flex items-center gap-2 bg-[var(--color-brand-accent)] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#a3551c] disabled:opacity-50">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null} Save
               </button>
             </div>
@@ -259,7 +259,7 @@ export function PromosTab() {
 
             {plansLoading ? (
               <div className="flex justify-center py-6">
-                <Loader2 className="w-5 h-5 animate-spin text-[#d98c2a]" />
+                <Loader2 className="w-5 h-5 animate-spin text-[var(--color-brand-primary)]" />
               </div>
             ) : plans.length === 0 ? (
               <p className="text-neutral-500 text-sm">
@@ -273,7 +273,7 @@ export function PromosTab() {
                   <input
                     type="text"
                     placeholder="Search plans..."
-                    className="w-full pl-10 pr-4 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-[#d98c2a]"
+                    className="w-full pl-10 pr-4 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-[var(--color-brand-primary)]"
                   />
                 </div>
 
@@ -286,7 +286,7 @@ export function PromosTab() {
                         <p className="text-xs text-neutral-500">{plan.meta}</p>
                       </div>
                       <button onClick={() => handlePlanSelect(plan)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${selectedPlan?.planId === plan.id ? "bg-[#d98c2a] text-white" : "border border-neutral-200 text-neutral-600 hover:bg-neutral-50"}`}>
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${selectedPlan?.planId === plan.id ? "bg-[var(--color-brand-primary)] text-white" : "border border-neutral-200 text-neutral-600 hover:bg-neutral-50"}`}>
                         Select
                       </button>
                     </div>
@@ -305,7 +305,7 @@ export function PromosTab() {
                   handlePlanSelect(selectedPlan);
                   setPlanSelectionOpen(false);
                 }}
-                  className="ml-4 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#c47020] text-white hover:bg-[#a3551c]">
+                  className="ml-4 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[var(--color-brand-accent)] text-white hover:bg-[#a3551c]">
                   <Search className="w-4 h-4" /> Use Selected Plan
                 </button>
               )}
@@ -317,7 +317,7 @@ export function PromosTab() {
       {/* List */}
       <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden">
         {loading ? (
-          <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#d98c2a]" /></div>
+          <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[var(--color-brand-primary)]" /></div>
         ) : filtered.length === 0 ? (
           <div className="py-12 text-center text-neutral-400 text-sm">No {type === "deal" ? "hot deals" : "promo products"} yet — add one above.</div>
         ) : (
@@ -342,7 +342,7 @@ export function PromosTab() {
                   <td className="px-4 py-3 text-neutral-600">{p.badge || "—"}</td>
                   <td className="px-4 py-3">
                     <button onClick={() => toggleActive(p)}
-                      className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${p.isActive ? "bg-[#d98c2a]" : "bg-neutral-200"}`}>
+                      className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${p.isActive ? "bg-[var(--color-brand-primary)]" : "bg-neutral-200"}`}>
                       <span
                         className={`inline-block w-3.5 h-3.5 transform rounded-full bg-white shadow transition-transform mt-0.5 ${p.isActive ? "translate-x-5" : "translate-x-0.5"}`}
                       />

@@ -501,7 +501,7 @@ export function DataTab({
                     onClick={() => pickPlan(p)}
                     className="flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 rounded-lg border text-center transition-all active:scale-[0.96] min-w-0 max-w-full overflow-hidden h-[64px]"
                     style={{
-                      borderColor:     isSelected ? (brand?.color ?? "#d98c2a") : "var(--color-border, #e5e5e5)",
+                      borderColor:     isSelected ? (brand?.color ?? "var(--color-brand-primary)") : "var(--color-border, #e5e5e5)",
                       backgroundColor: isSelected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "var(--color-card-bg, #fff)",
                     }}
                   >
@@ -522,7 +522,7 @@ export function DataTab({
                     )}
                     <span
                       className="text-[10px] font-bold leading-tight"
-                      style={{ color: brand?.color ?? "#d98c2a" }}
+                      style={{ color: brand?.color ?? "var(--color-brand-primary)" }}
                     >
                       {fmt(p.price)}
                     </span>
@@ -584,9 +584,9 @@ export function AirtimeTab({
                   onClick={() => pickPlan(p)}
                   className="py-2.5 rounded-lg text-center border font-bold text-[13px] transition-all active:scale-[0.96]"
                   style={{
-                    borderColor:     selected ? (brand?.color ?? "#d98c2a") : "var(--color-border, #e5e5e5)",
+                    borderColor:     selected ? (brand?.color ?? "var(--color-brand-primary)") : "var(--color-border, #e5e5e5)",
                     backgroundColor: selected ? (brand?.bg   ?? "rgba(217,140,42,0.08)") : "var(--color-card-bg, #fff)",
-                    color:           selected ? (brand?.text ?? "#d98c2a") : "#404040",
+                    color:           selected ? (brand?.text ?? "var(--color-brand-primary)") : "#404040",
                   }}
                 >
                   {fmt(p.price)}
@@ -672,7 +672,7 @@ export function CableTab({
           onChange={(e) => setSmartcard(e.target.value)}
           placeholder="Enter smartcard number"
           className="w-full border-2 border-neutral-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none transition-colors"
-          style={{ borderColor: smartcard ? (meta?.color ?? "#d98c2a") : "#e5e5e5" }}
+          style={{ borderColor: smartcard ? (meta?.color ?? "var(--color-brand-primary)") : "#e5e5e5" }}
         />
       </div>
 
@@ -698,15 +698,15 @@ export function CableTab({
                     onClick={() => setPlan(selected ? null : p)}
                     className="w-full px-3 py-2.5 rounded-xl text-left border-2 flex justify-between items-center gap-2 transition-all"
                     style={{
-                      borderColor:     selected ? (meta?.color ?? "#d98c2a") : "#ebebeb",
+                      borderColor:     selected ? (meta?.color ?? "var(--color-brand-primary)") : "#ebebeb",
                       backgroundColor: selected ? (meta?.bg   ?? "rgba(217,140,42,0.08)") : "#fafafa",
-                      boxShadow:       selected ? `0 0 0 2px ${meta?.color ?? "#d98c2a"}20` : "0 1px 3px rgba(0,0,0,0.04)",
+                      boxShadow:       selected ? `0 0 0 2px ${meta?.color ?? "var(--color-brand-primary)"}20` : "0 1px 3px rgba(0,0,0,0.04)",
                     }}
                   >
                     <span className="text-xs font-semibold text-neutral-800 leading-snug">{p.name}</span>
                     <span
                       className="text-xs font-black flex-shrink-0"
-                      style={{ color: meta?.color ?? "#d98c2a" }}
+                      style={{ color: meta?.color ?? "var(--color-brand-primary)" }}
                     >
                       {fmt(p.price)}
                     </span>
@@ -753,7 +753,7 @@ export function EducationTab({ plans, planLoad, plan, setPlan }: BaseProps) {
           <div className="space-y-2">
             {plans.map((p) => {
               const selected = plan?.id === p.id;
-              const meta     = EXAM_META[p.examName ?? ""] ?? { color: "#d98c2a", bg: "#fff7ed", gradient: "linear-gradient(135deg,#d98c2a,#b87020)" };
+              const meta     = EXAM_META[p.examName ?? ""] ?? { color: "var(--color-brand-primary)", bg: "#fff7ed", gradient: "linear-gradient(135deg,var(--color-brand-primary),#b87020)" };
               return (
                 <button
                   key={p.id}

@@ -33,7 +33,7 @@ export default function ShippingPage() {
               Shipping costs are calculated based on your delivery address.
               We offer free shipping on all orders that meet our minimum threshold.
             </p>
-            <div className="mt-6 p-4 bg-[#d98c2a]/5 border border-[#d98c2a]/20 rounded-xl text-center">
+            <div className="mt-6 p-4 bg-[var(--color-brand-primary-5)] border border-[var(--color-brand-primary-20)] rounded-xl text-center">
               <p className="text-sm text-neutral-700">
                 Check your final shipping cost at checkout.
               </p>

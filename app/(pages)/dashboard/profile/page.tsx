@@ -74,7 +74,7 @@ function PasswordInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full text-sm border border-neutral-200 rounded-xl pl-10 pr-20 py-3 outline-none focus:border-[#d98c2a] transition-colors"
+          className="w-full text-sm border border-neutral-200 rounded-xl pl-10 pr-20 py-3 outline-none focus:border-[var(--color-brand-primary)] transition-colors"
         />
         <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
           {suffix}
@@ -234,7 +234,7 @@ export default function ProfileSettingsPage() {
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" />
       </div>
     );
   }
@@ -275,7 +275,7 @@ export default function ProfileSettingsPage() {
           <div className="flex items-center gap-5">
             {/* Avatar */}
             <div className="relative flex-shrink-0">
-              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[#d98c2a]/10 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[var(--color-brand-primary-10)] flex items-center justify-center">
                 {avatar ? (
                   <Image
                     src={avatar}
@@ -286,7 +286,7 @@ export default function ProfileSettingsPage() {
                     unoptimized={avatar.startsWith("https://res.cloudinary.com")}
                   />
                 ) : (
-                  <span className="text-2xl font-bold text-[#d98c2a]">
+                  <span className="text-2xl font-bold text-[var(--color-brand-primary)]">
                     {initials(displayName)}
                   </span>
                 )}
@@ -296,7 +296,7 @@ export default function ProfileSettingsPage() {
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading}
                 title="Change profile photo"
-                className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-[#d98c2a] rounded-lg flex items-center justify-center shadow-md hover:bg-[#c47020] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-[var(--color-brand-primary)] rounded-lg flex items-center justify-center shadow-md hover:bg-[var(--color-brand-accent)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {uploading
                   ? <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
@@ -379,7 +379,7 @@ export default function ProfileSettingsPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your full name"
-                  className="w-full text-sm border border-neutral-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:border-[#d98c2a] transition-colors"
+                  className="w-full text-sm border border-neutral-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:border-[var(--color-brand-primary)] transition-colors"
                 />
               </div>
             </div>
@@ -414,7 +414,7 @@ export default function ProfileSettingsPage() {
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="08012345678"
                   maxLength={14}
-                  className="w-full text-sm border border-neutral-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:border-[#d98c2a] transition-colors"
+                  className="w-full text-sm border border-neutral-200 rounded-xl pl-10 pr-4 py-3 outline-none focus:border-[var(--color-brand-primary)] transition-colors"
                 />
               </div>
             </div>
@@ -424,7 +424,7 @@ export default function ProfileSettingsPage() {
               <button
                 onClick={handleSaveInfo}
                 disabled={!canSaveInfo}
-                className="flex items-center gap-2 px-6 py-3 bg-[#d98c2a] text-white text-sm font-semibold rounded-xl hover:bg-[#c47020] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-semibold rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {saving
                   ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -512,7 +512,7 @@ export default function ProfileSettingsPage() {
               <button
                 onClick={handleChangePassword}
                 disabled={!canChangePw}
-                className="flex items-center gap-2 px-6 py-3 bg-[#d98c2a] text-white text-sm font-semibold rounded-xl hover:bg-[#c47020] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-semibold rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {saving
                   ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -527,7 +527,7 @@ export default function ProfileSettingsPage() {
         <div className="bg-white rounded-2xl border border-neutral-100 p-5">
           <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Quick Links</p>
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-            <Link href="/dashboard"          className="text-[#d98c2a] hover:underline">Dashboard</Link>
+            <Link href="/dashboard"          className="text-[var(--color-brand-primary)] hover:underline">Dashboard</Link>
             <Link href="/dashboard/orders"   className="text-neutral-500 hover:text-neutral-700 hover:underline">My Orders</Link>
             <Link href="/dashboard/wishlist" className="text-neutral-500 hover:text-neutral-700 hover:underline">Wishlist</Link>
             <Link href="/shop"               className="text-neutral-500 hover:text-neutral-700 hover:underline">Shop</Link>

@@ -40,7 +40,7 @@ function Input({ label, value, onChange, type = "text", placeholder }: { label: 
     <div>
       <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">{label}</label>
       <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
     </div>
   );
 }
@@ -53,7 +53,7 @@ function Toggle({ label, description, checked, onChange }: { label: string; desc
         {description && <p className="text-xs text-neutral-400 mt-0.5">{description}</p>}
       </div>
       <button onClick={() => onChange(!checked)}
-        className={`relative w-10 h-5 rounded-full flex-shrink-0 transition-colors ${checked ? "bg-[#d98c2a]" : "bg-neutral-300"}`}>
+        className={`relative w-10 h-5 rounded-full flex-shrink-0 transition-colors ${checked ? "bg-[var(--color-brand-primary)]" : "bg-neutral-300"}`}>
         <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${checked ? "translate-x-5" : "translate-x-0.5"}`} />
       </button>
     </div>
@@ -101,13 +101,13 @@ export default function AdminSettingsPage() {
     });
   };
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" /></div>;
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <div><h1 className="text-xl font-semibold">Store Settings</h1><p className="text-sm text-neutral-400">Manage all site-wide settings from one place</p></div>
-        <button onClick={save} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 transition-colors">
+        <button onClick={save} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60 transition-colors">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {saving ? "Saving…" : "Save All"}
         </button>
@@ -116,7 +116,7 @@ export default function AdminSettingsPage() {
       <div className="flex gap-1 mb-6 bg-white border border-neutral-100 rounded-xl p-1.5 overflow-x-auto">
         {TABS.map(({ id, label, Icon }) => (
           <button key={id} onClick={() => setTab(id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${tab === id ? "bg-[#d98c2a] text-white" : "text-neutral-600 hover:bg-neutral-50"}`}>
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${tab === id ? "bg-[var(--color-brand-primary)] text-white" : "text-neutral-600 hover:bg-neutral-50"}`}>
             <Icon className="w-4 h-4" />{label}
           </button>
         ))}
@@ -150,7 +150,7 @@ export default function AdminSettingsPage() {
           <div>
             <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Footer Description</label>
             <textarea value={s.footer.description} onChange={(e) => upd("footer.description", e.target.value)} rows={3}
-              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none" />
+              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none" />
           </div>
         </>}
 
@@ -164,14 +164,14 @@ export default function AdminSettingsPage() {
               <div className="pt-2">
                 <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Free Shipping Threshold (₦)</label>
                 <input type="number" value={s.shipping.freeShippingThreshold} onChange={(e) => upd("shipping.freeShippingThreshold", Number(e.target.value))}
-                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
                 <p className="text-xs text-neutral-400 mt-1">Orders above this amount get free shipping</p>
               </div>
             )}
             <div>
               <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Default Shipping Cost (₦)</label>
               <input type="number" value={s.shipping.defaultShippingCost} onChange={(e) => upd("shipping.defaultShippingCost", Number(e.target.value))}
-                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
             </div>
           </>}
 
@@ -209,21 +209,21 @@ export default function AdminSettingsPage() {
             <div>
               <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Announcement Text</label>
               <input value={s.announcement.text} onChange={(e) => upd("announcement.text", e.target.value)}
-                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Background Color</label>
                 <div className="flex gap-2">
                   <input type="color" value={s.announcement.bgColor} onChange={(e) => upd("announcement.bgColor", e.target.value)} className="w-12 h-10 border border-neutral-200 rounded cursor-pointer" />
-                  <input value={s.announcement.bgColor} onChange={(e) => upd("announcement.bgColor", e.target.value)} className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+                  <input value={s.announcement.bgColor} onChange={(e) => upd("announcement.bgColor", e.target.value)} className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
                 </div>
               </div>
               <div>
                 <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Text Color</label>
                 <div className="flex gap-2">
                   <input type="color" value={s.announcement.textColor} onChange={(e) => upd("announcement.textColor", e.target.value)} className="w-12 h-10 border border-neutral-200 rounded cursor-pointer" />
-                  <input value={s.announcement.textColor} onChange={(e) => upd("announcement.textColor", e.target.value)} className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+                  <input value={s.announcement.textColor} onChange={(e) => upd("announcement.textColor", e.target.value)} className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
                 </div>
               </div>
             </div>
@@ -244,7 +244,7 @@ export default function AdminSettingsPage() {
           <div>
             <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Hero Subtitle</label>
             <textarea value={s.homepage.heroSubtitle} onChange={(e) => upd("homepage.heroSubtitle", e.target.value)} rows={3}
-              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none" />
+              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none" />
           </div>
           <h3 className="font-semibold text-neutral-700 pt-4">Sections Visibility</h3>
           <Toggle label="Featured Products" description="Show featured products section on homepage" checked={s.homepage.showFeaturedProducts} onChange={(v) => upd("homepage.showFeaturedProducts", v)} />
@@ -259,17 +259,17 @@ export default function AdminSettingsPage() {
           <div>
             <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Meta Description</label>
             <textarea value={s.meta.description} onChange={(e) => upd("meta.description", e.target.value)} rows={3}
-              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none" placeholder="Describe your store for search engines…" />
+              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none" placeholder="Describe your store for search engines…" />
           </div>
           <div>
             <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Meta Keywords (comma-separated)</label>
             <input value={(s.meta.keywords || []).join(", ")} onChange={(e) => upd("meta.keywords", e.target.value.split(",").map(k => k.trim()).filter(Boolean))}
-              placeholder="home goods, Nigeria, premium bedding" className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+              placeholder="home goods, Nigeria, premium bedding" className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
           </div>
           <div>
             <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Footer Copyright Text</label>
             <input value={s.footer.copyright} onChange={(e) => upd("footer.copyright", e.target.value)} placeholder="© 2025 Mercy Home Essentials. All rights reserved."
-              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
           </div>
         </>}
       </div>

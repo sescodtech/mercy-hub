@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     if (!settings.brandColors?.primary) {
       updates.brandColors = {
-        primary: "#d98c2a", secondary: "#fdf8f0", accent: "#c47020",
+        primary: "var(--color-brand-primary)", secondary: "#fdf8f0", accent: "var(--color-brand-accent)",
         success: "#10b981", warning: "#f59e0b", error: "#ef4444",
       };
     }
@@ -25,8 +25,8 @@ export async function GET(req: NextRequest) {
     if (!settings.uiColors?.headerBg) {
       updates.uiColors = {
         headerBg: "#fdf8f0", footerBg: "#1a1208", navText: "#404040",
-        navTextHover: "#d98c2a", buttonPrimary: "#c47020", buttonText: "#ffffff",
-        linkColor: "#d98c2a", cardBg: "#ffffff", pageBg: "#fdf8f0",
+        navTextHover: "var(--color-brand-primary)", buttonPrimary: "var(--color-brand-accent)", buttonText: "#ffffff",
+        linkColor: "var(--color-brand-primary)", cardBg: "#ffffff", pageBg: "#fdf8f0",
         sectionAltBg: "#ffffff", borderColor: "#e5e5e5",
         textPrimary: "#1a1208", textSecondary: "#737373",
       };

@@ -47,9 +47,9 @@ export function ColorSelector({ variants, selected, onChange, showLabel = true, 
               className={cn(
                 SIZE[size],
                 "rounded-full border-2 transition-all duration-200 relative flex-shrink-0",
-                "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#d98c2a]",
+                "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-brand-primary)]",
                 isSelected
-                  ? "border-[#d98c2a] scale-110 shadow-md ring-2 ring-[#d98c2a]/30 ring-offset-1"
+                  ? "border-[var(--color-brand-primary)] scale-110 shadow-md ring-2 ring-[var(--color-brand-primary-30)] ring-offset-1"
                   : "border-neutral-200 hover:border-neutral-400 hover:scale-105",
                 isOOS && "opacity-40 cursor-not-allowed"
               )}

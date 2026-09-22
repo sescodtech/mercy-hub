@@ -72,7 +72,7 @@ function SInput({ value, onChange, placeholder, type = "text" }: {
 }) {
   return (
     <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-      className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] transition-colors" />
+      className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] transition-colors" />
   );
 }
 
@@ -86,7 +86,7 @@ function ToggleRow({ label, desc, checked, onChange }: {
         {desc && <p className="text-xs text-neutral-400 mt-0.5">{desc}</p>}
       </div>
       <button onClick={() => onChange(!checked)}
-        className={cn("relative w-10 h-5 rounded-full transition-colors flex-shrink-0", checked ? "bg-[#d98c2a]" : "bg-neutral-300")}>
+        className={cn("relative w-10 h-5 rounded-full transition-colors flex-shrink-0", checked ? "bg-[var(--color-brand-primary)]" : "bg-neutral-300")}>
         <div className={cn("absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform", checked ? "translate-x-5" : "translate-x-0.5")} />
       </button>
     </div>
@@ -111,9 +111,9 @@ function AnnouncementPreview({ draft }: { draft: Draft }) {
             <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-neutral-900">Notifications</span>
-                <span className="px-1.5 py-0.5 bg-[#d98c2a] text-white text-[10px] rounded-full font-bold">1</span>
+                <span className="px-1.5 py-0.5 bg-[var(--color-brand-primary)] text-white text-[10px] rounded-full font-bold">1</span>
               </div>
-              <span className="text-xs text-[#d98c2a]">Mark all read</span>
+              <span className="text-xs text-[var(--color-brand-primary)]">Mark all read</span>
             </div>
             <div className={cn("px-4 py-3.5", cfg.previewBg, "border-b border-neutral-50")}>
               <div className="flex gap-3 items-start">
@@ -125,7 +125,7 @@ function AnnouncementPreview({ draft }: { draft: Draft }) {
                     <p className="text-sm font-semibold text-neutral-900 leading-snug">
                       {draft.title || <span className="text-neutral-300 italic">Your title here…</span>}
                     </p>
-                    <span className="w-2 h-2 rounded-full bg-[#d98c2a] flex-shrink-0 mt-1.5 ml-2" />
+                    <span className="w-2 h-2 rounded-full bg-[var(--color-brand-primary)] flex-shrink-0 mt-1.5 ml-2" />
                   </div>
                   <p className="text-xs text-neutral-400 mt-0.5 line-clamp-2">
                     {draft.body || <span className="italic">Your message body here…</span>}
@@ -171,7 +171,7 @@ function AnnouncementPreview({ draft }: { draft: Draft }) {
           <p className="text-xs text-neutral-400 mb-2 flex items-center gap-1.5"><Mail className="w-3 h-3" /> Email notification</p>
           <div className="border border-neutral-200 rounded-xl overflow-hidden shadow-sm bg-white">
             <div className="bg-[#1a1108] px-6 py-5 text-center">
-              <p className="font-serif text-lg font-semibold text-white">Mercy<span className="text-[#d98c2a]">Home</span></p>
+              <p className="font-serif text-lg font-semibold text-white">Mercy<span className="text-[var(--color-brand-primary)]">Home</span></p>
               <p className="text-[9px] tracking-[0.3em] uppercase text-white/30 mt-1">Essentials</p>
             </div>
             <div className="p-6">
@@ -182,13 +182,13 @@ function AnnouncementPreview({ draft }: { draft: Draft }) {
                 {draft.title || <span className="text-neutral-300 italic">Your title here…</span>}
               </h2>
               <p className="text-sm text-neutral-400 mb-3">Hi [Customer Name],</p>
-              <div className="border-l-4 border-[#d98c2a] pl-4 py-1 bg-[#fdf8f0] rounded-r-lg">
+              <div className="border-l-4 border-[var(--color-brand-primary)] pl-4 py-1 bg-[#fdf8f0] rounded-r-lg">
                 <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-wrap">
                   {draft.body || <span className="italic text-neutral-300">Your message body here…</span>}
                 </p>
               </div>
               <div className="mt-6 text-center">
-                <div className="inline-block px-6 py-3 bg-[#d98c2a] text-white text-sm font-semibold rounded-lg">Visit Our Store</div>
+                <div className="inline-block px-6 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-semibold rounded-lg">Visit Our Store</div>
               </div>
             </div>
             <div className="px-6 py-4 border-t border-neutral-100 text-center">
@@ -340,7 +340,7 @@ export default function AdminAnnouncementsPage() {
             {/* Step 1: Message */}
             <div className="bg-white rounded-2xl border border-neutral-100 p-6 space-y-4">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 rounded-full bg-[#d98c2a] text-white text-xs flex items-center justify-center font-bold">1</div>
+                <div className="w-6 h-6 rounded-full bg-[var(--color-brand-primary)] text-white text-xs flex items-center justify-center font-bold">1</div>
                 <h2 className="font-semibold text-neutral-900">Write your message</h2>
               </div>
 
@@ -358,7 +358,7 @@ export default function AdminAnnouncementsPage() {
                   onChange={e => set("body", e.target.value)}
                   rows={7}
                   placeholder={"Write your full message here.\n\nYou can include:\n• Specific times or dates\n• Steps users need to take\n• Contact info for support"}
-                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none transition-colors leading-relaxed"
+                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none transition-colors leading-relaxed"
                 />
               </div>
             </div>
@@ -366,7 +366,7 @@ export default function AdminAnnouncementsPage() {
             {/* Step 2: Type & Priority */}
             <div className="bg-white rounded-2xl border border-neutral-100 p-6 space-y-4">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 rounded-full bg-[#d98c2a] text-white text-xs flex items-center justify-center font-bold">2</div>
+                <div className="w-6 h-6 rounded-full bg-[var(--color-brand-primary)] text-white text-xs flex items-center justify-center font-bold">2</div>
                 <h2 className="font-semibold text-neutral-900">Type & Priority</h2>
               </div>
 
@@ -396,7 +396,7 @@ export default function AdminAnnouncementsPage() {
                     return (
                       <button key={p} onClick={() => set("priority", p)}
                         className={cn("flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all",
-                          draft.priority === p ? "border-[#d98c2a] bg-[#d98c2a]/5" : "border-neutral-200 hover:border-neutral-300")}>
+                          draft.priority === p ? "border-[var(--color-brand-primary)] bg-[var(--color-brand-primary-5)]" : "border-neutral-200 hover:border-neutral-300")}>
                         <div>
                           <div className="flex items-center gap-2">
                             <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase", cfg.badge)}>{cfg.label}</span>
@@ -413,7 +413,7 @@ export default function AdminAnnouncementsPage() {
             {/* Step 3: Audience */}
             <div className="bg-white rounded-2xl border border-neutral-100 p-6 space-y-4">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 rounded-full bg-[#d98c2a] text-white text-xs flex items-center justify-center font-bold">3</div>
+                <div className="w-6 h-6 rounded-full bg-[var(--color-brand-primary)] text-white text-xs flex items-center justify-center font-bold">3</div>
                 <h2 className="font-semibold text-neutral-900">Target Audience</h2>
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -422,7 +422,7 @@ export default function AdminAnnouncementsPage() {
                   return (
                     <button key={a} onClick={() => set("audience", a)}
                       className={cn("p-3 rounded-xl border-2 text-center transition-all",
-                        draft.audience === a ? "border-[#d98c2a] bg-[#d98c2a]/5 text-[#d98c2a]" : "border-neutral-200 text-neutral-600 hover:border-neutral-300")}>
+                        draft.audience === a ? "border-[var(--color-brand-primary)] bg-[var(--color-brand-primary-5)] text-[var(--color-brand-primary)]" : "border-neutral-200 text-neutral-600 hover:border-neutral-300")}>
                       <p className="text-sm font-semibold">{cfg.label}</p>
                       <p className="text-[11px] text-neutral-400 mt-0.5">{cfg.desc}</p>
                     </button>
@@ -434,7 +434,7 @@ export default function AdminAnnouncementsPage() {
             {/* Step 4: Delivery channels */}
             <div className="bg-white rounded-2xl border border-neutral-100 p-6 space-y-1">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 rounded-full bg-[#d98c2a] text-white text-xs flex items-center justify-center font-bold">4</div>
+                <div className="w-6 h-6 rounded-full bg-[var(--color-brand-primary)] text-white text-xs flex items-center justify-center font-bold">4</div>
                 <h2 className="font-semibold text-neutral-900">Delivery Channels</h2>
               </div>
 
@@ -468,7 +468,7 @@ export default function AdminAnnouncementsPage() {
             {/* Step 5: Schedule */}
             <div className="bg-white rounded-2xl border border-neutral-100 p-6 space-y-4">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 rounded-full bg-[#d98c2a] text-white text-xs flex items-center justify-center font-bold">5</div>
+                <div className="w-6 h-6 rounded-full bg-[var(--color-brand-primary)] text-white text-xs flex items-center justify-center font-bold">5</div>
                 <h2 className="font-semibold text-neutral-900">Schedule (optional)</h2>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
@@ -491,7 +491,7 @@ export default function AdminAnnouncementsPage() {
               <button
                 onClick={sendNow}
                 disabled={sending || !draft.title.trim() || !draft.body.trim() || (!draft.sendEmail && !draft.sendInApp)}
-                className="flex-1 py-4 bg-[#d98c2a] text-white text-sm font-semibold rounded-xl hover:bg-[#c47020] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 shadow-sm"
+                className="flex-1 py-4 bg-[var(--color-brand-primary)] text-white text-sm font-semibold rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 shadow-sm"
               >
                 {sending
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
@@ -512,7 +512,7 @@ export default function AdminAnnouncementsPage() {
             {/* Delivery summary */}
             {(draft.sendEmail || draft.sendInApp) && draft.title && (
               <div className="flex items-start gap-3 p-4 bg-neutral-50 border border-neutral-200 rounded-xl">
-                <CheckCheck className="w-4 h-4 text-[#d98c2a] flex-shrink-0 mt-0.5" />
+                <CheckCheck className="w-4 h-4 text-[var(--color-brand-primary)] flex-shrink-0 mt-0.5" />
                 <div className="text-xs text-neutral-600 leading-relaxed">
                   <strong>Ready to send:</strong> "{draft.title}" will be delivered as{" "}
                   {[draft.sendInApp && "in-app notifications", draft.sendEmail && "emails"].filter(Boolean).join(" and ")}{" "}
@@ -549,21 +549,21 @@ export default function AdminAnnouncementsPage() {
         </div>
         <button
           onClick={() => openCompose()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors"
         >
           <Plus className="w-4 h-4" /> New Announcement
         </button>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" /></div>
       ) : items.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-2xl border">
           <Bell className="w-12 h-12 text-neutral-200 mx-auto mb-4" />
           <p className="text-neutral-500 font-medium">No announcements yet</p>
           <p className="text-neutral-400 text-sm mt-1 mb-6">Create your first announcement to notify your users</p>
           <button onClick={() => openCompose()}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors">
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors">
             <Plus className="w-4 h-4" /> Create Announcement
           </button>
         </div>
@@ -616,7 +616,7 @@ export default function AdminAnnouncementsPage() {
                     {!item.isPublished && (
                       <button onClick={() => togglePublish(item)}
                         title="Send now"
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#d98c2a] text-white text-xs font-medium rounded-lg hover:bg-[#c47020] transition-colors">
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-brand-primary)] text-white text-xs font-medium rounded-lg hover:bg-[var(--color-brand-accent)] transition-colors">
                         <Send className="w-3.5 h-3.5" /> Send
                       </button>
                     )}

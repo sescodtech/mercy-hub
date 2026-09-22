@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           <p>You have the right to access, correct, or delete your personal information. To exercise these rights, contact us at the details below.</p>
 
           <h2>7. Contact Us</h2>
-          <p>If you have questions about this Privacy Policy, please <Link href="/contact" className="text-[#d98c2a]">contact us</Link>.</p>
+          <p>If you have questions about this Privacy Policy, please <Link href="/contact" className="text-[var(--color-brand-primary)]">contact us</Link>.</p>
         </div>
       </div>
     </div>

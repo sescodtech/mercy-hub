@@ -104,10 +104,10 @@ export default function AdminCouponsPage() {
             <p className="text-sm text-neutral-400">{coupons.length} active codes</p>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 px-4 py-2 bg-[#d98c2a] text-white text-sm rounded-lg hover:bg-[#c47020] transition-colors">
+            <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 px-4 py-2 bg-[var(--color-brand-primary)] text-white text-sm rounded-lg hover:bg-[var(--color-brand-accent)] transition-colors">
               <Plus className="w-4 h-4" /> New Coupon
             </button>
-            <Link href="/admin" className="text-sm text-[#d98c2a]">← Dashboard</Link>
+            <Link href="/admin" className="text-sm text-[var(--color-brand-primary)]">← Dashboard</Link>
           </div>
         </div>
       </div>
@@ -126,7 +126,7 @@ export default function AdminCouponsPage() {
                   value={form.code}
                   onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))}
                   placeholder="e.g. SAVE20"
-                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] font-mono"
+                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] font-mono"
                 />
               </div>
               <div>
@@ -136,7 +136,7 @@ export default function AdminCouponsPage() {
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   placeholder="Brief description"
-                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]"
+                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]"
                 />
               </div>
               <div>
@@ -144,7 +144,7 @@ export default function AdminCouponsPage() {
                 <select
                   value={form.type}
                   onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
-                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]"
+                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]"
                 >
                   <option value="percent">Percentage (%)</option>
                   <option value="fixed">Fixed Amount (₦)</option>
@@ -162,7 +162,7 @@ export default function AdminCouponsPage() {
                     value={form.value}
                     onChange={(e) => setForm((f) => ({ ...f, value: e.target.value }))}
                     placeholder={form.type === "percent" ? "e.g. 10" : "e.g. 2000"}
-                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]"
+                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]"
                   />
                 </div>
               )}
@@ -173,7 +173,7 @@ export default function AdminCouponsPage() {
                   value={form.minOrderAmount}
                   onChange={(e) => setForm((f) => ({ ...f, minOrderAmount: e.target.value }))}
                   placeholder="e.g. 10000"
-                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]"
+                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]"
                 />
               </div>
               <div>
@@ -183,7 +183,7 @@ export default function AdminCouponsPage() {
                   value={form.usageLimit}
                   onChange={(e) => setForm((f) => ({ ...f, usageLimit: e.target.value }))}
                   placeholder="Leave blank for unlimited"
-                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]"
+                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]"
                 />
               </div>
               <div>
@@ -192,7 +192,7 @@ export default function AdminCouponsPage() {
                   type="date"
                   value={form.startDate}
                   onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
-                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]"
+                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]"
                 />
               </div>
               <div>
@@ -201,11 +201,11 @@ export default function AdminCouponsPage() {
                   type="date"
                   value={form.endDate}
                   onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))}
-                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]"
+                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]"
                 />
               </div>
               <div className="sm:col-span-2 flex gap-3">
-                <button type="submit" className="px-6 py-2.5 bg-[#d98c2a] text-white text-sm rounded-lg hover:bg-[#c47020]">
+                <button type="submit" className="px-6 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm rounded-lg hover:bg-[var(--color-brand-accent)]">
                   Create Coupon
                 </button>
                 <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2.5 border border-neutral-200 text-sm rounded-lg hover:bg-neutral-50">
@@ -244,14 +244,14 @@ export default function AdminCouponsPage() {
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-bold text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded">{coupon.code}</span>
-                        <button onClick={() => copyCode(coupon.code)} className="text-neutral-400 hover:text-[#d98c2a]">
+                        <button onClick={() => copyCode(coupon.code)} className="text-neutral-400 hover:text-[var(--color-brand-primary)]">
                           <Copy className="w-3.5 h-3.5" />
                         </button>
                       </div>
                       {coupon.description && <p className="text-xs text-neutral-400 mt-0.5">{coupon.description}</p>}
                     </td>
                     <td className="px-5 py-4">
-                      <span className="font-semibold text-[#d98c2a]">{formatDiscount(coupon)}</span>
+                      <span className="font-semibold text-[var(--color-brand-primary)]">{formatDiscount(coupon)}</span>
                     </td>
                     <td className="px-5 py-4 text-neutral-600">
                       {coupon.minOrderAmount ? `₦${coupon.minOrderAmount.toLocaleString()}` : "—"}

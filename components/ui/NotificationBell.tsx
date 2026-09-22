@@ -30,7 +30,7 @@ function NotifItem({ n, onRead }: { n: UserNotification; onRead: (id: string) =>
       onClick={handleClick}
       className={cn(
         "px-4 py-3.5 border-b border-neutral-50 cursor-pointer transition-colors hover:bg-neutral-50",
-        !n.isRead && "bg-[#d98c2a]/5"
+        !n.isRead && "bg-[var(--color-brand-primary-5)]"
       )}
     >
       <div className="flex gap-3 items-start">
@@ -42,7 +42,7 @@ function NotifItem({ n, onRead }: { n: UserNotification; onRead: (id: string) =>
             <p className={cn("text-sm font-medium text-neutral-900 leading-snug", !n.isRead && "font-semibold")}>
               {n.announcement.title}
             </p>
-            {!n.isRead && <span className="w-2 h-2 rounded-full bg-[#d98c2a] flex-shrink-0 mt-1.5" />}
+            {!n.isRead && <span className="w-2 h-2 rounded-full bg-[var(--color-brand-primary)] flex-shrink-0 mt-1.5" />}
           </div>
           <AnimatePresence>
             {expanded && (
@@ -100,7 +100,7 @@ export function NotificationBell() {
             key={unreadCount}
             initial={{ scale: 1.4 }}
             animate={{ scale: 1 }}
-            className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#d98c2a] text-white text-[10px] flex items-center justify-center font-bold"
+            className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[var(--color-brand-primary)] text-white text-[10px] flex items-center justify-center font-bold"
           >
             {unreadCount > 9 ? "9+" : unreadCount}
           </motion.span>
@@ -121,12 +121,12 @@ export function NotificationBell() {
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-sm text-neutral-900">Notifications</h3>
                 {unreadCount > 0 && (
-                  <span className="px-1.5 py-0.5 bg-[#d98c2a] text-white text-[10px] rounded-full font-bold">{unreadCount}</span>
+                  <span className="px-1.5 py-0.5 bg-[var(--color-brand-primary)] text-white text-[10px] rounded-full font-bold">{unreadCount}</span>
                 )}
               </div>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
-                  <button onClick={markAllRead} className="text-xs text-[#d98c2a] hover:underline flex items-center gap-1">
+                  <button onClick={markAllRead} className="text-xs text-[var(--color-brand-primary)] hover:underline flex items-center gap-1">
                     <CheckCheck className="w-3 h-3" /> All read
                   </button>
                 )}

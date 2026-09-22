@@ -31,7 +31,7 @@ export async function FeaturedProducts() {
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.15em] mb-1" style={{ color: "var(--color-brand-primary, #d98c2a)" }}>
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] mb-1" style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }}>
               Handpicked
             </p>
             <h2 className="font-display text-lg font-semibold text-neutral-900">
@@ -53,7 +53,7 @@ export async function FeaturedProducts() {
           <Link
             href="/shop"
             className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
-            style={{ color: "var(--color-brand-primary, #d98c2a)", borderWidth: "1px", borderStyle: "solid", borderColor: "var(--color-brand-primary, #d98c2a)" }}
+            style={{ color: "var(--color-brand-primary, var(--color-brand-primary))", borderWidth: "1px", borderStyle: "solid", borderColor: "var(--color-brand-primary, var(--color-brand-primary))" }}
           >
             View All Products <ArrowRight className="w-4 h-4" />
           </Link>

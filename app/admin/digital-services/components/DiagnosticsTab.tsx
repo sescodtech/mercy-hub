@@ -41,7 +41,7 @@ export function DiagnosticsTab() {
       <div className="bg-white rounded-2xl border border-neutral-100 p-6">
         <h2 className="font-semibold text-neutral-900 mb-4">Provider Health</h2>
         {loading && !provider ? (
-          <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-[#d98c2a]" /></div>
+          <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-[var(--color-brand-primary)]" /></div>
         ) : provider ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="border border-neutral-100 rounded-xl p-4">

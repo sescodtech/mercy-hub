@@ -67,15 +67,15 @@ function OrderTimeline({ currentStatus }: { currentStatus: string }) {
               <div className={cn(
                 "w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all",
                 isCompleted
-                  ? "bg-[#d98c2a] border-[#d98c2a] text-white"
+                  ? "bg-[var(--color-brand-primary)] border-[var(--color-brand-primary)] text-white"
                   : "bg-white border-neutral-200 text-neutral-300",
-                isCurrent && "ring-2 ring-[#d98c2a] ring-offset-1"
+                isCurrent && "ring-2 ring-[var(--color-brand-primary)] ring-offset-1"
               )}>
                 <Icon className="w-3 h-3" />
               </div>
               <span className={cn(
                 "text-[9px] text-center leading-tight font-medium",
-                isCompleted ? "text-[#d98c2a]" : "text-neutral-400"
+                isCompleted ? "text-[var(--color-brand-primary)]" : "text-neutral-400"
               )}>
                 {step.label}
               </span>
@@ -83,7 +83,7 @@ function OrderTimeline({ currentStatus }: { currentStatus: string }) {
             {i < ORDER_TIMELINE.length - 1 && (
               <div className={cn(
                 "h-0.5 w-5 mx-0.5 flex-shrink-0 mb-4",
-                i < currentIdx ? "bg-[#d98c2a]" : "bg-neutral-200"
+                i < currentIdx ? "bg-[var(--color-brand-primary)]" : "bg-neutral-200"
               )} />
             )}
           </div>
@@ -174,7 +174,7 @@ export default function AdminOrdersPage() {
             <h1 className="text-xl font-semibold text-neutral-900">Orders</h1>
             <p className="text-sm text-neutral-400">{total} total orders</p>
           </div>
-          <Link href="/admin" className="text-sm text-[#d98c2a]">← Dashboard</Link>
+          <Link href="/admin" className="text-sm text-[var(--color-brand-primary)]">← Dashboard</Link>
         </div>
 
         {/* Status filter pills */}
@@ -184,7 +184,7 @@ export default function AdminOrdersPage() {
             className={cn(
               "flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all",
               !statusFilter
-                ? "bg-[#d98c2a] text-white border-[#d98c2a]"
+                ? "bg-[var(--color-brand-primary)] text-white border-[var(--color-brand-primary)]"
                 : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300"
             )}
           >
@@ -197,7 +197,7 @@ export default function AdminOrdersPage() {
               className={cn(
                 "flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all",
                 statusFilter === s
-                  ? "bg-[#d98c2a] text-white border-[#d98c2a]"
+                  ? "bg-[var(--color-brand-primary)] text-white border-[var(--color-brand-primary)]"
                   : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300"
               )}
             >
@@ -219,7 +219,7 @@ export default function AdminOrdersPage() {
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               placeholder="Search by order number…"
-              className="pl-9 pr-4 py-2.5 text-sm rounded-lg border border-neutral-200 w-full outline-none focus:border-[#d98c2a]"
+              className="pl-9 pr-4 py-2.5 text-sm rounded-lg border border-neutral-200 w-full outline-none focus:border-[var(--color-brand-primary)]"
             />
           </div>
         </div>
@@ -372,7 +372,7 @@ export default function AdminOrdersPage() {
                                     value={order.orderStatus}
                                     onChange={(e) => updateStatus(order._id, e.target.value)}
                                     disabled={updating === order._id}
-                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 outline-none focus:border-[#d98c2a] cursor-pointer"
+                                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 outline-none focus:border-[var(--color-brand-primary)] cursor-pointer"
                                   >
                                     {Object.entries(STATUS_CONFIG).map(([s, c]) => (
                                       <option key={s} value={s}>{c.label}</option>
@@ -390,13 +390,13 @@ export default function AdminOrdersPage() {
                                         setTrackingInputs((t) => ({ ...t, [order._id]: e.target.value }))
                                       }
                                       placeholder="Enter tracking #"
-                                      className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2 outline-none focus:border-[#d98c2a]"
+                                      className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2 outline-none focus:border-[var(--color-brand-primary)]"
                                     />
                                     <button
                                       onClick={() =>
                                         updateStatus(order._id, order.orderStatus, trackingInputs[order._id])
                                       }
-                                      className="px-3 py-2 bg-[#d98c2a] text-white text-xs rounded-lg hover:bg-[#c47020] transition-colors"
+                                      className="px-3 py-2 bg-[var(--color-brand-primary)] text-white text-xs rounded-lg hover:bg-[var(--color-brand-accent)] transition-colors"
                                     >
                                       Save
                                     </button>
@@ -468,8 +468,8 @@ export default function AdminOrdersPage() {
                 className={cn(
                   "w-9 h-9 rounded-lg text-sm font-medium transition-all",
                   p === page
-                    ? "bg-[#d98c2a] text-white"
-                    : "bg-white border border-neutral-200 text-neutral-600 hover:border-[#d98c2a]"
+                    ? "bg-[var(--color-brand-primary)] text-white"
+                    : "bg-white border border-neutral-200 text-neutral-600 hover:border-[var(--color-brand-primary)]"
                 )}
               >
                 {p}

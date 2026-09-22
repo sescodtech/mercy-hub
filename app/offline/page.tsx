@@ -7,7 +7,7 @@ export default function OfflinePage() {
 
       <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
         style={{ backgroundColor: "rgba(217,140,42,0.12)" }}>
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d98c2a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-primary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <line x1="1" y1="1" x2="23" y2="23"/>
           <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
           <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
@@ -28,7 +28,7 @@ export default function OfflinePage() {
       <button
         onClick={() => window.location.reload()}
         className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
-        style={{ backgroundColor: "#d98c2a" }}
+        style={{ backgroundColor: "var(--color-brand-primary)" }}
       >
         Try again
       </button>

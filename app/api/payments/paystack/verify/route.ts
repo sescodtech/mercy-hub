@@ -5,6 +5,7 @@ import { Order } from "@/lib/models";
 import Settings from "@/lib/models/Settings";
 import { sendOrderConfirmationEmail, sendAdminOrderAlert } from "@/lib/email";
 import { sendOrderConfirmation } from "@/services/whatsapp";
+import { releaseReservedStock } from "@/lib/orders/stock";
 
 export async function GET(req: NextRequest) {
   try {
@@ -26,6 +27,8 @@ export async function GET(req: NextRequest) {
     );
 
     if (!paystackData.status || paystackData.data?.status !== "success") {
+      const failedOrderId = paystackData.data?.metadata?.orderId;
+      if (failedOrderId) { await connectDB(); await releaseReservedStock(String(failedOrderId)); }
       return NextResponse.json(
         { success: false, error: `Payment was not successful. Status: ${paystackData.data?.status ?? "unknown"}` },
         { status: 400 }
@@ -47,6 +50,12 @@ export async function GET(req: NextRequest) {
     }
 
     const alreadyPaid = order.paymentStatus === "paid";
+    const paidAmount = Number(paystackData.data?.amount || 0) / 100;
+    const currency = String(paystackData.data?.currency || "NGN").toUpperCase();
+    if (currency !== "NGN" || Math.abs(paidAmount - order.total) > 0.01) {
+      await releaseReservedStock(String(order._id));
+      return NextResponse.json({ success: false, error: "Payment amount or currency does not match the order" }, { status: 400 });
+    }
 
     // ── 3. Mark paid + send notifications ───────────────────
     if (!alreadyPaid) {

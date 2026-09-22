@@ -54,7 +54,7 @@ function LoginForm() {
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-5"
           style={{
-            backgroundImage: "radial-gradient(circle at 25px 25px, #d98c2a 2px, transparent 0)",
+            backgroundImage: "radial-gradient(circle at 25px 25px, var(--color-brand-primary) 2px, transparent 0)",
             backgroundSize: "50px 50px",
           }}
         />
@@ -62,7 +62,7 @@ function LoginForm() {
         {/* Logo */}
         <Link href="/" className="relative z-10">
           <span className="font-display text-2xl font-semibold text-white">
-            Mercy<span style={{ color: "#d98c2a" }}>Home</span>
+            Mercy<span style={{ color: "var(--color-brand-primary)" }}>Home</span>
           </span>
         </Link>
 
@@ -72,7 +72,7 @@ function LoginForm() {
             className="w-14 h-14 rounded-2xl flex items-center justify-center"
             style={{ backgroundColor: "rgba(217,140,42,0.15)" }}
           >
-            <ShoppingBag className="w-7 h-7" style={{ color: "#d98c2a" }} />
+            <ShoppingBag className="w-7 h-7" style={{ color: "var(--color-brand-primary)" }} />
           </div>
           <div>
             <h2 className="font-display text-3xl font-semibold text-white leading-tight mb-3">
@@ -93,7 +93,7 @@ function LoginForm() {
               <div key={point} className="flex items-center gap-2.5">
                 <div
                   className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-white"
-                  style={{ backgroundColor: "#d98c2a" }}
+                  style={{ backgroundColor: "var(--color-brand-primary)" }}
                 >
                   ✓
                 </div>
@@ -118,7 +118,7 @@ function LoginForm() {
           <div className="lg:hidden text-center mb-8">
             <Link href="/">
               <span className="font-display text-2xl font-semibold text-neutral-900">
-                Mercy<span style={{ color: "#d98c2a" }}>Home</span>
+                Mercy<span style={{ color: "var(--color-brand-primary)" }}>Home</span>
               </span>
             </Link>
           </div>
@@ -170,7 +170,7 @@ function LoginForm() {
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 placeholder="you@example.com"
-                className="w-full px-3.5 py-3 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[#d98c2a] focus:ring-2 focus:ring-[#d98c2a]/10 transition-all bg-white"
+                className="w-full px-3.5 py-3 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[var(--color-brand-primary)] focus:ring-2 focus:ring-[var(--color-brand-primary-10)] transition-all bg-white"
               />
             </div>
 
@@ -182,7 +182,7 @@ function LoginForm() {
                 <Link
                   href="/auth/forgot-password"
                   className="text-xs font-medium hover:underline"
-                  style={{ color: "#d98c2a" }}
+                  style={{ color: "var(--color-brand-primary)" }}
                 >
                   Forgot password?
                 </Link>
@@ -194,7 +194,7 @@ function LoginForm() {
                   value={form.password}
                   onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
                   placeholder="••••••••"
-                  className="w-full px-3.5 py-3 pr-11 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[#d98c2a] focus:ring-2 focus:ring-[#d98c2a]/10 transition-all bg-white"
+                  className="w-full px-3.5 py-3 pr-11 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[var(--color-brand-primary)] focus:ring-2 focus:ring-[var(--color-brand-primary-10)] transition-all bg-white"
                 />
                 <button
                   type="button"
@@ -211,9 +211,9 @@ function LoginForm() {
               type="submit"
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-white rounded-xl disabled:opacity-60 transition-all mt-2"
-              style={{ backgroundColor: loading ? "#c47020" : "#d98c2a" }}
-              onMouseEnter={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "#c47020")}
-              onMouseLeave={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "#d98c2a")}
+              style={{ backgroundColor: loading ? "var(--color-brand-accent)" : "var(--color-brand-primary)" }}
+              onMouseEnter={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-brand-accent)")}
+              onMouseLeave={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-brand-primary)")}
             >
               {loading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</>
@@ -228,7 +228,7 @@ function LoginForm() {
             <Link
               href="/auth/register"
               className="font-semibold hover:underline"
-              style={{ color: "#d98c2a" }}
+              style={{ color: "var(--color-brand-primary)" }}
             >
               Create one
             </Link>
@@ -243,7 +243,7 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-[#fdf8f0] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#d98c2a" }} />
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--color-brand-primary)" }} />
       </div>
     }>
       <LoginForm />

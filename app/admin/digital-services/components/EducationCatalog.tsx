@@ -50,7 +50,7 @@ export function EducationCatalog() {
       <div className="flex items-center justify-between mb-1">
         <h2 className="font-semibold text-neutral-900">Education / Exam PIN Catalog</h2>
         <button onClick={() => setEditing({ ...EMPTY })}
-          className="flex items-center gap-1.5 text-sm font-medium text-[#d98c2a] hover:underline">
+          className="flex items-center gap-1.5 text-sm font-medium text-[var(--color-brand-primary)] hover:underline">
           <Plus className="w-3.5 h-3.5" /> Add Exam
         </button>
       </div>
@@ -68,7 +68,7 @@ export function EducationCatalog() {
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">Exam Type</label>
               <select value={editing.examName} onChange={(e) => setEditing({ ...editing, examName: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]">
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]">
                 {supported.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
@@ -76,17 +76,17 @@ export function EducationCatalog() {
               <label className="block text-xs font-medium text-neutral-500 mb-1">Display Name</label>
               <input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                 placeholder="e.g. WAEC Result Checker"
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">Cost Price (₦)</label>
               <input type="number" value={editing.costPrice} onChange={(e) => setEditing({ ...editing, costPrice: Number(e.target.value) })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">Default Quantity</label>
               <input type="number" min={1} value={editing.quantity} onChange={(e) => setEditing({ ...editing, quantity: Number(e.target.value) })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" />
             </div>
           </div>
           <div className="flex items-center justify-between pt-1">
@@ -95,7 +95,7 @@ export function EducationCatalog() {
               Active
             </label>
             <button onClick={save} disabled={saving}
-              className="flex items-center gap-2 bg-[#c47020] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#a3551c] disabled:opacity-50">
+              className="flex items-center gap-2 bg-[var(--color-brand-accent)] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#a3551c] disabled:opacity-50">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null} Save
             </button>
           </div>
@@ -103,7 +103,7 @@ export function EducationCatalog() {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-[#d98c2a]" /></div>
+        <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-[var(--color-brand-primary)]" /></div>
       ) : (
         <div className="divide-y divide-neutral-50 border border-neutral-100 rounded-xl">
           {plans.map((p) => (

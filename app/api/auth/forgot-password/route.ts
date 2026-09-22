@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
           </p>
           <div style="text-align:center;margin:32px 0">
             <a href="${resetUrl}"
-              style="background:#d98c2a;color:white;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:14px;font-weight:600;display:inline-block">
+              style="background:var(--color-brand-primary);color:white;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:14px;font-weight:600;display:inline-block">
               Reset Password
             </a>
           </div>

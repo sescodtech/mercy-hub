@@ -16,7 +16,7 @@ import {
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
 
-const COLORS = ["#d98c2a", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+const COLORS = ["var(--color-brand-primary)", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 const STATUS_CONFIG: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   pending:    { color: "text-yellow-600 bg-yellow-50",  icon: Clock,        label: "Pending" },
@@ -59,10 +59,12 @@ export function AdminDashboard() {
   const lowStockProducts   = (a?.lowStockProducts   as Record<string, unknown>[] | undefined) ?? [];
 
   const statCards = [
-    { label: "Total Revenue",   value: overview ? formatPrice(overview.totalRevenue ?? 0) : "—", change: overview?.revenueGrowth ?? 0, icon: DollarSign,   color: "text-[#d98c2a]",  bg: "bg-[#d98c2a]/10" },
+    { label: "Total Revenue",   value: overview ? formatPrice(overview.totalRevenue ?? 0) : "—", change: overview?.revenueGrowth ?? 0, icon: DollarSign,   color: "text-[var(--color-brand-primary)]",  bg: "bg-[var(--color-brand-primary-10)]" },
     { label: "Total Orders",    value: String(overview?.totalOrders   ?? "—"), change: 8.1,  icon: ShoppingCart, color: "text-blue-600",   bg: "bg-blue-50" },
     { label: "Customers",       value: String(overview?.totalCustomers ?? "—"), change: 15.3, icon: Users,       color: "text-purple-600", bg: "bg-purple-50" },
     { label: "Active Products", value: String(overview?.totalProducts  ?? "—"), change: 3.2,  icon: Package,     color: "text-green-600",  bg: "bg-green-50" },
+    { label: "Pending Payments", value: String(overview?.pendingPayments ?? "—"), change: 0, icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
+    { label: "Low Stock", value: String(overview?.lowStockCount ?? "—"), change: 0, icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50" },
   ];
 
   return (
@@ -96,7 +98,7 @@ export function AdminDashboard() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 xl:grid-cols-6 gap-3 sm:gap-4">
         {statCards.map(({ label, value, change, icon: Icon, color, bg }, i) => (
           <motion.div
             key={label}
@@ -128,7 +130,7 @@ export function AdminDashboard() {
               <h2 className="font-semibold text-neutral-900">Revenue Over Time</h2>
               <p className="text-xs text-neutral-400">Last {range} days</p>
             </div>
-            <TrendingUp className="w-5 h-5 text-[#d98c2a]" />
+            <TrendingUp className="w-5 h-5 text-[var(--color-brand-primary)]" />
           </div>
           {loading ? (
             <div className="h-52 bg-neutral-100 rounded-lg animate-pulse" />
@@ -143,7 +145,7 @@ export function AdminDashboard() {
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v: string) => v.slice(5)} axisLine={false} tickLine={false} />
                 <YAxis tickFormatter={(v: number) => `₦${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip formatter={(v: number) => [formatPrice(v), "Revenue"]} />
-                <Line type="monotone" dataKey="revenue" stroke="#d98c2a" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
+                <Line type="monotone" dataKey="revenue" stroke="var(--color-brand-primary)" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -196,7 +198,7 @@ export function AdminDashboard() {
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
                 <Tooltip />
-                <Bar dataKey="orders" fill="#d98c2a" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="orders" fill="var(--color-brand-primary)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -240,7 +242,7 @@ export function AdminDashboard() {
         <div className="lg:col-span-2 bg-white rounded-xl border border-neutral-100 overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
             <h2 className="font-semibold text-neutral-900">Recent Orders</h2>
-            <Link href="/admin/orders" className="text-xs text-[#d98c2a]">View all →</Link>
+            <Link href="/admin/orders" className="text-xs text-[var(--color-brand-primary)]">View all →</Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -313,11 +315,11 @@ export function AdminDashboard() {
                 <p className="text-xs text-orange-600 font-semibold">{p.stock as number} left</p>
               </div>
               <Link href="/admin/products">
-                <Eye className="w-3.5 h-3.5 text-neutral-400 hover:text-[#d98c2a]" />
+                <Eye className="w-3.5 h-3.5 text-neutral-400 hover:text-[var(--color-brand-primary)]" />
               </Link>
             </div>
           ))}
-          <Link href="/admin/products" className="block text-center text-xs text-[#d98c2a] mt-3">
+          <Link href="/admin/products" className="block text-center text-xs text-[var(--color-brand-primary)] mt-3">
             Manage Inventory →
           </Link>
         </div>

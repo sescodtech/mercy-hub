@@ -52,7 +52,7 @@ function Input({ label, value, onChange, placeholder, type = "text" }: {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]"
+        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]"
       />
     </div>
   );
@@ -140,7 +140,7 @@ export default function AdminBrandingPage() {
     finally { setSaving(false); }
   };
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" /></div>;
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
@@ -150,7 +150,7 @@ export default function AdminBrandingPage() {
           <p className="text-sm text-neutral-400 mt-0.5">Manage logos, company info, social links, and SEO meta tags.</p>
         </div>
         <button onClick={save} disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 transition-colors">
+          className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60 transition-colors">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {saving ? "Saving…" : "Save All"}
         </button>
@@ -161,7 +161,7 @@ export default function AdminBrandingPage() {
         {TABS.map(({ id, label, Icon }) => (
           <button key={id} onClick={() => setTab(id)}
             className={cn("flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors",
-              tab === id ? "bg-[#d98c2a] text-white" : "text-neutral-600 hover:bg-neutral-50")}>
+              tab === id ? "bg-[var(--color-brand-primary)] text-white" : "text-neutral-600 hover:bg-neutral-50")}>
             <Icon className="w-4 h-4" />{label}
           </button>
         ))}
@@ -204,7 +204,7 @@ export default function AdminBrandingPage() {
                     </div>
                   ) : (
                     <div
-                      className="w-full h-20 rounded-lg border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center gap-1.5 text-neutral-400 hover:border-[#d98c2a] hover:text-[#d98c2a] transition-colors cursor-pointer"
+                      className="w-full h-20 rounded-lg border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center gap-1.5 text-neutral-400 hover:border-[var(--color-brand-primary)] hover:text-[var(--color-brand-primary)] transition-colors cursor-pointer"
                       onClick={() => fileRefs.current[key]?.click()}
                     >
                       <ImageIcon className="w-5 h-5" />
@@ -227,7 +227,7 @@ export default function AdminBrandingPage() {
                     <button
                       onClick={() => fileRefs.current[key]?.click()}
                       disabled={uploading === key}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-[#d98c2a] text-[#d98c2a] rounded-lg hover:bg-[#d98c2a]/5 disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-[var(--color-brand-primary)] text-[var(--color-brand-primary)] rounded-lg hover:bg-[var(--color-brand-primary-5)] disabled:opacity-50"
                     >
                       {uploading === key
                         ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -304,7 +304,7 @@ export default function AdminBrandingPage() {
                 onChange={(e) => setSEO((s) => ({ ...s, metaDescription: e.target.value }))}
                 rows={3}
                 placeholder="Discover premium home essentials crafted for modern living."
-                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none"
+                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none"
               />
               <p className="text-xs text-neutral-400 mt-1">{seo.metaDescription.length}/160 characters</p>
             </div>
@@ -326,7 +326,7 @@ export default function AdminBrandingPage() {
                       </div>
                     )
                     : (
-                      <label className="cursor-pointer w-full h-32 rounded-lg border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center gap-2 text-neutral-400 hover:border-[#d98c2a] hover:text-[#d98c2a] transition-colors">
+                      <label className="cursor-pointer w-full h-32 rounded-lg border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center gap-2 text-neutral-400 hover:border-[var(--color-brand-primary)] hover:text-[var(--color-brand-primary)] transition-colors">
                         <Upload className="w-5 h-5" />
                         <span className="text-xs">Upload OG Image (1200×630)</span>
                         <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
@@ -352,7 +352,7 @@ export default function AdminBrandingPage() {
                       </div>
                     )
                     : (
-                      <label className="cursor-pointer w-full h-32 rounded-lg border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center gap-2 text-neutral-400 hover:border-[#d98c2a] hover:text-[#d98c2a] transition-colors">
+                      <label className="cursor-pointer w-full h-32 rounded-lg border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center gap-2 text-neutral-400 hover:border-[var(--color-brand-primary)] hover:text-[var(--color-brand-primary)] transition-colors">
                         <Upload className="w-5 h-5" />
                         <span className="text-xs">Upload Twitter Card (1200×628)</span>
                         <input type="file" accept="image/*" className="hidden" onChange={async (e) => {

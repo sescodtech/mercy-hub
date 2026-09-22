@@ -52,7 +52,7 @@ export function fmt(n: number) {
 }
 
 export const CATEGORY_META: Record<Category, { label: string; desc: string; color: string }> = {
-  data:      { label: "Data Bundles", desc: "Buy data for any network",   color: "#d98c2a" },
+  data:      { label: "Data Bundles", desc: "Buy data for any network",   color: "var(--color-brand-primary)" },
   airtime:   { label: "Airtime",      desc: "Recharge any number",        color: "#10b981" },
   cable:     { label: "Cable TV",     desc: "DStv, GOtv, Startimes",      color: "#6366f1" },
   education: { label: "Education",   desc: "WAEC, NECO, NABTEB pins",    color: "#f59e0b" },

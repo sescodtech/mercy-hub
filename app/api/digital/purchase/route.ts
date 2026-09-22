@@ -61,6 +61,9 @@ export async function POST(req: NextRequest) {
 
     const config = await getDigitalConfig();
     const userId = session.user.id as string;
+    if (!(config.services as any)?.[category as string]) {
+      return NextResponse.json({ success: false, error: "This digital service is currently unavailable" }, { status: 403 });
+    }
 
     // ── Resolve cost price and plan description ─────────────────
     let costPrice  = 0;
@@ -116,6 +119,9 @@ export async function POST(req: NextRequest) {
     }
 
     const customerPrice = applyMarkup(costPrice, category as DigitalCategory, config);
+    if (!Number.isFinite(customerPrice) || customerPrice <= 0 || !Number.isFinite(costPrice) || costPrice < 0) {
+      return NextResponse.json({ success: false, error: "Invalid service pricing" }, { status: 400 });
+    }
     const orderRef      = generateDigitalRef();
 
     // ── Phase 1: Payment ────────────────────────────────────────
@@ -133,6 +139,8 @@ export async function POST(req: NextRequest) {
       if (!paystackRef) {
         return NextResponse.json({ success: false, error: "Missing Paystack reference" }, { status: 400 });
       }
+      const existing = await DigitalOrder.findOne({ paystackRef });
+      if (existing) return NextResponse.json({ success: false, error: "This payment reference has already been used" }, { status: 409 });
       // Verify with Paystack
       const verify = await fetch(`https://api.paystack.co/transaction/verify/${paystackRef}`, {
         headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },

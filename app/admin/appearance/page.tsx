@@ -34,14 +34,14 @@ const UI_COLOR_FIELDS = [
 ];
 
 const BRAND_DEFAULTS = {
-  primary: "#d98c2a", secondary: "#fdf8f0", accent: "#c47020",
+  primary: "var(--color-brand-primary)", secondary: "#fdf8f0", accent: "var(--color-brand-accent)",
   success: "#10b981", warning: "#f59e0b", error: "#ef4444",
 };
 
 const UI_DEFAULTS = {
   headerBg: "#fdf8f0", footerBg: "#1a1208", navText: "#404040",
-  navTextHover: "#d98c2a", buttonPrimary: "#c47020", buttonText: "#ffffff",
-  linkColor: "#d98c2a", cardBg: "#ffffff", pageBg: "#fdf8f0",
+  navTextHover: "var(--color-brand-primary)", buttonPrimary: "var(--color-brand-accent)", buttonText: "#ffffff",
+  linkColor: "var(--color-brand-primary)", cardBg: "#ffffff", pageBg: "#fdf8f0",
   sectionAltBg: "#ffffff", borderColor: "#e5e5e5",
   textPrimary: "#1a1208", textSecondary: "#737373",
 };
@@ -71,9 +71,9 @@ function ColorField({
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="#d98c2a"
+          placeholder="var(--color-brand-primary)"
           maxLength={7}
-          className="w-24 text-sm font-mono border border-neutral-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#d98c2a]"
+          className="w-24 text-sm font-mono border border-neutral-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[var(--color-brand-primary)]"
         />
       </div>
     </div>
@@ -121,7 +121,7 @@ export default function AdminAppearancePage() {
   const resetBrand = () => setBrand(BRAND_DEFAULTS);
   const resetUI    = () => setUI(UI_DEFAULTS);
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" /></div>;
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
@@ -136,7 +136,7 @@ export default function AdminAppearancePage() {
         <button
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60 transition-colors"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {saving ? "Saving…" : "Save Changes"}
@@ -153,7 +153,7 @@ export default function AdminAppearancePage() {
             key={id}
             onClick={() => setTab(id as AppearanceTab)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-              tab === id ? "bg-[#d98c2a] text-white" : "text-neutral-600 hover:bg-neutral-50"
+              tab === id ? "bg-[var(--color-brand-primary)] text-white" : "text-neutral-600 hover:bg-neutral-50"
             }`}
           >
             <Icon className="w-4 h-4" />{label}

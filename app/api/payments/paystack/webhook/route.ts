@@ -7,6 +7,7 @@ import { sendOrderConfirmationEmail, sendAdminOrderAlert } from "@/lib/email";
 import { sendOrderConfirmation } from "@/services/whatsapp";
 import { DigitalDeposit } from "@/lib/models/DigitalModels";
 import { creditWallet }   from "@/services/vtu/helpers";
+import { releaseReservedStock } from "@/lib/orders/stock";
 
 export async function POST(req: NextRequest) {
   const body      = await req.text();
@@ -26,14 +27,15 @@ export async function POST(req: NextRequest) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
   } else {
-    console.warn("[PAYSTACK_WEBHOOK] PAYSTACK_WEBHOOK_SECRET not set. Skipping signature check.");
+    console.error("[PAYSTACK_WEBHOOK] PAYSTACK_WEBHOOK_SECRET is not configured");
+    return new NextResponse("Webhook secret is not configured", { status: 503 });
   }
 
   const event = JSON.parse(body);
   console.log("[PAYSTACK_WEBHOOK] Event received:", event.event);
 
-  // Only process successful payments
-  if (event.event !== "charge.success") {
+  // Process successful and failed charges. Other Paystack events are acknowledged.
+  if (!["charge.success", "charge.failed"].includes(event.event)) {
     return NextResponse.json({ received: true });
   }
 
@@ -71,6 +73,19 @@ export async function POST(req: NextRequest) {
 
     if (!order) {
       console.error("[PAYSTACK_WEBHOOK] Order not found for reference:", reference);
+      return NextResponse.json({ received: true });
+    }
+
+    if (event.event === "charge.failed") {
+      order.paymentStatus = "failed";
+      await order.save();
+      await releaseReservedStock(String(order._id));
+      return NextResponse.json({ received: true });
+    }
+
+    const paidAmount = Number(data?.amount || 0) / 100;
+    if (String(data?.currency || "NGN").toUpperCase() !== "NGN" || Math.abs(paidAmount - order.total) > 0.01) {
+      console.error("[PAYSTACK_WEBHOOK] Amount/currency mismatch", { order: order.orderNumber, paidAmount, expected: order.total });
       return NextResponse.json({ received: true });
     }
 

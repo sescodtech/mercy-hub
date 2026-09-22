@@ -76,11 +76,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   >
                     <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
                       <h3 className="font-semibold text-sm text-neutral-900">
-                        Notifications{unreadCount > 0 && <span className="text-xs text-[#d98c2a] ml-1">({unreadCount} new)</span>}
+                        Notifications{unreadCount > 0 && <span className="text-xs text-[var(--color-brand-primary)] ml-1">({unreadCount} new)</span>}
                       </h3>
                       <div className="flex items-center gap-2">
                         {unreadCount > 0 && (
-                          <button onClick={markAllRead} className="text-xs text-[#d98c2a] hover:underline">Mark all read</button>
+                          <button onClick={markAllRead} className="text-xs text-[var(--color-brand-primary)] hover:underline">Mark all read</button>
                         )}
                         <button onClick={() => setNotifOpen(false)}>
                           <X className="w-4 h-4 text-neutral-400" />
@@ -91,9 +91,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       {notifications.length === 0 ? (
                         <div className="py-8 text-center text-sm text-neutral-400">No notifications yet</div>
                       ) : notifications.map((n) => (
-                        <div key={n.id} className={cn("px-4 py-3 border-b border-neutral-50 text-sm", !n.read && "bg-[#d98c2a]/5")}>
+                        <div key={n.id} className={cn("px-4 py-3 border-b border-neutral-50 text-sm", !n.read && "bg-[var(--color-brand-primary-5)]")}>
                           <div className="flex items-start gap-2">
-                            <div className={cn("w-2 h-2 rounded-full mt-1.5 flex-shrink-0", !n.read ? "bg-[#d98c2a]" : "bg-neutral-300")} />
+                            <div className={cn("w-2 h-2 rounded-full mt-1.5 flex-shrink-0", !n.read ? "bg-[var(--color-brand-primary)]" : "bg-neutral-300")} />
                             <div>
                               <p className="text-neutral-800 font-medium">{n.message}</p>
                               <p className="text-neutral-400 text-xs mt-0.5">{new Date(n.createdAt).toLocaleTimeString()}</p>
@@ -103,7 +103,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       ))}
                     </div>
                     <div className="px-4 py-3 border-t border-neutral-100">
-                      <Link href="/admin/orders" onClick={() => setNotifOpen(false)} className="text-xs text-[#d98c2a] hover:underline">
+                      <Link href="/admin/orders" onClick={() => setNotifOpen(false)} className="text-xs text-[var(--color-brand-primary)] hover:underline">
                         View all orders →
                       </Link>
                     </div>
@@ -113,7 +113,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
 
             <Link href="/shop"
-              className="hidden sm:flex items-center text-xs text-[#d98c2a] px-3 py-1.5 border border-[#d98c2a]/30 rounded-lg hover:bg-[#d98c2a]/5 transition-colors">
+              className="hidden sm:flex items-center text-xs text-[var(--color-brand-primary)] px-3 py-1.5 border border-[var(--color-brand-primary-30)] rounded-lg hover:bg-[var(--color-brand-primary-5)] transition-colors">
               View Store →
             </Link>
           </div>

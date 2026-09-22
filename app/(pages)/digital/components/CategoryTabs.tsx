@@ -41,8 +41,8 @@ export function CategoryTabs({ active, onChange }: Props) {
                 style={
                   isActive
                     ? {
-                        backgroundColor: "var(--color-brand-primary, #d98c2a)",
-                        borderColor: "var(--color-brand-primary, #d98c2a)",
+                        backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))",
+                        borderColor: "var(--color-brand-primary, var(--color-brand-primary))",
                         color: "#fff",
                       }
                     : {

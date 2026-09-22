@@ -52,7 +52,7 @@ export function AdminSidebar({ mobile = false, onClose }: SidebarProps) {
       <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between">
         <Link href="/" className="block">
           <span style={{ fontFamily: "serif", fontSize: "1.25rem", fontWeight: 600, color: "white" }}>
-            Mercy<span style={{ color: "#d98c2a" }}>Home</span>
+            Mercy<span style={{ color: "var(--color-brand-primary)" }}>Home</span>
           </span>
           <span style={{
             fontSize: "10px", letterSpacing: "0.25em", textTransform: "uppercase",
@@ -84,7 +84,7 @@ export function AdminSidebar({ mobile = false, onClose }: SidebarProps) {
                 onClick={onClose}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all",
-                  isActive ? "text-[#d98c2a]" : "hover:text-white"
+                  isActive ? "text-[var(--color-brand-primary)]" : "hover:text-white"
                 )}
                 style={isActive ? { backgroundColor: "rgba(217,140,42,0.2)" } : {}}
               >

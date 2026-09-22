@@ -85,7 +85,7 @@ export function Footer() {
               ) : (
                 <>
                   <span className="font-display text-2xl font-semibold text-cream tracking-tight">
-                    {businessName.split(" ")[0]}<span style={{ color: "var(--color-brand-primary, #d98c2a)" }}>{businessName.split(" ").slice(1, 2).join(" ")}</span>
+                    {businessName.split(" ")[0]}<span style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }}>{businessName.split(" ").slice(1, 2).join(" ")}</span>
                   </span>
                   <span className="block text-[9px] tracking-[0.3em] uppercase text-cream/40 -mt-1">
                     {businessName.split(" ").slice(2).join(" ") || "Essentials"}
@@ -99,10 +99,10 @@ export function Footer() {
                 {activeSocial.map(({ key, url, Icon }) => (
                   <a key={key} href={url} target="_blank" rel="noopener noreferrer" aria-label={key}
                     className="w-9 h-9 rounded-sm border border-white/15 flex items-center justify-center text-cream/50 hover:text-white transition-all duration-200"
-                    style={{ "--hover-bg": "var(--color-brand-primary, #d98c2a)" } as any}
+                    style={{ "--hover-bg": "var(--color-brand-primary, var(--color-brand-primary))" } as any}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "var(--color-brand-primary, #d98c2a)";
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor = "var(--color-brand-primary, #d98c2a)";
+                      (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "var(--color-brand-primary, var(--color-brand-primary))";
+                      (e.currentTarget as HTMLAnchorElement).style.borderColor = "var(--color-brand-primary, var(--color-brand-primary))";
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "";
@@ -126,7 +126,7 @@ export function Footer() {
                     <Link
                       href={link.href}
                       className="text-sm text-cream/50 transition-colors"
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-brand-primary, #d98c2a)"; }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-brand-primary, var(--color-brand-primary))"; }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = ""; }}
                     >
                       {link.label}
@@ -146,7 +146,7 @@ export function Footer() {
             { Icon: Mail,   text: email },
           ].map(({ Icon, text }) => (
             <div key={text} className="flex items-center gap-3 text-sm text-cream/50">
-              <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "var(--color-brand-primary, #d98c2a)" }} />
+              <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }} />
               {text}
             </div>
           ))}

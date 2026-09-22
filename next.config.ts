@@ -1,10 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
@@ -31,6 +27,8 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options",         value: "SAMEORIGIN" },
           { key: "X-XSS-Protection",        value: "1; mode=block" },
           { key: "Referrer-Policy",         value: "strict-origin-when-cross-origin" },
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          { key: "X-DNS-Prefetch-Control", value: "on" },
         ],
       },
       // Service worker must be served with correct headers

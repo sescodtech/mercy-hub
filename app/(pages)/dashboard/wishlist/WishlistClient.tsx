@@ -42,7 +42,7 @@ export default function WishlistClient() {
               <p className="text-sm text-neutral-500">
                 {items.length} {items.length === 1 ? "item" : "items"} saved
               </p>
-              <Link href="/cart" className="text-sm font-medium text-[#d98c2a] hover:underline flex items-center gap-1">
+              <Link href="/cart" className="text-sm font-medium text-[var(--color-brand-primary)] hover:underline flex items-center gap-1">
                 <ShoppingCart className="w-4 h-4" /> Move all to cart
               </Link>
             </div>

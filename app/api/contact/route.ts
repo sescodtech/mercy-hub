@@ -56,13 +56,13 @@ export async function POST(req: NextRequest) {
           <p style="color:#555;font-size:14px;line-height:1.6">
             Thank you for reaching out! We've received your message and will get back to you within 24 hours.
           </p>
-          <div style="margin:24px 0;padding:16px;background:#fdf8f0;border-left:4px solid #d98c2a;border-radius:4px;font-size:14px;color:#555">
+          <div style="margin:24px 0;padding:16px;background:#fdf8f0;border-left:4px solid var(--color-brand-primary);border-radius:4px;font-size:14px;color:#555">
             <strong>Your message:</strong><br/><br/>
             ${message.replace(/\n/g, "<br>")}
           </div>
           <p style="color:#555;font-size:14px">
             In the meantime, you can browse our store at 
-            <a href="${settings?.website || "https://mercy-hub.vercel.app"}" style="color:#d98c2a">${settings?.businessName ?? "Mercy Home"}</a>.
+            <a href="${settings?.website || "https://mercy-hub.vercel.app"}" style="color:var(--color-brand-primary)">${settings?.businessName ?? "Mercy Home"}</a>.
           </p>
           <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
           <p style="color:#ccc;font-size:11px;text-align:center">© ${new Date().getFullYear()} ${settings?.businessName ?? "Mercy Home Essentials"}</p>

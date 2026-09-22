@@ -29,7 +29,7 @@ export default function CookiesPage() {
           <p>You can manage and disable cookies through your browser settings. However, please note that disabling essential cookies may affect the functionality of our website.</p>
 
           <h2>Contact Us</h2>
-          <p>If you have any questions about our use of cookies, please <Link href="/contact" className="text-[#d98c2a]">contact us</Link>.</p>
+          <p>If you have any questions about our use of cookies, please <Link href="/contact" className="text-[var(--color-brand-primary)]">contact us</Link>.</p>
         </div>
       </div>
     </div>

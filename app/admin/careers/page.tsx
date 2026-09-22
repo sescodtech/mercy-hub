@@ -61,7 +61,7 @@ export default function AdminCareersPage() {
     } catch { toast.error("Failed to update"); }
   };
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" /></div>;
 
   if (editing !== null) return (
     <div className="max-w-3xl mx-auto py-8 px-4">
@@ -74,13 +74,13 @@ export default function AdminCareersPage() {
           <div key={key}>
             <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">{label}</label>
             <input value={(editing as any)[key] || ""} onChange={(e) => setEditing({ ...editing, [key]: e.target.value })}
-              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
           </div>
         ))}
         <div>
           <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">Type</label>
           <select value={editing.type || "full-time"} onChange={(e) => setEditing({ ...editing, type: e.target.value })}
-            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]">
+            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]">
             {["full-time","part-time","contract","remote"].map(t => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
@@ -88,11 +88,11 @@ export default function AdminCareersPage() {
           <div key={key}>
             <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">{label}</label>
             <textarea value={(editing as any)[key] || ""} onChange={(e) => setEditing({ ...editing, [key]: e.target.value })} rows={5}
-              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none" />
+              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none" />
           </div>
         ))}
         <label className="flex items-center gap-3 cursor-pointer">
-          <div className={cn("w-10 h-5 rounded-full relative transition-colors", editing.isActive ? "bg-[#d98c2a]" : "bg-neutral-300")}
+          <div className={cn("w-10 h-5 rounded-full relative transition-colors", editing.isActive ? "bg-[var(--color-brand-primary)]" : "bg-neutral-300")}
             onClick={() => setEditing({ ...editing, isActive: !editing.isActive })}>
             <div className={cn("absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform", editing.isActive ? "translate-x-5" : "translate-x-0.5")} />
           </div>
@@ -100,7 +100,7 @@ export default function AdminCareersPage() {
         </label>
         <div className="flex gap-3 pt-2">
           <button onClick={save} disabled={saving}
-            className="flex-1 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 flex items-center justify-center gap-2">
+            className="flex-1 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60 flex items-center justify-center gap-2">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {saving ? "Saving…" : "Save Job"}
           </button>
@@ -114,7 +114,7 @@ export default function AdminCareersPage() {
     <div className="max-w-5xl mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <div><h1 className="text-xl font-semibold">Career Postings</h1><p className="text-sm text-neutral-400">{jobs.length} jobs</p></div>
-        <button onClick={() => setEditing({ ...EMPTY_JOB })} className="flex items-center gap-2 px-4 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020]">
+        <button onClick={() => setEditing({ ...EMPTY_JOB })} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)]">
           <Plus className="w-4 h-4" /> New Job
         </button>
       </div>
@@ -153,7 +153,7 @@ export default function AdminCareersPage() {
                         <div>
                           <p className="text-sm font-medium text-neutral-900">{app.name}</p>
                           <p className="text-xs text-neutral-400">{app.email} · {new Date(app.appliedAt).toLocaleDateString()}</p>
-                          {app.cvUrl && <a href={app.cvUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[#d98c2a] underline">View CV</a>}
+                          {app.cvUrl && <a href={app.cvUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--color-brand-primary)] underline">View CV</a>}
                         </div>
                         <select value={app.status} onChange={(e) => updateAppStatus(job._id, app._id, e.target.value)}
                           className={cn("text-xs font-semibold px-2 py-1 rounded-full border-0 outline-none cursor-pointer", STATUS_COLORS[app.status] || "bg-neutral-100 text-neutral-600")}>

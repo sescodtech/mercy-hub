@@ -70,7 +70,7 @@ function Input({ label, value, onChange, placeholder, type = "text", note }: {
     <div>
       <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">{label}</label>
       <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
       {note && <p className="text-xs text-neutral-400 mt-1">{note}</p>}
     </div>
   );
@@ -86,7 +86,7 @@ function Toggle({ label, desc, checked, onChange }: {
         {desc && <p className="text-xs text-neutral-400 mt-0.5">{desc}</p>}
       </div>
       <button onClick={() => onChange(!checked)}
-        className={`relative w-10 h-5 rounded-full flex-shrink-0 transition-colors ${checked ? "bg-[#d98c2a]" : "bg-neutral-300"}`}>
+        className={`relative w-10 h-5 rounded-full flex-shrink-0 transition-colors ${checked ? "bg-[var(--color-brand-primary)]" : "bg-neutral-300"}`}>
         <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${checked ? "translate-x-5" : "translate-x-0.5"}`} />
       </button>
     </div>
@@ -175,7 +175,7 @@ export default function AdminHomepagePage() {
       return { ...c, trustBadges: b };
     });
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" /></div>;
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
@@ -185,7 +185,7 @@ export default function AdminHomepagePage() {
           <p className="text-sm text-neutral-400 mt-0.5">Manage all homepage content without touching code.</p>
         </div>
         <button onClick={save} disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 transition-colors">
+          className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60 transition-colors">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {saving ? "Saving…" : "Save Changes"}
         </button>
@@ -196,7 +196,7 @@ export default function AdminHomepagePage() {
         {TABS.map(({ id, label, Icon }) => (
           <button key={id} onClick={() => setTab(id)}
             className={cn("flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors",
-              tab === id ? "bg-[#d98c2a] text-white" : "text-neutral-600 hover:bg-neutral-50")}>
+              tab === id ? "bg-[var(--color-brand-primary)] text-white" : "text-neutral-600 hover:bg-neutral-50")}>
             <Icon className="w-4 h-4" />{label}
           </button>
         ))}
@@ -217,7 +217,7 @@ export default function AdminHomepagePage() {
                 <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Subheadline</label>
                 <textarea value={cms.hero.subheadline} onChange={(e) => updHero("subheadline", e.target.value)}
                   rows={2} placeholder="Discover premium home essentials…"
-                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none" />
+                  className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none" />
               </div>
               <Input label="Primary CTA Text" value={cms.hero.ctaPrimaryText} onChange={(v) => updHero("ctaPrimaryText", v)} placeholder="Shop Collection" />
               <Input label="Primary CTA URL"  value={cms.hero.ctaPrimaryUrl}  onChange={(v) => updHero("ctaPrimaryUrl", v)}  placeholder="/shop" />
@@ -232,7 +232,7 @@ export default function AdminHomepagePage() {
                 {(["left", "center", "right"] as const).map((pos) => (
                   <button key={pos} onClick={() => updHero("textPosition", pos)}
                     className={cn("px-4 py-2 text-sm rounded-lg border transition-colors capitalize",
-                      cms.hero.textPosition === pos ? "bg-[#d98c2a] text-white border-[#d98c2a]" : "border-neutral-200 text-neutral-600 hover:border-[#d98c2a]")}>
+                      cms.hero.textPosition === pos ? "bg-[var(--color-brand-primary)] text-white border-[var(--color-brand-primary)]" : "border-neutral-200 text-neutral-600 hover:border-[var(--color-brand-primary)]")}>
                     {pos}
                   </button>
                 ))}
@@ -257,7 +257,7 @@ export default function AdminHomepagePage() {
                   </div>
                 </div>
               ) : (
-                <label className="cursor-pointer w-full h-40 rounded-xl border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center gap-2 text-neutral-400 hover:border-[#d98c2a] hover:text-[#d98c2a] transition-colors">
+                <label className="cursor-pointer w-full h-40 rounded-xl border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center gap-2 text-neutral-400 hover:border-[var(--color-brand-primary)] hover:text-[var(--color-brand-primary)] transition-colors">
                   {uploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <ImageIcon className="w-8 h-8" />}
                   <span className="text-sm">{uploading ? "Uploading…" : "Upload Hero Image"}</span>
                   <span className="text-xs">Recommended: 1400×900px</span>
@@ -279,7 +279,7 @@ export default function AdminHomepagePage() {
                 </label>
                 <input type="range" min={0} max={90} value={cms.hero.overlayOpacity}
                   onChange={(e) => updHero("overlayOpacity", Number(e.target.value))}
-                  className="w-full accent-[#d98c2a]" />
+                  className="w-full accent-[var(--color-brand-primary)]" />
               </div>
             )}
           </>
@@ -324,7 +324,7 @@ export default function AdminHomepagePage() {
               <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">About Text</label>
               <textarea value={cms.aboutText} onChange={(e) => setCms((c) => ({ ...c, aboutText: e.target.value }))}
                 rows={5} placeholder="Tell your brand story here…"
-                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none" />
+                className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none" />
             </div>
             <div>
               <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-2">About Image</label>
@@ -339,7 +339,7 @@ export default function AdminHomepagePage() {
                   </div>
                 </div>
               ) : (
-                <label className="cursor-pointer w-full h-40 rounded-xl border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center gap-2 text-neutral-400 hover:border-[#d98c2a] hover:text-[#d98c2a] transition-colors">
+                <label className="cursor-pointer w-full h-40 rounded-xl border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center gap-2 text-neutral-400 hover:border-[var(--color-brand-primary)] hover:text-[var(--color-brand-primary)] transition-colors">
                   <ImageIcon className="w-8 h-8" />
                   <span className="text-sm">Upload About Image</span>
                   <input ref={aboutImgRef} type="file" accept="image/*" className="hidden"
@@ -358,7 +358,7 @@ export default function AdminHomepagePage() {
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-neutral-800">Customer Testimonials</h2>
               <button onClick={addTestimonial}
-                className="flex items-center gap-1.5 text-sm text-[#d98c2a] hover:text-[#c47020] font-medium">
+                className="flex items-center gap-1.5 text-sm text-[var(--color-brand-primary)] hover:text-[var(--color-brand-accent)] font-medium">
                 <Plus className="w-4 h-4" /> Add Testimonial
               </button>
             </div>
@@ -367,7 +367,7 @@ export default function AdminHomepagePage() {
               <div className="text-center py-10 border-2 border-dashed border-neutral-200 rounded-xl">
                 <MessageSquare className="w-8 h-8 text-neutral-200 mx-auto mb-2" />
                 <p className="text-sm text-neutral-400">No testimonials yet</p>
-                <button onClick={addTestimonial} className="mt-2 text-xs text-[#d98c2a] hover:underline">
+                <button onClick={addTestimonial} className="mt-2 text-xs text-[var(--color-brand-primary)] hover:underline">
                   Add your first testimonial
                 </button>
               </div>
@@ -402,14 +402,14 @@ export default function AdminHomepagePage() {
                     <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Review Text</label>
                     <textarea value={t.text} onChange={(e) => updTestimonial(i, "text", e.target.value)}
                       rows={2} placeholder="Write the customer review here…"
-                      className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none" />
+                      className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-2">Rating</label>
                     <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map((n) => (
                         <button key={n} onClick={() => updTestimonial(i, "rating", n)}>
-                          <Star className={cn("w-5 h-5", n <= t.rating ? "text-[#d98c2a] fill-[#d98c2a]" : "text-neutral-200")} />
+                          <Star className={cn("w-5 h-5", n <= t.rating ? "text-[var(--color-brand-primary)] fill-[var(--color-brand-primary)]" : "text-neutral-200")} />
                         </button>
                       ))}
                     </div>
@@ -426,7 +426,7 @@ export default function AdminHomepagePage() {
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-neutral-800">Trust Badges</h2>
               <button onClick={addBadge}
-                className="flex items-center gap-1.5 text-sm text-[#d98c2a] hover:text-[#c47020] font-medium">
+                className="flex items-center gap-1.5 text-sm text-[var(--color-brand-primary)] hover:text-[var(--color-brand-accent)] font-medium">
                 <Plus className="w-4 h-4" /> Add Badge
               </button>
             </div>
@@ -456,7 +456,7 @@ export default function AdminHomepagePage() {
                     <div>
                       <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide block mb-1.5">Icon</label>
                       <select value={b.icon} onChange={(e) => updBadge(i, "icon", e.target.value)}
-                        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]">
+                        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]">
                         {LUCIDE_ICONS.map((ic) => <option key={ic} value={ic}>{ic}</option>)}
                       </select>
                     </div>

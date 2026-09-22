@@ -10,7 +10,7 @@ import {
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from "recharts";
 
-const COLORS = ["#d98c2a", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+const COLORS = ["var(--color-brand-primary)", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 export default function AdminAnalyticsPage() {
   const [range, setRange] = useState("30");
@@ -35,17 +35,17 @@ export default function AdminAnalyticsPage() {
             <select
               value={range}
               onChange={(e) => setRange(e.target.value)}
-              className="text-sm border border-neutral-200 rounded-lg px-3 py-2 outline-none focus:border-[#d98c2a]"
+              className="text-sm border border-neutral-200 rounded-lg px-3 py-2 outline-none focus:border-[var(--color-brand-primary)]"
             >
               <option value="7">Last 7 days</option>
               <option value="30">Last 30 days</option>
               <option value="90">Last 90 days</option>
             </select>
-            <button onClick={refresh} className="flex items-center gap-1.5 px-3 py-2 text-sm bg-[#d98c2a] text-white rounded-lg hover:bg-[#c47020]">
+            <button onClick={refresh} className="flex items-center gap-1.5 px-3 py-2 text-sm bg-[var(--color-brand-primary)] text-white rounded-lg hover:bg-[var(--color-brand-accent)]">
               <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
               Refresh
             </button>
-            <Link href="/admin" className="text-sm text-[#d98c2a]">← Dashboard</Link>
+            <Link href="/admin" className="text-sm text-[var(--color-brand-primary)]">← Dashboard</Link>
           </div>
         </div>
       </div>
@@ -55,7 +55,7 @@ export default function AdminAnalyticsPage() {
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Total Revenue",     value: overview ? formatPrice(overview.totalRevenue) : "—",    icon: DollarSign,   color: "text-[#d98c2a]",  bg: "bg-[#d98c2a]/10" },
+            { label: "Total Revenue",     value: overview ? formatPrice(overview.totalRevenue) : "—",    icon: DollarSign,   color: "text-[var(--color-brand-primary)]",  bg: "bg-[var(--color-brand-primary-10)]" },
             { label: "Total Orders",      value: String(overview?.totalOrders ?? "—"),                   icon: ShoppingCart, color: "text-blue-600",   bg: "bg-blue-50" },
             { label: "New Customers",     value: String(overview?.totalCustomers ?? "—"),                icon: Users,        color: "text-purple-600", bg: "bg-purple-50" },
             { label: "Avg Order Value",   value: overview ? formatPrice(overview.avgOrderValue) : "—",   icon: TrendingUp,   color: "text-green-600",  bg: "bg-green-50" },
@@ -84,7 +84,7 @@ export default function AdminAnalyticsPage() {
                 <YAxis tickFormatter={(v: number) => `₦${(v/1000).toFixed(0)}k`} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip formatter={(v: number) => [formatPrice(v), "Revenue"]} />
                 <Legend />
-                <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#d98c2a" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="revenue" name="Revenue" stroke="var(--color-brand-primary)" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 6 }} />
                 <Line type="monotone" dataKey="orders" name="Orders" stroke="#3b82f6" strokeWidth={2} dot={false} yAxisId={1} />
               </LineChart>
             </ResponsiveContainer>
@@ -103,7 +103,7 @@ export default function AdminAnalyticsPage() {
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
                   <Tooltip />
-                  <Bar dataKey="orders" name="Orders" fill="#d98c2a" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="orders" name="Orders" fill="var(--color-brand-primary)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -178,7 +178,7 @@ export default function AdminAnalyticsPage() {
                     <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis type="category" dataKey="_id" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={80} />
                     <Tooltip />
-                    <Bar dataKey="count" fill="#d98c2a" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="count" fill="var(--color-brand-primary)" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
                 <div className="grid grid-cols-2 gap-2 mt-4">

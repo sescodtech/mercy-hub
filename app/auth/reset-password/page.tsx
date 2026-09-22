@@ -54,7 +54,7 @@ function ResetForm() {
         <Link
           href="/auth/forgot-password"
           className="inline-flex items-center gap-2 py-3 px-5 text-sm font-medium rounded-xl text-white"
-          style={{ backgroundColor: "#d98c2a" }}
+          style={{ backgroundColor: "var(--color-brand-primary)" }}
         >
           Request New Link
         </Link>
@@ -84,7 +84,7 @@ function ResetForm() {
           className="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
           style={{ backgroundColor: "rgba(217,140,42,0.1)" }}
         >
-          <Lock className="w-6 h-6" style={{ color: "#d98c2a" }} />
+          <Lock className="w-6 h-6" style={{ color: "var(--color-brand-primary)" }} />
         </div>
         <h1 className="font-display text-2xl font-semibold text-neutral-900 mb-1.5">
           Set new password
@@ -106,7 +106,7 @@ function ResetForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Min. 8 characters"
-              className="w-full px-3.5 py-3 pr-11 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[#d98c2a] focus:ring-2 focus:ring-[#d98c2a]/10 transition-all bg-white"
+              className="w-full px-3.5 py-3 pr-11 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[var(--color-brand-primary)] focus:ring-2 focus:ring-[var(--color-brand-primary-10)] transition-all bg-white"
             />
             <button
               type="button"
@@ -133,7 +133,7 @@ function ResetForm() {
               "w-full px-3.5 py-3 text-sm border rounded-xl outline-none focus:ring-2 transition-all bg-white",
               confirm && confirm !== password
                 ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                : "border-neutral-200 focus:border-[#d98c2a] focus:ring-[#d98c2a]/10"
+                : "border-neutral-200 focus:border-[var(--color-brand-primary)] focus:ring-[var(--color-brand-primary-10)]"
             )}
           />
           {confirm && confirm !== password && (
@@ -151,9 +151,9 @@ function ResetForm() {
           type="submit"
           disabled={loading}
           className="w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-white rounded-xl disabled:opacity-60 transition-all mt-2"
-          style={{ backgroundColor: "#d98c2a" }}
-          onMouseEnter={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "#c47020")}
-          onMouseLeave={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "#d98c2a")}
+          style={{ backgroundColor: "var(--color-brand-primary)" }}
+          onMouseEnter={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-brand-accent)")}
+          onMouseLeave={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-brand-primary)")}
         >
           {loading
             ? <><Loader2 className="w-4 h-4 animate-spin" /> Resetting…</>
@@ -182,7 +182,7 @@ export default function ResetPasswordPage() {
         <div className="text-center mb-8">
           <Link href="/">
             <span className="font-display text-2xl font-semibold text-neutral-900">
-              Mercy<span style={{ color: "#d98c2a" }}>Home</span>
+              Mercy<span style={{ color: "var(--color-brand-primary)" }}>Home</span>
             </span>
           </Link>
         </div>
@@ -190,7 +190,7 @@ export default function ResetPasswordPage() {
         <div className="bg-white rounded-2xl border border-neutral-100 p-8 shadow-sm">
           <Suspense fallback={
             <div className="flex justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#d98c2a" }} />
+              <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--color-brand-primary)" }} />
             </div>
           }>
             <ResetForm />

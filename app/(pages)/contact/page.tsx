@@ -56,8 +56,8 @@ export default function ContactPage() {
               <div className="space-y-5">
                 {settings?.address?.street && (
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-[#d98c2a]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5 text-[#d98c2a]" />
+                    <div className="w-10 h-10 bg-[var(--color-brand-primary-10)] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-5 h-5 text-[var(--color-brand-primary)]" />
                     </div>
                     <div>
                       <p className="font-medium text-neutral-900 mb-0.5">Address</p>
@@ -72,13 +72,13 @@ export default function ContactPage() {
 
                 {settings?.phone && settings.phone.length > 0 && (
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-[#d98c2a]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Phone className="w-5 h-5 text-[#d98c2a]" />
+                    <div className="w-10 h-10 bg-[var(--color-brand-primary-10)] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-5 h-5 text-[var(--color-brand-primary)]" />
                     </div>
                     <div>
                       <p className="font-medium text-neutral-900 mb-0.5">Phone</p>
                       {settings.phone.map((p, i) => (
-                        <a key={i} href={`tel:${p}`} className="block text-sm text-neutral-500 hover:text-[#d98c2a] transition-colors">
+                        <a key={i} href={`tel:${p}`} className="block text-sm text-neutral-500 hover:text-[var(--color-brand-primary)] transition-colors">
                           {p}
                         </a>
                       ))}
@@ -88,16 +88,16 @@ export default function ContactPage() {
 
                 {settings?.email && (
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-[#d98c2a]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Mail className="w-5 h-5 text-[#d98c2a]" />
+                    <div className="w-10 h-10 bg-[var(--color-brand-primary-10)] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Mail className="w-5 h-5 text-[var(--color-brand-primary)]" />
                     </div>
                     <div>
                       <p className="font-medium text-neutral-900 mb-0.5">Email</p>
-                      <a href={`mailto:${settings.email}`} className="text-sm text-neutral-500 hover:text-[#d98c2a] transition-colors">
+                      <a href={`mailto:${settings.email}`} className="text-sm text-neutral-500 hover:text-[var(--color-brand-primary)] transition-colors">
                         {settings.email}
                       </a>
                       {settings.supportEmail && settings.supportEmail !== settings.email && (
-                        <a href={`mailto:${settings.supportEmail}`} className="block text-sm text-neutral-500 hover:text-[#d98c2a] transition-colors">
+                        <a href={`mailto:${settings.supportEmail}`} className="block text-sm text-neutral-500 hover:text-[var(--color-brand-primary)] transition-colors">
                           {settings.supportEmail} (Support)
                         </a>
                       )}
@@ -121,8 +121,8 @@ export default function ContactPage() {
                 )}
 
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-[#d98c2a]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-5 h-5 text-[#d98c2a]" />
+                  <div className="w-10 h-10 bg-[var(--color-brand-primary-10)] rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-5 h-5 text-[var(--color-brand-primary)]" />
                   </div>
                   <div>
                     <p className="font-medium text-neutral-900 mb-0.5">Business Hours</p>
@@ -143,7 +143,7 @@ export default function ContactPage() {
                 <h3 className="font-display text-xl font-semibold text-neutral-900 mb-2">Message Sent!</h3>
                 <p className="text-neutral-500 text-sm mb-6">We'll get back to you within 24 hours.</p>
                 <button onClick={() => { setSent(false); setForm({ name: "", email: "", phone: "", subject: "", message: "" }); }}
-                  className="text-sm text-[#d98c2a] hover:underline">Send another message</button>
+                  className="text-sm text-[var(--color-brand-primary)] hover:underline">Send another message</button>
               </div>
             ) : (
               <form onSubmit={submit} className="space-y-4">
@@ -159,7 +159,7 @@ export default function ContactPage() {
                       <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">{label}</label>
                       <input type={type} value={(form as Record<string, string>)[key]}
                         onChange={(e) => set(key, e.target.value)} placeholder={placeholder}
-                        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] transition-colors" />
+                        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] transition-colors" />
                     </div>
                   ))}
                 </div>
@@ -167,10 +167,10 @@ export default function ContactPage() {
                   <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">Message *</label>
                   <textarea value={form.message} onChange={(e) => set("message", e.target.value)}
                     rows={5} placeholder="How can we help you?"
-                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] transition-colors resize-none" />
+                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] transition-colors resize-none" />
                 </div>
                 <button type="submit" disabled={sending}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 transition-colors">
+                  className="w-full flex items-center justify-center gap-2 py-3.5 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60 transition-colors">
                   {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   {sending ? "Sending…" : "Send Message"}
                 </button>

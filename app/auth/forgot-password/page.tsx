@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
         <div className="text-center mb-10">
           <Link href="/">
             <span className="font-display text-2xl font-semibold text-neutral-900">
-              Mercy<span style={{ color: "#d98c2a" }}>Home</span>
+              Mercy<span style={{ color: "var(--color-brand-primary)" }}>Home</span>
             </span>
           </Link>
         </div>
@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
               <button
                 onClick={() => setSent(false)}
                 className="font-medium hover:underline"
-                style={{ color: "#d98c2a" }}
+                style={{ color: "var(--color-brand-primary)" }}
               >
                 try again
               </button>
@@ -75,7 +75,7 @@ export default function ForgotPasswordPage() {
             {/* Icon */}
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6"
               style={{ backgroundColor: "rgba(217,140,42,0.1)" }}>
-              <Mail className="w-6 h-6" style={{ color: "#d98c2a" }} />
+              <Mail className="w-6 h-6" style={{ color: "var(--color-brand-primary)" }} />
             </div>
 
             <h1 className="font-display text-2xl font-semibold text-neutral-900 mb-2">
@@ -96,7 +96,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full px-3.5 py-3 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[#d98c2a] focus:ring-2 focus:ring-[#d98c2a]/10 transition-all bg-white"
+                  className="w-full px-3.5 py-3 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[var(--color-brand-primary)] focus:ring-2 focus:ring-[var(--color-brand-primary-10)] transition-all bg-white"
                 />
               </div>
 
@@ -104,9 +104,9 @@ export default function ForgotPasswordPage() {
                 type="submit"
                 disabled={loading}
                 className="w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-white rounded-xl disabled:opacity-60 transition-all"
-                style={{ backgroundColor: "#d98c2a" }}
-                onMouseEnter={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "#c47020")}
-                onMouseLeave={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "#d98c2a")}
+                style={{ backgroundColor: "var(--color-brand-primary)" }}
+                onMouseEnter={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-brand-accent)")}
+                onMouseLeave={(e) => !loading && ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-brand-primary)")}
               >
                 {loading
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>

@@ -52,7 +52,7 @@ export default function CareersPage() {
     <div className="min-h-screen bg-cream">
       <div className="bg-[#1a1108] text-white py-20">
         <div className="container-site text-center">
-          <p className="text-[#d98c2a] text-xs tracking-[0.3em] uppercase font-body mb-4">Join Our Team</p>
+          <p className="text-[var(--color-brand-primary)] text-xs tracking-[0.3em] uppercase font-body mb-4">Join Our Team</p>
           <h1 className="font-display text-5xl font-light text-white mb-4">Careers at Mercy Home</h1>
           <p className="text-neutral-400 max-w-xl mx-auto text-sm">Be part of a team that brings premium home essentials to Nigerian families.</p>
         </div>
@@ -60,7 +60,7 @@ export default function CareersPage() {
 
       <div className="container-site py-12 max-w-4xl mx-auto">
         {loading ? (
-          <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" /></div>
+          <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" /></div>
         ) : jobs.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-2xl border border-neutral-100">
             <Briefcase className="w-12 h-12 text-neutral-200 mx-auto mb-4" />
@@ -115,19 +115,19 @@ export default function CareersPage() {
                         <div className="space-y-3">
                           <div className="grid sm:grid-cols-2 gap-3">
                             <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full Name *"
-                              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+                              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
                             <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Email Address *" type="email"
-                              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+                              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
                           </div>
                           <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Phone Number"
-                            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+                            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
                           <input value={form.cvUrl} onChange={(e) => setForm({ ...form, cvUrl: e.target.value })} placeholder="CV / Resume Link (Google Drive, Dropbox, etc.)"
-                            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+                            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
                           <textarea value={form.coverLetter} onChange={(e) => setForm({ ...form, coverLetter: e.target.value })} placeholder="Cover Letter (optional)"
-                            rows={4} className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none" />
+                            rows={4} className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none" />
                           <div className="flex gap-3">
                             <button onClick={() => handleApply(job._id)} disabled={submitting}
-                              className="flex-1 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
+                              className="flex-1 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
                               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                               {submitting ? "Submitting…" : "Submit Application"}
                             </button>
@@ -137,7 +137,7 @@ export default function CareersPage() {
                       </div>
                     ) : (
                       <button onClick={() => setApplying(job._id)}
-                        className="mt-4 px-6 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors">
+                        className="mt-4 px-6 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors">
                         Apply for this Position
                       </button>
                     )}

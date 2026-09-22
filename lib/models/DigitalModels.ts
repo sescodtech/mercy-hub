@@ -56,7 +56,9 @@ const DigitalOrderSchema = new Schema<IDigitalOrder>({
 
 DigitalOrderSchema.index({ user: 1, createdAt: -1 });
 DigitalOrderSchema.index({ status: 1 });
-DigitalOrderSchema.index({ paystackRef: 1 }, { sparse: true });
+DigitalOrderSchema.index({ paystackRef: 1 }, { unique: true, sparse: true });
+DigitalOrderSchema.index({ providerRef: 1 }, { sparse: true });
+DigitalOrderSchema.index({ category: 1, status: 1, createdAt: -1 });
 
 // ─── DigitalWallet ────────────────────────────────────────────
 // Per-user wallet for topping up and spending on digital services

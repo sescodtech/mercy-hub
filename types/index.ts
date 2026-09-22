@@ -166,6 +166,7 @@ export interface IOrder {
   paymentMethod: "paystack" | "flutterwave" | "cod";
   paymentStatus: "pending" | "paid" | "failed" | "refunded";
   paymentReference?: string;
+  stockReleasedAt?: Date;
   orderStatus: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled" | "returned";
   subtotal: number;
   shippingCost: number;

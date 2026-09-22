@@ -102,7 +102,7 @@ export default function FAQPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search questions…"
-            className="w-full pl-11 pr-4 py-3 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[#d98c2a] bg-white"
+            className="w-full pl-11 pr-4 py-3 text-sm border border-neutral-200 rounded-xl outline-none focus:border-[var(--color-brand-primary)] bg-white"
           />
         </div>
       </div>
@@ -113,7 +113,7 @@ export default function FAQPage() {
             <p className="text-neutral-400 mb-3">No results for "{search}"</p>
             <button
               onClick={() => setSearch("")}
-              className="text-sm text-[#d98c2a] hover:underline"
+              className="text-sm text-[var(--color-brand-primary)] hover:underline"
             >
               Clear search
             </button>
@@ -139,7 +139,7 @@ export default function FAQPage() {
                             {item.q}
                           </span>
                           {isOpen
-                            ? <ChevronUp className="w-4 h-4 text-[#d98c2a] flex-shrink-0" />
+                            ? <ChevronUp className="w-4 h-4 text-[var(--color-brand-primary)] flex-shrink-0" />
                             : <ChevronDown className="w-4 h-4 text-neutral-400 flex-shrink-0" />}
                         </button>
                         {isOpen && (
@@ -166,7 +166,7 @@ export default function FAQPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/contact"
-              className="px-6 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors">
+              className="px-6 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors">
               Contact Us
             </Link>
             <Link href="/support"

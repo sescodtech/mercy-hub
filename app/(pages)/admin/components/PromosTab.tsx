@@ -148,7 +148,7 @@ export function PromosTab() {
           </button>
         </div>
         <button onClick={() => openEditor({ ...EMPTY, type })}
-          className="flex items-center gap-2 bg-[#c47020] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#a3551c]">
+          className="flex items-center gap-2 bg-[var(--color-brand-accent)] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#a3551c]">
           <Plus className="w-4 h-4" /> Add {type === "deal" ? "Deal" : "Promo Product"}
         </button>
       </div>
@@ -172,7 +172,7 @@ export function PromosTab() {
                     setPlanCategory(cat as typeof PLAN_BACKED_CATEGORIES[number]);
                   }
                 }}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]">
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]">
                 <option value="data">Data</option>
                 <option value="airtime">Airtime</option>
                 <option value="cable">Cable TV</option>
@@ -183,7 +183,7 @@ export function PromosTab() {
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">Badge</label>
               <input value={editing.badge} onChange={(e) => setEditing({ ...editing, badge: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" placeholder="e.g. Hot, Limited Time" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" placeholder="e.g. Hot, Limited Time" />
             </div>
 
             {/* ── Live plan picker — replaces the old free-text Provider Plan ID field ── */}
@@ -192,7 +192,7 @@ export function PromosTab() {
                 <label className="block text-xs font-medium text-neutral-500 mb-1">Data Plan *</label>
 
                 {selectedPlan ? (
-                  <div className="flex items-center justify-between border border-[#d98c2a] bg-[#fff7ed] rounded-lg px-3 py-2.5">
+                  <div className="flex items-center justify-between border border-[var(--color-brand-primary)] bg-[#fff7ed] rounded-lg px-3 py-2.5">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-neutral-800 truncate">{selectedPlan.label}</p>
                       <p className="text-xs text-neutral-500">{selectedPlan.meta}</p>
@@ -206,7 +206,7 @@ export function PromosTab() {
                     <button
                       type="button"
                       onClick={() => setPickerOpen((v) => !v)}
-                      className="w-full flex items-center justify-between border border-neutral-200 rounded-lg px-3 py-2.5 text-sm text-left text-neutral-500 hover:border-[#d98c2a]"
+                      className="w-full flex items-center justify-between border border-neutral-200 rounded-lg px-3 py-2.5 text-sm text-left text-neutral-500 hover:border-[var(--color-brand-primary)]"
                     >
                       Select an available plan…
                       <ChevronDown className="w-4 h-4 flex-shrink-0" />
@@ -231,7 +231,7 @@ export function PromosTab() {
 
                         <div className="max-h-64 overflow-y-auto divide-y divide-neutral-50">
                           {plansLoading ? (
-                            <div className="flex justify-center py-6"><Loader2 className="w-4 h-4 animate-spin text-[#d98c2a]" /></div>
+                            <div className="flex justify-center py-6"><Loader2 className="w-4 h-4 animate-spin text-[var(--color-brand-primary)]" /></div>
                           ) : availablePlans.length === 0 ? (
                             <p className="text-sm text-neutral-400 text-center py-6">No live plans returned by the provider right now.</p>
                           ) : (
@@ -264,22 +264,22 @@ export function PromosTab() {
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">Title *</label>
               <input value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" placeholder="e.g. 2GB MTN — Weekend Special" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" placeholder="e.g. 2GB MTN — Weekend Special" />
             </div>
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-neutral-500 mb-1">Subtitle</label>
               <input value={editing.subtitle} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" placeholder="Short supporting line" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" placeholder="Short supporting line" />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">CTA Label</label>
               <input value={editing.ctaLabel} onChange={(e) => setEditing({ ...editing, ctaLabel: e.target.value })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" placeholder="Buy Now (default)" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" placeholder="Buy Now (default)" />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1">Sort Order</label>
               <input type="number" value={editing.sortOrder} onChange={(e) => setEditing({ ...editing, sortOrder: Number(e.target.value) })}
-                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" />
+                className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" />
             </div>
           </div>
 
@@ -291,7 +291,7 @@ export function PromosTab() {
             <div className="flex gap-2">
               <button onClick={() => setEditing(null)} className="px-4 py-2 rounded-xl text-sm font-medium text-neutral-600 hover:bg-neutral-50">Cancel</button>
               <button onClick={save} disabled={saving || !editing.title || (isPlanBackedCategory && !editing.providerPlanId)}
-                className="flex items-center gap-2 bg-[#c47020] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#a3551c] disabled:opacity-50">
+                className="flex items-center gap-2 bg-[var(--color-brand-accent)] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#a3551c] disabled:opacity-50">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Save
               </button>
             </div>
@@ -302,7 +302,7 @@ export function PromosTab() {
       {/* List */}
       <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden">
         {loading ? (
-          <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#d98c2a]" /></div>
+          <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[var(--color-brand-primary)]" /></div>
         ) : filtered.length === 0 ? (
           <div className="py-12 text-center text-neutral-400 text-sm">No {type === "deal" ? "hot deals" : "promo products"} yet — add one above.</div>
         ) : (
@@ -331,7 +331,7 @@ export function PromosTab() {
                   </td>
                   <td className="px-4 py-3">
                     <button onClick={() => toggleActive(p)}
-                      className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${p.isActive ? "bg-[#d98c2a]" : "bg-neutral-200"}`}>
+                      className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${p.isActive ? "bg-[var(--color-brand-primary)]" : "bg-neutral-200"}`}>
                       <span className={`inline-block w-3.5 h-3.5 transform rounded-full bg-white shadow transition-transform mt-0.5 ${p.isActive ? "translate-x-5" : "translate-x-0.5"}`} />
                     </button>
                   </td>

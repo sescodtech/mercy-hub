@@ -53,7 +53,7 @@ export function OrderSummaryPanel({
         )}
         <div className="flex justify-between text-sm pt-1.5 border-t border-neutral-200">
           <span className="text-neutral-500">Amount</span>
-          <span className="font-bold" style={{ color: "#d98c2a" }}>{fmt(plan.price)}</span>
+          <span className="font-bold" style={{ color: "var(--color-brand-primary)" }}>{fmt(plan.price)}</span>
         </div>
       </div>
 
@@ -63,11 +63,11 @@ export function OrderSummaryPanel({
           onClick={() => setPayMethod("wallet")}
           className="p-2.5 rounded-xl border-2 text-left transition-all"
           style={{
-            borderColor: payMethod === "wallet" ? "#d98c2a" : "#e5e5e5",
+            borderColor: payMethod === "wallet" ? "var(--color-brand-primary)" : "#e5e5e5",
             backgroundColor: payMethod === "wallet" ? "rgba(217,140,42,0.08)" : "transparent",
           }}
         >
-          <Wallet className="w-4 h-4 mb-1" style={{ color: "#d98c2a" }} />
+          <Wallet className="w-4 h-4 mb-1" style={{ color: "var(--color-brand-primary)" }} />
           <p className="text-sm font-semibold text-neutral-800">Wallet</p>
           <p className="text-xs text-neutral-400">Balance: {fmt(walletBal)}</p>
         </button>
@@ -75,7 +75,7 @@ export function OrderSummaryPanel({
           onClick={() => setPayMethod("paystack")}
           className="p-2.5 rounded-xl border-2 text-left transition-all"
           style={{
-            borderColor: payMethod === "paystack" ? "#d98c2a" : "#e5e5e5",
+            borderColor: payMethod === "paystack" ? "var(--color-brand-primary)" : "#e5e5e5",
             backgroundColor: payMethod === "paystack" ? "rgba(217,140,42,0.08)" : "transparent",
           }}
         >
@@ -96,7 +96,7 @@ export function OrderSummaryPanel({
         onClick={onPurchase}
         disabled={!canPurchase}
         className="w-full text-white py-3.5 rounded-xl font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        style={{ backgroundColor: "#c47020" }}
+        style={{ backgroundColor: "var(--color-brand-accent)" }}
       >
         {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : `Pay ${fmt(plan.price)}`}
       </button>

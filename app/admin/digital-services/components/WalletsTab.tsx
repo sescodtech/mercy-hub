@@ -74,11 +74,11 @@ export function WalletsTab() {
           <div className="relative">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search customer name or email…"
-              className="w-full border border-neutral-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" />
+              className="w-full border border-neutral-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" />
           </div>
         </div>
         {loading ? (
-          <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-[#d98c2a]" /></div>
+          <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-[var(--color-brand-primary)]" /></div>
         ) : wallets.length === 0 ? (
           <p className="text-sm text-neutral-400 text-center py-10">No wallets found</p>
         ) : (
@@ -116,7 +116,7 @@ export function WalletsTab() {
 
             <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-center">
               <p className="text-xs text-neutral-500 uppercase tracking-wide">Current Balance</p>
-              <p className="text-2xl font-bold" style={{ color: "#c47020" }}>{fmt(selected.balance)}</p>
+              <p className="text-2xl font-bold" style={{ color: "var(--color-brand-accent)" }}>{fmt(selected.balance)}</p>
             </div>
 
             {/* Manual adjustment */}
@@ -134,12 +134,12 @@ export function WalletsTab() {
               </div>
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount (₦)"
-                  className="border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" />
+                  className="border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" />
                 <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Reason (e.g. refund for MH-DIG…)"
-                  className="border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]" />
+                  className="border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]" />
               </div>
               <button onClick={submitAdjustment} disabled={adjusting || !amount}
-                className="w-full bg-[#c47020] text-white py-2 rounded-lg text-sm font-semibold hover:bg-[#a3551c] disabled:opacity-50 flex items-center justify-center gap-2">
+                className="w-full bg-[var(--color-brand-accent)] text-white py-2 rounded-lg text-sm font-semibold hover:bg-[#a3551c] disabled:opacity-50 flex items-center justify-center gap-2">
                 {adjusting ? <Loader2 className="w-4 h-4 animate-spin" /> : null} Apply {action === "credit" ? "Credit" : "Debit"}
               </button>
             </div>
@@ -148,7 +148,7 @@ export function WalletsTab() {
             <div>
               <p className="text-sm font-semibold text-neutral-800 mb-2">Recent Ledger</p>
               {detailLoad ? (
-                <div className="flex justify-center py-6"><Loader2 className="w-4 h-4 animate-spin text-[#d98c2a]" /></div>
+                <div className="flex justify-center py-6"><Loader2 className="w-4 h-4 animate-spin text-[var(--color-brand-primary)]" /></div>
               ) : ledger.length === 0 ? (
                 <p className="text-sm text-neutral-400 py-4 text-center">No wallet activity yet</p>
               ) : (

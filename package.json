@@ -6,9 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "backup:mongodb": "node scripts/mongodb-backup.mjs",
+    "verify:production": "node scripts/verify-production.mjs",
+    "verify": "npm run type-check && npm run lint && npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

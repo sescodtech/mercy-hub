@@ -81,7 +81,7 @@ export default function AdminBlogPage() {
     } catch { toast.error("Failed to update"); }
   };
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" /></div>;
 
   if (editing !== null) return (
     <div className="max-w-3xl mx-auto py-8 px-4">
@@ -96,7 +96,7 @@ export default function AdminBlogPage() {
           <div key={key}>
             <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">{label}</label>
             <input value={(editing as any)[key] || ""} onChange={(e) => setEditing({ ...editing, [key]: e.target.value })} placeholder={ph}
-              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
           </div>
         ))}
 
@@ -121,7 +121,7 @@ export default function AdminBlogPage() {
               value={editing.coverImage || ""}
               onChange={(e) => setEditing({ ...editing, coverImage: e.target.value })}
               placeholder="Paste image URL or upload below"
-              className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]"
+              className="flex-1 text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]"
             />
             <button
               onClick={() => fileRef.current?.click()}
@@ -147,20 +147,20 @@ export default function AdminBlogPage() {
         <div>
           <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">Excerpt</label>
           <textarea value={editing.excerpt || ""} onChange={(e) => setEditing({ ...editing, excerpt: e.target.value })} rows={3}
-            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none" placeholder="Short summary…" />
+            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none" placeholder="Short summary…" />
         </div>
         <div>
           <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">Content</label>
           <textarea value={editing.content || ""} onChange={(e) => setEditing({ ...editing, content: e.target.value })} rows={12}
-            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] resize-none font-mono" placeholder="Post content (HTML supported)…" />
+            className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] resize-none font-mono" placeholder="Post content (HTML supported)…" />
         </div>
         <div>
           <label className="text-xs font-semibold text-neutral-600 uppercase tracking-wide block mb-1.5">Tags (comma-separated)</label>
           <input value={(editing.tags || []).join(", ")} onChange={(e) => setEditing({ ...editing, tags: e.target.value.split(",").map(t => t.trim()).filter(Boolean) })}
-            placeholder="home decor, tips, Nigeria" className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+            placeholder="home decor, tips, Nigeria" className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
         </div>
         <label className="flex items-center gap-3 cursor-pointer">
-          <div className={cn("w-10 h-5 rounded-full transition-colors relative", editing.isPublished ? "bg-[#d98c2a]" : "bg-neutral-300")}
+          <div className={cn("w-10 h-5 rounded-full transition-colors relative", editing.isPublished ? "bg-[var(--color-brand-primary)]" : "bg-neutral-300")}
             onClick={() => setEditing({ ...editing, isPublished: !editing.isPublished })}>
             <div className={cn("absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform", editing.isPublished ? "translate-x-5" : "translate-x-0.5")} />
           </div>
@@ -168,7 +168,7 @@ export default function AdminBlogPage() {
         </label>
         <div className="flex gap-3 pt-2">
           <button onClick={save} disabled={saving}
-            className="flex-1 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
+            className="flex-1 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {saving ? "Saving…" : "Save Post"}
           </button>
@@ -182,7 +182,7 @@ export default function AdminBlogPage() {
     <div className="max-w-5xl mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <div><h1 className="text-xl font-semibold">Blog Posts</h1><p className="text-sm text-neutral-400">{posts.length} posts</p></div>
-        <button onClick={() => setEditing({ ...EMPTY })} className="flex items-center gap-2 px-4 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors">
+        <button onClick={() => setEditing({ ...EMPTY })} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors">
           <Plus className="w-4 h-4" /> New Post
         </button>
       </div>
@@ -215,7 +215,7 @@ export default function AdminBlogPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2 justify-end">
-                      <button onClick={() => togglePublish(post)} className="p-1.5 text-neutral-400 hover:text-[#d98c2a] transition-colors" title={post.isPublished ? "Unpublish" : "Publish"}>
+                      <button onClick={() => togglePublish(post)} className="p-1.5 text-neutral-400 hover:text-[var(--color-brand-primary)] transition-colors" title={post.isPublished ? "Unpublish" : "Publish"}>
                         {post.isPublished ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                       <button onClick={() => setEditing(post)} className="p-1.5 text-neutral-400 hover:text-blue-600 transition-colors"><Edit className="w-4 h-4" /></button>

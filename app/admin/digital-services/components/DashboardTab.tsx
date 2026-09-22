@@ -28,7 +28,7 @@ export function DashboardTab() {
   }
 
   if (loading) {
-    return <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[#d98c2a]" /></div>;
+    return <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[var(--color-brand-primary)]" /></div>;
   }
   if (!stats) return <p className="text-sm text-neutral-400 py-10 text-center">Couldn't load dashboard stats.</p>;
 
@@ -78,7 +78,7 @@ export function DashboardTab() {
       {/* Stats grid — 8 cards, matches the old DATAHUB dashboard density */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Transactions", value: stats.totalOrders,            sub: `${stats.todayOrders} today`,        icon: TrendingUp, color: "#d98c2a" },
+          { label: "Total Transactions", value: stats.totalOrders,            sub: `${stats.todayOrders} today`,        icon: TrendingUp, color: "var(--color-brand-primary)" },
           { label: "Revenue",             value: fmt(stats.totalRevenue),     sub: "All time",                          icon: Wallet,     color: "#10b981", isText: true },
           { label: "Profit",              value: fmt(stats.grossProfit),      sub: "Revenue − cost",                    icon: TrendingUp, color: "#6366f1", isText: true },
           { label: "Customers",           value: stats.customerCount,         sub: "Unique buyers",                     icon: Users,      color: "#0ea5e9" },

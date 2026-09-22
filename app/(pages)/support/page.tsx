@@ -35,9 +35,9 @@ export default function SupportPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {TOPICS.map(({ icon: Icon, title, desc, href }) => (
               <Link key={title} href={href}
-                className="bg-white rounded-2xl border border-neutral-100 p-6 hover:border-[#d98c2a]/30 hover:shadow-sm transition-all group">
-                <div className="w-10 h-10 bg-[#d98c2a]/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#d98c2a]/20 transition-colors">
-                  <Icon className="w-5 h-5 text-[#d98c2a]" />
+                className="bg-white rounded-2xl border border-neutral-100 p-6 hover:border-[var(--color-brand-primary-30)] hover:shadow-sm transition-all group">
+                <div className="w-10 h-10 bg-[var(--color-brand-primary-10)] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[var(--color-brand-primary-20)] transition-colors">
+                  <Icon className="w-5 h-5 text-[var(--color-brand-primary)]" />
                 </div>
                 <h3 className="font-semibold text-neutral-900 text-sm mb-1">{title}</h3>
                 <p className="text-xs text-neutral-400 leading-relaxed">{desc}</p>
@@ -55,7 +55,7 @@ export default function SupportPage() {
               Find quick answers to the most common questions about shopping with us.
             </p>
             <Link href="/faq"
-              className="flex items-center gap-2 text-sm font-medium text-[#d98c2a] hover:text-[#c47020] transition-colors">
+              className="flex items-center gap-2 text-sm font-medium text-[var(--color-brand-primary)] hover:text-[var(--color-brand-accent)] transition-colors">
               Browse all FAQs <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
@@ -66,7 +66,7 @@ export default function SupportPage() {
             <div className="space-y-2">
               {POLICIES.map(({ title, href }) => (
                 <Link key={title} href={href}
-                  className="flex items-center justify-between py-2 text-sm text-neutral-600 hover:text-[#d98c2a] border-b border-neutral-50 last:border-0 transition-colors">
+                  className="flex items-center justify-between py-2 text-sm text-neutral-600 hover:text-[var(--color-brand-primary)] border-b border-neutral-50 last:border-0 transition-colors">
                   <span className="flex items-center gap-2">
                     <FileText className="w-3.5 h-3.5" />{title}
                   </span>
@@ -85,7 +85,7 @@ export default function SupportPage() {
             {[
               { icon: MessageCircle, title: "WhatsApp",  sub: "Fastest response", href: "/contact", color: "text-green-600", bg: "bg-green-50" },
               { icon: Mail,          title: "Email",     sub: "Within 24 hours",  href: "/contact", color: "text-blue-600",  bg: "bg-blue-50" },
-              { icon: Phone,         title: "Call Us",   sub: "Mon–Fri 9am–6pm",  href: "/contact", color: "text-[#d98c2a]", bg: "bg-[#d98c2a]/10" },
+              { icon: Phone,         title: "Call Us",   sub: "Mon–Fri 9am–6pm",  href: "/contact", color: "text-[var(--color-brand-primary)]", bg: "bg-[var(--color-brand-primary-10)]" },
             ].map(({ icon: Icon, title, sub, href, color, bg }) => (
               <Link key={title} href={href}
                 className="flex flex-col items-center text-center p-5 rounded-xl border border-neutral-100 hover:border-neutral-200 hover:shadow-sm transition-all">

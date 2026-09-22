@@ -71,7 +71,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             {product.isNewArrival && !discount && (
               <span
                 className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-sm text-white leading-tight tracking-wide"
-                style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                style={{ backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))" }}
               >
                 NEW
               </span>
@@ -143,7 +143,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 style={{ backgroundColor: "var(--color-footer-bg, #1a1208)" }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                    "var(--color-button-primary, #c47020)";
+                    "var(--color-button-primary, var(--color-brand-accent))";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.backgroundColor =
@@ -179,7 +179,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLHeadingElement).style.color =
-                "var(--color-brand-primary, #d98c2a)";
+                "var(--color-brand-primary, var(--color-brand-primary))";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLHeadingElement).style.color =
@@ -199,7 +199,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     className={cn("w-2 h-2 sm:w-2.5 sm:h-2.5")}
                     style={
                       i <= Math.round(product.rating)
-                        ? { color: "var(--color-brand-primary, #d98c2a)", fill: "currentColor" }
+                        ? { color: "var(--color-brand-primary, var(--color-brand-primary))", fill: "currentColor" }
                         : { color: "#e5e5e5", fill: "currentColor" }
                     }
                   />
@@ -220,7 +220,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   fontVariantNumeric: "tabular-nums",
                   letterSpacing: "-0.02em",
                   color: isOnSale
-                    ? "var(--color-brand-accent, #c47020)"
+                    ? "var(--color-brand-accent, var(--color-brand-accent))"
                     : "var(--color-text-primary, #1a1208)",
                 }}
               >
@@ -241,7 +241,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               <button
                 onClick={handleAddToCart}
                 className="sm:hidden w-6 h-6 rounded-md flex items-center justify-center text-white flex-shrink-0 transition-opacity"
-                style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                style={{ backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))" }}
                 aria-label="Add to cart"
               >
                 <ShoppingCart className="w-3 h-3" />

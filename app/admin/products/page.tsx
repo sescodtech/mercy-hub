@@ -200,10 +200,10 @@ export default function AdminProductsPage() {
           </div>
           <div className="flex items-center gap-3">
             <button onClick={openCreate}
-              className="flex items-center gap-2 px-4 py-2 bg-[#d98c2a] text-white text-sm rounded-lg hover:bg-[#c47020]">
+              className="flex items-center gap-2 px-4 py-2 bg-[var(--color-brand-primary)] text-white text-sm rounded-lg hover:bg-[var(--color-brand-accent)]">
               <Plus className="w-4 h-4" /> Add Product
             </button>
-            <Link href="/admin" className="text-sm text-[#d98c2a]">← Dashboard</Link>
+            <Link href="/admin" className="text-sm text-[var(--color-brand-primary)]">← Dashboard</Link>
           </div>
         </div>
       </div>
@@ -238,7 +238,7 @@ export default function AdminProductsPage() {
                 >
                   <Icon className="w-4 h-4" />{label}
                   {id === "colors" && form.colorVariants.length > 0 && (
-                    <span className="ml-1 px-1.5 py-0.5 bg-[#d98c2a] text-white text-xs rounded-full">
+                    <span className="ml-1 px-1.5 py-0.5 bg-[var(--color-brand-primary)] text-white text-xs rounded-full">
                       {form.colorVariants.length}
                     </span>
                   )}
@@ -276,7 +276,7 @@ export default function AdminProductsPage() {
                     <div className="flex items-center justify-between mb-2">
                       <label className="form-label mb-0">Images (max 5)</label>
                       <button onClick={() => fileRef.current?.click()} disabled={uploading || form.images.length >= 5}
-                        className="flex items-center gap-1.5 text-xs text-[#d98c2a] disabled:opacity-40">
+                        className="flex items-center gap-1.5 text-xs text-[var(--color-brand-primary)] disabled:opacity-40">
                         {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
                         Upload
                       </button>
@@ -286,22 +286,22 @@ export default function AdminProductsPage() {
                     <div className="grid grid-cols-5 gap-2">
                       {form.images.map((img, i) => (
                         <div key={i} className={cn("relative aspect-square rounded-lg overflow-hidden border-2 cursor-pointer",
-                          img.isFeatured ? "border-[#d98c2a]" : "border-neutral-200")}>
+                          img.isFeatured ? "border-[var(--color-brand-primary)]" : "border-neutral-200")}>
                           <Image src={img.url} alt={`Product ${i + 1}`} fill className="object-cover" sizes="80px" />
                           <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-colors flex items-end justify-center gap-1 pb-1 opacity-0 hover:opacity-100">
                             <button onClick={() => setFeatured(i)} title="Set as featured"
-                              className="p-1 bg-[#d98c2a] rounded text-white"><Star className="w-3 h-3" /></button>
+                              className="p-1 bg-[var(--color-brand-primary)] rounded text-white"><Star className="w-3 h-3" /></button>
                             <button onClick={() => removeImage(i)} className="p-1 bg-red-500 rounded text-white">
                               <X className="w-3 h-3" /></button>
                           </div>
                           {img.isFeatured && (
-                            <div className="absolute top-1 left-1 bg-[#d98c2a] rounded px-1 text-[9px] text-white font-bold">MAIN</div>
+                            <div className="absolute top-1 left-1 bg-[var(--color-brand-primary)] rounded px-1 text-[9px] text-white font-bold">MAIN</div>
                           )}
                         </div>
                       ))}
                       {form.images.length < 5 && (
                         <button onClick={() => fileRef.current?.click()} disabled={uploading}
-                          className="aspect-square rounded-lg border-2 border-dashed border-neutral-200 flex items-center justify-center text-neutral-300 hover:border-[#d98c2a] hover:text-[#d98c2a] transition-colors">
+                          className="aspect-square rounded-lg border-2 border-dashed border-neutral-200 flex items-center justify-center text-neutral-300 hover:border-[var(--color-brand-primary)] hover:text-[var(--color-brand-primary)] transition-colors">
                           {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
                         </button>
                       )}
@@ -312,7 +312,7 @@ export default function AdminProductsPage() {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="form-label mb-0">Size/Other Variants (optional)</label>
-                      <button onClick={addVariant} className="text-xs text-[#d98c2a] flex items-center gap-1">
+                      <button onClick={addVariant} className="text-xs text-[var(--color-brand-primary)] flex items-center gap-1">
                         <Plus className="w-3 h-3" />Add variant
                       </button>
                     </div>
@@ -401,7 +401,7 @@ export default function AdminProductsPage() {
                       <label key={key} className="flex items-center gap-2.5 cursor-pointer">
                         <div
                           className={cn("w-4 h-4 rounded border-2 flex items-center justify-center transition-colors",
-                            (form as any)[key] ? "bg-[#d98c2a] border-[#d98c2a]" : "border-neutral-300")}
+                            (form as any)[key] ? "bg-[var(--color-brand-primary)] border-[var(--color-brand-primary)]" : "border-neutral-300")}
                           onClick={() => setForm((f) => ({ ...f, [key]: !(f as any)[key] }))}
                         >
                           {(form as any)[key] && <Check className="w-2.5 h-2.5 text-white" />}
@@ -412,7 +412,7 @@ export default function AdminProductsPage() {
                   </div>
 
                   <button onClick={save} disabled={saving}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60">
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60">
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                     {saving ? "Saving…" : editing ? "Update Product" : "Create Product"}
                   </button>
@@ -440,7 +440,7 @@ export default function AdminProductsPage() {
                 />
 
                 <button onClick={save} disabled={saving}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60">
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                   {saving ? "Saving…" : editing ? "Update Product" : "Create Product"}
                 </button>
@@ -454,15 +454,15 @@ export default function AdminProductsPage() {
           <div className="relative flex-1 min-w-[200px] max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input value={search} onChange={(e) => handleSearch(e.target.value)} placeholder="Search products…"
-              className="w-full pl-9 pr-4 py-2.5 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[#d98c2a]" />
+              className="w-full pl-9 pr-4 py-2.5 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[var(--color-brand-primary)]" />
           </div>
           <select value={catFilter} onChange={(e) => { setCatFilter(e.target.value); setPage(1); }}
-            className="text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] bg-white">
+            className="text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] bg-white">
             <option value="">All categories</option>
             {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
           <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] bg-white">
+            className="text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] bg-white">
             <option value="">All status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
@@ -494,7 +494,7 @@ export default function AdminProductsPage() {
                   <tr><td colSpan={7} className="px-4 py-14 text-center">
                     <Package className="w-10 h-10 text-neutral-200 mx-auto mb-3" />
                     <p className="text-neutral-400">No products found.</p>
-                    <button onClick={openCreate} className="mt-3 text-sm text-[#d98c2a] hover:underline">
+                    <button onClick={openCreate} className="mt-3 text-sm text-[var(--color-brand-primary)] hover:underline">
                       Add your first product
                     </button>
                   </td></tr>
@@ -552,7 +552,7 @@ export default function AdminProductsPage() {
                             {p.isActive ? "Active" : "Hidden"}
                           </span>
                           {p.isFeatured && (
-                            <span className="text-[10px] text-[#d98c2a] font-medium flex items-center gap-0.5">
+                            <span className="text-[10px] text-[var(--color-brand-primary)] font-medium flex items-center gap-0.5">
                               <Star className="w-2.5 h-2.5" />Featured
                             </span>
                           )}
@@ -566,7 +566,7 @@ export default function AdminProductsPage() {
                             {p.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                           <button onClick={() => openEdit(p)}
-                            className="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-[#d98c2a]">
+                            className="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-[var(--color-brand-primary)]">
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button onClick={() => del(p._id, p.name)}
@@ -587,11 +587,11 @@ export default function AdminProductsPage() {
               <p className="text-xs text-neutral-400">Page {page} of {pages}</p>
               <div className="flex items-center gap-2">
                 <button onClick={() => setPage((p) => p - 1)} disabled={page === 1}
-                  className="w-8 h-8 rounded-lg border border-neutral-200 flex items-center justify-center disabled:opacity-40 hover:border-[#d98c2a]">
+                  className="w-8 h-8 rounded-lg border border-neutral-200 flex items-center justify-center disabled:opacity-40 hover:border-[var(--color-brand-primary)]">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button onClick={() => setPage((p) => p + 1)} disabled={page === pages}
-                  className="w-8 h-8 rounded-lg border border-neutral-200 flex items-center justify-center disabled:opacity-40 hover:border-[#d98c2a]">
+                  className="w-8 h-8 rounded-lg border border-neutral-200 flex items-center justify-center disabled:opacity-40 hover:border-[var(--color-brand-primary)]">
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>

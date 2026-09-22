@@ -274,8 +274,8 @@ export default function DigitalClient() {
             className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 border transition-colors"
             style={{ backgroundColor: "rgba(217,140,42,0.1)", borderColor: "rgba(217,140,42,0.2)" }}
           >
-            <Wallet className="w-3.5 h-3.5" style={{ color: "#d98c2a" }} />
-            <span className="text-xs font-semibold" style={{ color: "#d98c2a" }}>{fmt(walletBal)}</span>
+            <Wallet className="w-3.5 h-3.5" style={{ color: "var(--color-brand-primary)" }} />
+            <span className="text-xs font-semibold" style={{ color: "var(--color-brand-primary)" }}>{fmt(walletBal)}</span>
           </Link>
         </div>
       </div>

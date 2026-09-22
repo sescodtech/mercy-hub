@@ -116,7 +116,7 @@ export default function WalletPage() {
         {/* Top-up form */}
         <div className="bg-white rounded-2xl border border-neutral-100 p-5">
           <h2 className="font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-            <Plus className="w-4 h-4 text-[#d98c2a]" /> Add Funds
+            <Plus className="w-4 h-4 text-[var(--color-brand-primary)]" /> Add Funds
           </h2>
 
           <div className="grid grid-cols-5 gap-2 mb-4">
@@ -125,7 +125,7 @@ export default function WalletPage() {
                 onClick={() => setAmount(String(a))}
                 className={`py-2 rounded-xl text-xs font-semibold border-2 transition-all ${
                   amount === String(a)
-                    ? "border-[#d98c2a] bg-[#d98c2a]/10 text-[#d98c2a]"
+                    ? "border-[var(--color-brand-primary)] bg-[var(--color-brand-primary-10)] text-[var(--color-brand-primary)]"
                     : "border-neutral-200 text-neutral-600 hover:border-neutral-300"
                 }`}>
                 {fmt(a)}
@@ -139,7 +139,7 @@ export default function WalletPage() {
               type="number" value={amount}
               onChange={e => { setAmount(e.target.value); setError(""); }}
               placeholder="Enter custom amount"
-              className="w-full border border-neutral-200 rounded-xl pl-8 pr-4 py-3 text-sm focus:outline-none focus:border-[#d98c2a] focus:ring-1 focus:ring-[#d98c2a]/30"
+              className="w-full border border-neutral-200 rounded-xl pl-8 pr-4 py-3 text-sm focus:outline-none focus:border-[var(--color-brand-primary)] focus:ring-1 focus:ring-[var(--color-brand-primary-30)]"
             />
           </div>
 
@@ -148,7 +148,7 @@ export default function WalletPage() {
           )}
 
           <button onClick={handleDeposit} disabled={depositing || !amount}
-            className="w-full bg-[#c47020] text-white py-3.5 rounded-xl font-semibold text-sm hover:bg-[#a3551c] transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+            className="w-full bg-[var(--color-brand-accent)] text-white py-3.5 rounded-xl font-semibold text-sm hover:bg-[#a3551c] transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
             {depositing ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting to Paystack...</> : "Top Up via Paystack"}
           </button>
 
@@ -184,7 +184,7 @@ export default function WalletPage() {
         )}
 
         <div className="text-center">
-          <Link href="/dashboard/digital-orders" className="text-sm text-[#d98c2a] hover:underline">
+          <Link href="/dashboard/digital-orders" className="text-sm text-[var(--color-brand-primary)] hover:underline">
             View all digital orders →
           </Link>
         </div>

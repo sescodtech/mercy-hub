@@ -31,11 +31,11 @@ export default function BlogPostPage() {
     })();
   }, [slug]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-cream"><Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-cream"><Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" /></div>;
   if (notFound || !post) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-cream gap-4">
       <p className="text-neutral-600">Post not found.</p>
-      <Link href="/blog" className="text-[#d98c2a] text-sm underline">Back to Blog</Link>
+      <Link href="/blog" className="text-[var(--color-brand-primary)] text-sm underline">Back to Blog</Link>
     </div>
   );
 
@@ -46,20 +46,20 @@ export default function BlogPostPage() {
           <Image src={post.coverImage} alt={post.title} fill className="object-cover" priority sizes="100vw" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 container-site pb-8">
-            <span className="inline-block px-3 py-1 bg-[#d98c2a] text-white text-xs font-semibold rounded-md uppercase tracking-wide mb-3">{post.category}</span>
+            <span className="inline-block px-3 py-1 bg-[var(--color-brand-primary)] text-white text-xs font-semibold rounded-md uppercase tracking-wide mb-3">{post.category}</span>
             <h1 className="font-display text-3xl md:text-5xl font-light text-white leading-tight">{post.title}</h1>
           </div>
         </div>
       )}
 
       <div className="container-site py-10 max-w-3xl mx-auto">
-        <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-[#d98c2a] mb-8 transition-colors">
+        <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-[var(--color-brand-primary)] mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to Blog
         </Link>
 
         {!post.coverImage && (
           <>
-            <span className="inline-block px-3 py-1 bg-[#d98c2a] text-white text-xs font-semibold rounded-md uppercase tracking-wide mb-4">{post.category}</span>
+            <span className="inline-block px-3 py-1 bg-[var(--color-brand-primary)] text-white text-xs font-semibold rounded-md uppercase tracking-wide mb-4">{post.category}</span>
             <h1 className="font-display text-4xl font-light text-neutral-900 mb-4">{post.title}</h1>
           </>
         )}
@@ -70,9 +70,9 @@ export default function BlogPostPage() {
           <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{post.viewCount} views</span>
         </div>
 
-        {post.excerpt && <p className="text-lg text-neutral-600 leading-relaxed border-l-4 border-[#d98c2a] pl-5 mb-8 italic">{post.excerpt}</p>}
+        {post.excerpt && <p className="text-lg text-neutral-600 leading-relaxed border-l-4 border-[var(--color-brand-primary)] pl-5 mb-8 italic">{post.excerpt}</p>}
 
-        <div className="prose prose-neutral prose-headings:font-display prose-headings:font-light prose-a:text-[#d98c2a] max-w-none" dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, "<br/>") }} />
+        <div className="prose prose-neutral prose-headings:font-display prose-headings:font-light prose-a:text-[var(--color-brand-primary)] max-w-none" dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, "<br/>") }} />
 
         {post.tags.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap mt-10 pt-8 border-t border-neutral-100">
@@ -84,7 +84,7 @@ export default function BlogPostPage() {
         )}
 
         <div className="mt-10">
-          <Link href="/blog" className="inline-flex items-center gap-2 px-6 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors">
+          <Link href="/blog" className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors">
             <ArrowLeft className="w-4 h-4" /> More Posts
           </Link>
         </div>

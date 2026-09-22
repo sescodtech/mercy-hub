@@ -46,7 +46,7 @@ export function PlanVisibility() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-[#d98c2a]" /></div>
+        <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-[var(--color-brand-primary)]" /></div>
       ) : plans.length === 0 ? (
         <p className="text-sm text-neutral-400 py-6 text-center">No live plans returned by the provider right now.</p>
       ) : (
@@ -58,7 +58,7 @@ export function PlanVisibility() {
                 <p className="text-xs text-neutral-400">{p.meta} · <span className="font-mono">{p.id}</span></p>
               </div>
               <button onClick={() => toggle(p)} disabled={toggling === p.id}
-                className={`relative inline-flex h-5 w-9 rounded-full transition-colors flex-shrink-0 ml-3 ${!p.hidden ? "bg-[#d98c2a]" : "bg-neutral-200"}`}>
+                className={`relative inline-flex h-5 w-9 rounded-full transition-colors flex-shrink-0 ml-3 ${!p.hidden ? "bg-[var(--color-brand-primary)]" : "bg-neutral-200"}`}>
                 <span className={`inline-block w-3.5 h-3.5 transform rounded-full bg-white shadow transition-transform mt-0.5 ${!p.hidden ? "translate-x-5" : "translate-x-0.5"}`} />
               </button>
             </div>

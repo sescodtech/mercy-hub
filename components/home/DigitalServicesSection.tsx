@@ -8,7 +8,7 @@ const SERVICES = [
     label: "Data",
     icon:  Wifi,
     href:  "/digital?category=data",
-    color: "#d98c2a",
+    color: "var(--color-brand-primary)",
     bg:    "rgba(217,140,42,0.12)",
   },
   {
@@ -51,14 +51,14 @@ export function DigitalServicesSection() {
           <div className="flex items-center gap-1.5">
             <span
               className="w-1.5 h-4 rounded-full"
-              style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+              style={{ backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))" }}
             />
             <h2 className="text-sm font-semibold text-neutral-800">Digital Services</h2>
           </div>
           <Link
             href="/digital"
             className="flex items-center gap-0.5 text-xs font-medium"
-            style={{ color: "var(--color-brand-primary, #d98c2a)" }}
+            style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }}
           >
             See all <ChevronRight className="w-3 h-3" />
           </Link>

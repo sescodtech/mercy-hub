@@ -19,7 +19,7 @@ interface Props {
 
 const EMPTY_VARIANT: Omit<IColorVariant, "_id"> = {
   label: "",
-  colorHex: "#d98c2a",
+  colorHex: "var(--color-brand-primary)",
   images: [],
   sku: "",
   priceOverride: null,
@@ -104,7 +104,7 @@ export function ColorVariantManager({ productId, variants, onChange }: Props) {
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
-          <Palette className="w-4 h-4 text-[#d98c2a]" />
+          <Palette className="w-4 h-4 text-[var(--color-brand-primary)]" />
           <label className="text-sm font-semibold text-neutral-700">
             Color Variants
             {variants.length > 0 && (
@@ -117,7 +117,7 @@ export function ColorVariantManager({ productId, variants, onChange }: Props) {
         <button
           type="button"
           onClick={add}
-          className="flex items-center gap-1.5 text-xs text-[#d98c2a] hover:text-[#c47020] font-medium"
+          className="flex items-center gap-1.5 text-xs text-[var(--color-brand-primary)] hover:text-[var(--color-brand-accent)] font-medium"
         >
           <Plus className="w-3.5 h-3.5" /> Add Color
         </button>
@@ -130,7 +130,7 @@ export function ColorVariantManager({ productId, variants, onChange }: Props) {
           <button
             type="button"
             onClick={add}
-            className="mt-2 text-xs text-[#d98c2a] hover:underline"
+            className="mt-2 text-xs text-[var(--color-brand-primary)] hover:underline"
           >
             Add your first color variant
           </button>
@@ -143,7 +143,7 @@ export function ColorVariantManager({ productId, variants, onChange }: Props) {
           className={cn(
             "border rounded-xl overflow-hidden transition-all",
             v.enabled ? "border-neutral-200" : "border-neutral-100 opacity-60",
-            expanded === i && "border-[#d98c2a]/40"
+            expanded === i && "border-[var(--color-brand-primary-40)]"
           )}
         >
           {/* Header row */}
@@ -224,7 +224,7 @@ export function ColorVariantManager({ productId, variants, onChange }: Props) {
                     <input
                       value={v.colorHex}
                       onChange={(e) => update(i, "colorHex", e.target.value)}
-                      placeholder="#d98c2a"
+                      placeholder="var(--color-brand-primary)"
                       className="form-input flex-1 font-mono text-sm"
                     />
                   </div>
@@ -282,7 +282,7 @@ export function ColorVariantManager({ productId, variants, onChange }: Props) {
                     type="button"
                     onClick={() => fileRefs.current[i]?.click()}
                     disabled={uploading === i || v.images.length >= 5}
-                    className="flex items-center gap-1.5 text-xs text-[#d98c2a] disabled:opacity-40"
+                    className="flex items-center gap-1.5 text-xs text-[var(--color-brand-primary)] disabled:opacity-40"
                   >
                     {uploading === i
                       ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -318,7 +318,7 @@ export function ColorVariantManager({ productId, variants, onChange }: Props) {
                       type="button"
                       onClick={() => fileRefs.current[i]?.click()}
                       disabled={uploading === i}
-                      className="w-16 h-16 rounded-lg border-2 border-dashed border-neutral-200 flex items-center justify-center text-neutral-300 hover:border-[#d98c2a] hover:text-[#d98c2a] transition-colors"
+                      className="w-16 h-16 rounded-lg border-2 border-dashed border-neutral-200 flex items-center justify-center text-neutral-300 hover:border-[var(--color-brand-primary)] hover:text-[var(--color-brand-primary)] transition-colors"
                     >
                       {uploading === i
                         ? <Loader2 className="w-4 h-4 animate-spin" />

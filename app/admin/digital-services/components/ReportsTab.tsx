@@ -10,7 +10,7 @@ interface Stats {
   categoryBreakdown: CategoryStat[];
 }
 
-const CAT_COLOR: Record<string, string> = { data: "#d98c2a", airtime: "#10b981", cable: "#6366f1", education: "#f59e0b" };
+const CAT_COLOR: Record<string, string> = { data: "var(--color-brand-primary)", airtime: "#10b981", cable: "#6366f1", education: "#f59e0b" };
 
 export function ReportsTab() {
   const [stats,   setStats]   = useState<Stats | null>(null);
@@ -35,7 +35,7 @@ export function ReportsTab() {
           <p className="text-sm text-neutral-400">Download every digital order as a CSV file, ready for Excel or Google Sheets.</p>
         </div>
         <button onClick={exportAll}
-          className="flex items-center gap-2 bg-[#c47020] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#a3551c]">
+          className="flex items-center gap-2 bg-[var(--color-brand-accent)] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#a3551c]">
           <Download className="w-4 h-4" /> Download CSV
         </button>
       </div>
@@ -52,7 +52,7 @@ export function ReportsTab() {
         <p className="text-sm text-neutral-400 mb-5">Based on all fulfilled orders to date.</p>
 
         {loading ? (
-          <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-[#d98c2a]" /></div>
+          <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-[var(--color-brand-primary)]" /></div>
         ) : !stats || stats.categoryBreakdown.length === 0 ? (
           <p className="text-sm text-neutral-400 py-6 text-center">No fulfilled orders yet — reports will populate as sales come in.</p>
         ) : (
@@ -69,7 +69,7 @@ export function ReportsTab() {
                   <div className="h-2.5 bg-neutral-100 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
-                      style={{ width: `${(c.revenue / maxRevenue) * 100}%`, backgroundColor: CAT_COLOR[c.category] || "#d98c2a" }}
+                      style={{ width: `${(c.revenue / maxRevenue) * 100}%`, backgroundColor: CAT_COLOR[c.category] || "var(--color-brand-primary)" }}
                     />
                   </div>
                 </div>

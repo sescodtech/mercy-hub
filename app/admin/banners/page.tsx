@@ -98,7 +98,7 @@ export default function AdminBannersPage() {
           <p className="text-sm text-neutral-400">{banners.length} banner{banners.length !== 1 ? "s" : ""} — shown on homepage hero</p>
         </div>
         <button onClick={() => { setShowForm(!showForm); setEditing(null); setForm(EMPTY); }}
-          className="flex items-center gap-2 px-4 py-2 bg-[#d98c2a] text-white text-sm rounded-lg hover:bg-[#c47020]">
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--color-brand-primary)] text-white text-sm rounded-lg hover:bg-[var(--color-brand-accent)]">
           <Plus className="w-4 h-4" /> Add Banner
         </button>
       </div>
@@ -146,14 +146,14 @@ export default function AdminBannersPage() {
                   <input type="text" value={(form as Record<string, string>)[key]}
                     onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
                     placeholder={placeholder}
-                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a]" />
+                    className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)]" />
                 </div>
               ))}
             </div>
 
             <div className="flex gap-3 pt-2">
               <button onClick={save} disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 bg-[#d98c2a] text-white text-sm rounded-lg hover:bg-[#c47020] disabled:opacity-60">
+                className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm rounded-lg hover:bg-[var(--color-brand-accent)] disabled:opacity-60">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 {saving ? "Saving…" : editing ? "Update Banner" : "Create Banner"}
               </button>

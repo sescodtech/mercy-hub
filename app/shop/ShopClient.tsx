@@ -110,8 +110,8 @@ export function ShopClient({ searchParams }: ShopClientProps) {
           style={{
             backgroundImage: `repeating-linear-gradient(
               45deg,
-              var(--color-brand-primary, #d98c2a) 0px,
-              var(--color-brand-primary, #d98c2a) 1px,
+              var(--color-brand-primary, var(--color-brand-primary)) 0px,
+              var(--color-brand-primary, var(--color-brand-primary)) 1px,
               transparent 1px,
               transparent 12px
             )`,
@@ -121,7 +121,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
         <div className="relative container-site px-4 sm:px-6 py-8 sm:py-10 md:py-12">
 
           {/* Breadcrumb */}
-          <div className="flex items-center gap-1.5 text-xs mb-4 sm:mb-5" style={{ color: "var(--color-brand-primary, #d98c2a)" }}>
+          <div className="flex items-center gap-1.5 text-xs mb-4 sm:mb-5" style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }}>
             <span className="text-white/40">Home</span>
             <ChevronRight className="w-3 h-3 text-white/20" />
             <span className="font-medium">{activeCategoryLabel}</span>
@@ -133,10 +133,10 @@ export function ShopClient({ searchParams }: ShopClientProps) {
             {/* Left — title + tagline */}
             <div className="max-w-lg">
               <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-4 h-4" style={{ color: "var(--color-brand-primary, #d98c2a)" }} />
+                <Sparkles className="w-4 h-4" style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }} />
                 <span
                   className="text-xs tracking-[0.2em] uppercase font-semibold"
-                  style={{ color: "var(--color-brand-primary, #d98c2a)" }}
+                  style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }}
                 >
                   {category || filterTag ? "Curated Collection" : "Premium Store"}
                 </span>
@@ -175,7 +175,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                   }}
                   onFocus={(e) => {
                     (e.currentTarget as HTMLInputElement).style.borderColor =
-                      "var(--color-brand-primary, #d98c2a)";
+                      "var(--color-brand-primary, var(--color-brand-primary))";
                     (e.currentTarget as HTMLInputElement).style.backgroundColor =
                       "rgba(255,255,255,0.12)";
                   }}
@@ -201,7 +201,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
           {/* Promo strip */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-6 pt-5 border-t border-white/10">
             <div className="flex items-center gap-2">
-              <Truck className="w-3.5 h-3.5" style={{ color: "var(--color-brand-primary, #d98c2a)" }} />
+              <Truck className="w-3.5 h-3.5" style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }} />
               <span className="text-xs text-white/60">
                 Free delivery on orders over{" "}
                 <span className="text-white font-semibold">
@@ -245,8 +245,8 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                   style={
                     isActive
                       ? {
-                          backgroundColor: "var(--color-brand-primary, #d98c2a)",
-                          borderColor: "var(--color-brand-primary, #d98c2a)",
+                          backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))",
+                          borderColor: "var(--color-brand-primary, var(--color-brand-primary))",
                           color: "#fff",
                         }
                       : {
@@ -258,9 +258,9 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                   onMouseEnter={(e) => {
                     if (!isActive) {
                       (e.currentTarget as HTMLButtonElement).style.borderColor =
-                        "var(--color-brand-primary, #d98c2a)";
+                        "var(--color-brand-primary, var(--color-brand-primary))";
                       (e.currentTarget as HTMLButtonElement).style.color =
-                        "var(--color-brand-primary, #d98c2a)";
+                        "var(--color-brand-primary, var(--color-brand-primary))";
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -293,9 +293,9 @@ export function ShopClient({ searchParams }: ShopClientProps) {
               style={
                 filterOpen || activeFiltersCount > 0
                   ? {
-                      backgroundColor: "color-mix(in srgb, var(--color-brand-primary, #d98c2a) 10%, transparent)",
-                      borderColor: "var(--color-brand-primary, #d98c2a)",
-                      color: "var(--color-brand-primary, #d98c2a)",
+                      backgroundColor: "color-mix(in srgb, var(--color-brand-primary, var(--color-brand-primary)) 10%, transparent)",
+                      borderColor: "var(--color-brand-primary, var(--color-brand-primary))",
+                      color: "var(--color-brand-primary, var(--color-brand-primary))",
                     }
                   : {
                       backgroundColor: "var(--color-card-bg, #fff)",
@@ -309,7 +309,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
               {activeFiltersCount > 0 && (
                 <span
                   className="w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold text-white"
-                  style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                  style={{ backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))" }}
                 >
                   {activeFiltersCount}
                 </span>
@@ -339,7 +339,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                 }}
                 onFocus={(e) => {
                   (e.currentTarget as HTMLSelectElement).style.borderColor =
-                    "var(--color-brand-primary, #d98c2a)";
+                    "var(--color-brand-primary, var(--color-brand-primary))";
                 }}
                 onBlur={(e) => {
                   (e.currentTarget as HTMLSelectElement).style.borderColor =
@@ -408,14 +408,14 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                       value={minPrice}
                       onChange={(e) => setMinPrice(e.target.value)}
                       placeholder="Min"
-                      className="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[#d98c2a]"
+                      className="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[var(--color-brand-primary)]"
                     />
                     <input
                       type="number"
                       value={maxPrice}
                       onChange={(e) => setMaxPrice(e.target.value)}
                       placeholder="Max"
-                      className="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[#d98c2a]"
+                      className="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[var(--color-brand-primary)]"
                     />
                   </div>
                 </div>
@@ -432,7 +432,7 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                       type="checkbox"
                       checked={inStock}
                       onChange={(e) => setInStock(e.target.checked)}
-                      className="w-4 h-4 accent-[#d98c2a]"
+                      className="w-4 h-4 accent-[var(--color-brand-primary)]"
                     />
                     <span className="text-sm" style={{ color: "var(--color-text-primary, #1a1208)" }}>
                       In Stock Only
@@ -444,14 +444,14 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                   <button
                     onClick={() => { setPage(1); setFilterOpen(false); }}
                     className="w-full flex items-center justify-center gap-2 py-2.5 text-white text-sm font-semibold rounded-lg transition-colors"
-                    style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                    style={{ backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))" }}
                     onMouseEnter={(e) => {
                       (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                        "var(--color-brand-accent, #c47020)";
+                        "var(--color-brand-accent, var(--color-brand-accent))";
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                        "var(--color-brand-primary, #d98c2a)";
+                        "var(--color-brand-primary, var(--color-brand-primary))";
                     }}
                   >
                     Apply Filters
@@ -472,17 +472,17 @@ export function ShopClient({ searchParams }: ShopClientProps) {
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
               style={{
-                backgroundColor: "color-mix(in srgb, var(--color-brand-primary, #d98c2a) 10%, transparent)",
+                backgroundColor: "color-mix(in srgb, var(--color-brand-primary, var(--color-brand-primary)) 10%, transparent)",
               }}
             >
-              <Search className="w-7 h-7" style={{ color: "var(--color-brand-primary, #d98c2a)" }} />
+              <Search className="w-7 h-7" style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }} />
             </div>
             <p className="font-display text-xl font-semibold text-neutral-700 mb-2">No products found</p>
             <p className="text-sm text-neutral-400 mb-6">Try adjusting your filters or search terms.</p>
             <button
               onClick={clearFilters}
               className="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-medium rounded-xl transition-colors"
-              style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+              style={{ backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))" }}
             >
               Clear All Filters
             </button>
@@ -512,8 +512,8 @@ export function ShopClient({ searchParams }: ShopClientProps) {
                 style={
                   p === page
                     ? {
-                        backgroundColor: "var(--color-brand-primary, #d98c2a)",
-                        borderColor: "var(--color-brand-primary, #d98c2a)",
+                        backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))",
+                        borderColor: "var(--color-brand-primary, var(--color-brand-primary))",
                         color: "#fff",
                       }
                     : {

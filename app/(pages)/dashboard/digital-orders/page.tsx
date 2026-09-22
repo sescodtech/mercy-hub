@@ -82,7 +82,7 @@ export default function DigitalOrdersPage() {
               onClick={() => { setCatF(c); setPage(1); }}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all capitalize ${
                 catF === c
-                  ? "border-[#d98c2a] bg-[#d98c2a]/10 text-[#d98c2a]"
+                  ? "border-[var(--color-brand-primary)] bg-[var(--color-brand-primary-10)] text-[var(--color-brand-primary)]"
                   : "border-neutral-200 text-neutral-500 hover:border-neutral-300"
               }`}>
               {c || "All"}
@@ -91,12 +91,12 @@ export default function DigitalOrdersPage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[#d98c2a]" /></div>
+          <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[var(--color-brand-primary)]" /></div>
         ) : orders.length === 0 ? (
           <div className="bg-white rounded-2xl border border-neutral-100 p-12 text-center">
             <Wifi className="w-10 h-10 text-neutral-200 mx-auto mb-3" />
             <p className="text-neutral-500 text-sm">No digital orders yet</p>
-            <Link href="/digital" className="mt-3 inline-block text-sm text-[#d98c2a] hover:underline">Buy data or airtime →</Link>
+            <Link href="/digital" className="mt-3 inline-block text-sm text-[var(--color-brand-primary)] hover:underline">Buy data or airtime →</Link>
           </div>
         ) : (
           <div className="space-y-3">
@@ -111,8 +111,8 @@ export default function DigitalOrdersPage() {
                   <button className="w-full p-4 text-left"
                     onClick={() => setExpanded(isExpanded ? null : o._id)}>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-[#d98c2a]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-[#d98c2a]" />
+                      <div className="w-10 h-10 bg-[var(--color-brand-primary-10)] rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-5 h-5 text-[var(--color-brand-primary)]" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-neutral-900 text-sm truncate">{o.planName}</p>
@@ -149,10 +149,10 @@ export default function DigitalOrdersPage() {
                       </div>
 
                       {o.pins && o.pins.length > 0 && (
-                        <div className="mt-3 bg-[#fdf8f0] border border-[#d98c2a]/20 rounded-xl p-3">
+                        <div className="mt-3 bg-[#fdf8f0] border border-[var(--color-brand-primary-20)] rounded-xl p-3">
                           <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">Your Exam Pins</p>
                           {o.pins.map((pin, i) => (
-                            <p key={i} className="font-mono text-base font-bold text-[#d98c2a] text-center">{pin}</p>
+                            <p key={i} className="font-mono text-base font-bold text-[var(--color-brand-primary)] text-center">{pin}</p>
                           ))}
                         </div>
                       )}

@@ -67,8 +67,8 @@ function VerifyContent() {
     return (
       <div className="min-h-screen bg-[#fdf8f0] flex items-center justify-center px-4">
         <div className="text-center max-w-sm">
-          <div className="w-20 h-20 rounded-full bg-[#d98c2a]/10 flex items-center justify-center mx-auto mb-6">
-            <Loader2 className="w-10 h-10 text-[#d98c2a] animate-spin" />
+          <div className="w-20 h-20 rounded-full bg-[var(--color-brand-primary-10)] flex items-center justify-center mx-auto mb-6">
+            <Loader2 className="w-10 h-10 text-[var(--color-brand-primary)] animate-spin" />
           </div>
           <h1 className="font-display text-2xl font-semibold text-neutral-900 mb-2">
             Verifying Payment
@@ -80,7 +80,7 @@ function VerifyContent() {
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="w-2 h-2 rounded-full bg-[#d98c2a] animate-bounce"
+                className="w-2 h-2 rounded-full bg-[var(--color-brand-primary)] animate-bounce"
                 style={{ animationDelay: `${i * 0.15}s` }}
               />
             ))}
@@ -133,7 +133,7 @@ function VerifyContent() {
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               href="/dashboard/orders"
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#d98c2a] text-white text-sm font-semibold rounded-xl hover:bg-[#c47020] transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[var(--color-brand-primary)] text-white text-sm font-semibold rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors"
             >
               <ShoppingBag className="w-4 h-4" />
               Track My Order
@@ -189,7 +189,7 @@ function VerifyContent() {
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             href="/checkout"
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#d98c2a] text-white text-sm font-semibold rounded-xl hover:bg-[#c47020] transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[var(--color-brand-primary)] text-white text-sm font-semibold rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors"
           >
             Try Again
           </Link>
@@ -216,7 +216,7 @@ export default function VerifyPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-[#fdf8f0] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[#d98c2a] animate-spin" />
+        <Loader2 className="w-8 h-8 text-[var(--color-brand-primary)] animate-spin" />
       </div>
     }>
       <VerifyContent />

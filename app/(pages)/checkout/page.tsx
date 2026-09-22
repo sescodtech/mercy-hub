@@ -51,7 +51,7 @@ function Input({ value, onChange, placeholder, type = "text", disabled }: {
   return (
     <input type={type} value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] transition-colors disabled:bg-neutral-50 disabled:text-neutral-400" />
+      className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] transition-colors disabled:bg-neutral-50 disabled:text-neutral-400" />
   );
 }
 
@@ -130,21 +130,21 @@ export default function CheckoutPage() {
       const { data } = await axios.post("/api/orders", {
         items: items.map((item) => ({
           product: item.product._id,
-          variant: item.variant ? { name: item.variant.name, value: item.variant.value } : undefined,
-          quantity: item.quantity, price: item.variant?.price ?? item.product.price,
-          total: (item.variant?.price ?? item.product.price) * item.quantity,
+          variant: item.variant ? { _id: item.variant._id, name: item.variant.name, value: item.variant.value } : undefined,
+          colorVariant: item.colorVariant ? { _id: item.colorVariant._id } : undefined,
+          quantity: item.quantity,
         })),
-        shippingAddress: address, paymentMethod, subtotal, shippingCost, discount, total,
-        coupon: appliedCoupon ? { code: appliedCoupon, discount } : undefined,
+        shippingAddress: address, paymentMethod,
+        coupon: appliedCoupon ? { code: appliedCoupon } : undefined,
       });
       if (!data.success) throw new Error(data.error);
 
       if (paymentMethod === "paystack") {
-        const r = await axios.post("/api/payments/paystack/initialize", { email: session.user.email, amount: total, orderId: data.data._id, reference: data.data.orderNumber });
+        const r = await axios.post("/api/payments/paystack/initialize", { orderId: data.data._id });
         if (r.data.success) { window.location.href = r.data.data.authorization_url; return; }
       }
       if (paymentMethod === "flutterwave") {
-        const r = await axios.post("/api/payments/flutterwave/initialize", { email: session.user.email, amount: total, orderId: data.data._id, name: `${address.firstName} ${address.lastName}`, phone: address.phone });
+        const r = await axios.post("/api/payments/flutterwave/initialize", { orderId: data.data._id });
         if (r.data.success) { window.location.href = r.data.data.link; }
       }
     } catch (err: any) { toast.error(err?.response?.data?.error ?? "Failed to place order. Please try again."); }
@@ -153,7 +153,7 @@ export default function CheckoutPage() {
 
   if (status === "loading") return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
-      <Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" />
+      <Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" />
     </div>
   );
 
@@ -165,15 +165,15 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-cream">
       <div className="bg-white border-b border-neutral-100">
         <div className="container-site py-4 flex items-center justify-between">
-          <Link href="/" className="font-display text-xl font-semibold text-neutral-900">Mercy<span className="text-[#d98c2a]">Home</span></Link>
+          <Link href="/" className="font-display text-xl font-semibold text-neutral-900">Mercy<span className="text-[var(--color-brand-primary)]">Home</span></Link>
           <div className="flex items-center gap-2">
             {steps.map((s, i) => {
               const order = { address: 0, payment: 1 };
               const isDone = order[s.id] < order[step]; const isCurrent = s.id === step;
               return (
                 <div key={s.id} className="flex items-center gap-2">
-                  <div className={cn("flex items-center gap-1.5 text-xs font-medium", isCurrent ? "text-[#d98c2a]" : isDone ? "text-green-600" : "text-neutral-400")}>
-                    <div className={cn("w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold", isCurrent ? "bg-[#d98c2a] text-white" : isDone ? "bg-green-500 text-white" : "bg-neutral-200 text-neutral-500")}>
+                  <div className={cn("flex items-center gap-1.5 text-xs font-medium", isCurrent ? "text-[var(--color-brand-primary)]" : isDone ? "text-green-600" : "text-neutral-400")}>
+                    <div className={cn("w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold", isCurrent ? "bg-[var(--color-brand-primary)] text-white" : isDone ? "bg-green-500 text-white" : "bg-neutral-200 text-neutral-500")}>
                       {isDone ? "✓" : i + 1}
                     </div>
                     <span className="hidden sm:block">{s.label}</span>
@@ -194,17 +194,17 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      <div className="container-site py-10">
+      <div className="container-site py-6 sm:py-8 lg:py-10">
         <div className="grid lg:grid-cols-[1fr_380px] gap-10 items-start">
           <div className="space-y-6">
             {/* Address Step */}
-            <div className={cn("bg-white rounded-2xl border transition-all", step === "address" ? "border-[#d98c2a]/30 shadow-sm" : "border-neutral-100")}>
+            <div className={cn("bg-white rounded-2xl border transition-all", step === "address" ? "border-[color:var(--color-brand-primary-30)] shadow-sm" : "border-neutral-100")}>
               <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
-                <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-[#d98c2a]" /><h2 className="font-semibold text-neutral-900">Delivery Address</h2></div>
-                {step !== "address" && <button onClick={() => setStep("address")} className="text-xs text-[#d98c2a] hover:underline">Edit</button>}
+                <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-[var(--color-brand-primary)]" /><h2 className="font-semibold text-neutral-900">Delivery Address</h2></div>
+                {step !== "address" && <button onClick={() => setStep("address")} className="text-xs text-[var(--color-brand-primary)] hover:underline">Edit</button>}
               </div>
               {step === "address" ? (
-                <div className="p-6 space-y-4">
+                <div className="p-4 sm:p-6 space-y-4">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <Field label="First Name" required><Input value={address.firstName} onChange={(v) => set("firstName", v)} placeholder="Adaeze" /></Field>
                     <Field label="Last Name" required><Input value={address.lastName} onChange={(v) => set("lastName", v)} placeholder="Okafor" /></Field>
@@ -216,14 +216,14 @@ export default function CheckoutPage() {
                     <Field label="City" required><Input value={address.city} onChange={(v) => set("city", v)} placeholder="Lagos" /></Field>
                     <Field label="State" required>
                       <select value={address.state} onChange={(e) => set("state", e.target.value)}
-                        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] transition-colors">
+                        className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] transition-colors">
                         <option value="">Select state…</option>
                         {NIGERIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </Field>
                   </div>
                   <button onClick={() => { if (validateAddress()) setStep("payment"); }}
-                    className="w-full py-3.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors flex items-center justify-center gap-2">
+                    className="w-full py-3.5 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors flex items-center justify-center gap-2">
                     Continue to Payment <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -236,9 +236,9 @@ export default function CheckoutPage() {
 
             {/* Payment Step */}
             {step === "payment" && (
-              <div className="bg-white rounded-2xl border border-[#d98c2a]/30 shadow-sm">
+              <div className="bg-white rounded-2xl border border-[color:var(--color-brand-primary-30)] shadow-sm">
                 <div className="flex items-center gap-2 px-6 py-4 border-b border-neutral-100">
-                  <CreditCard className="w-4 h-4 text-[#d98c2a]" /><h2 className="font-semibold text-neutral-900">Secure Payment</h2>
+                  <CreditCard className="w-4 h-4 text-[var(--color-brand-primary)]" /><h2 className="font-semibold text-neutral-900">Secure Payment</h2>
                 </div>
                 <div className="p-6 space-y-3">
                   <div className="flex items-start gap-3 p-3.5 bg-blue-50 border border-blue-100 rounded-xl mb-4">
@@ -249,14 +249,14 @@ export default function CheckoutPage() {
                     <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-sm text-red-700">No payment methods available. Please contact support.</div>
                   ) : availablePayments.map((pm) => (
                     <label key={pm.id} className={cn("flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all",
-                      paymentMethod === pm.id ? "border-[#d98c2a] bg-[#d98c2a]/5" : "border-neutral-200 hover:border-neutral-300")}>
-                      <input type="radio" value={pm.id} checked={paymentMethod === pm.id} onChange={() => setPaymentMethod(pm.id)} className="accent-[#d98c2a]" />
+                      paymentMethod === pm.id ? "border-[var(--color-brand-primary)] bg-[var(--color-brand-primary-5)]" : "border-neutral-200 hover:border-neutral-300")}>
+                      <input type="radio" value={pm.id} checked={paymentMethod === pm.id} onChange={() => setPaymentMethod(pm.id)} className="accent-[var(--color-brand-primary)]" />
                       <div><p className="text-sm font-medium text-neutral-900">{pm.label}</p><p className="text-xs text-neutral-400">{pm.sub}</p></div>
                     </label>
                   ))}
                   {availablePayments.length > 0 && (
                     <button onClick={placeOrder} disabled={placing}
-                      className="w-full py-4 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 transition-colors flex items-center justify-center gap-2 mt-2">
+                      className="w-full py-4 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60 transition-colors flex items-center justify-center gap-2 mt-2">
                       {placing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                       {placing ? "Processing…" : "Proceed to Secure Payment"}
                     </button>
@@ -278,7 +278,7 @@ export default function CheckoutPage() {
                     <div key={`${item.product._id}-${item.variant?.value}`} className="flex gap-3">
                       <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0">
                         {img ? <Image src={img} alt={item.product.name} fill className="object-cover" sizes="48px" /> : <ShoppingBag className="w-5 h-5 text-neutral-300 m-auto mt-3.5" />}
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#d98c2a] text-white text-[9px] rounded-full flex items-center justify-center font-bold">{item.quantity}</span>
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--color-brand-primary)] text-white text-[9px] rounded-full flex items-center justify-center font-bold">{item.quantity}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-neutral-800 truncate">{item.product.name}</p>
@@ -300,7 +300,7 @@ export default function CheckoutPage() {
                     <div className="relative flex-1">
                       <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
                       <input value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
-                        placeholder="Coupon code" className="w-full pl-8 pr-3 py-2 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[#d98c2a]" />
+                        placeholder="Coupon code" className="w-full pl-8 pr-3 py-2 text-sm border border-neutral-200 rounded-lg outline-none focus:border-[var(--color-brand-primary)]" />
                     </div>
                     <button onClick={applyCoupon} disabled={couponLoading || !couponCode.trim()}
                       className="px-3 py-2 text-xs border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-50 flex-shrink-0">
@@ -324,7 +324,7 @@ export default function CheckoutPage() {
               </div>
               {address.state && (
                 <div className="flex items-center gap-2 text-xs text-neutral-500 bg-neutral-50 p-3 rounded-lg">
-                  <Truck className="w-3.5 h-3.5 text-[#d98c2a] flex-shrink-0" />{shippingLabel}
+                  <Truck className="w-3.5 h-3.5 text-[var(--color-brand-primary)] flex-shrink-0" />{shippingLabel}
                 </div>
               )}
             </div>

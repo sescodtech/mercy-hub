@@ -184,6 +184,7 @@ const OrderSchema = new Schema({
   paymentMethod:    { type: String, enum: ["paystack", "flutterwave", "cod"], required: true },
   paymentStatus:    { type: String, enum: ["pending","paid","failed","refunded"], default: "pending" },
   paymentReference: { type: String },
+  stockReleasedAt:  { type: Date },
   orderStatus: {
     type: String,
     enum: ["pending","confirmed","processing","shipped","delivered","cancelled","returned"],
@@ -214,6 +215,7 @@ OrderSchema.index({ orderNumber: 1 });
 OrderSchema.index({ orderStatus: 1 });
 OrderSchema.index({ paymentStatus: 1 });
 OrderSchema.index({ paymentReference: 1 }, { unique: true, sparse: true });
+OrderSchema.index({ paymentStatus: 1, orderStatus: 1, createdAt: -1 });
 
 // ─── Coupon Model ───────────────────────────────────────────
 const CouponSchema = new Schema({

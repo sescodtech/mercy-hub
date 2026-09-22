@@ -80,7 +80,7 @@ function OrdersContent() {
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" />
       </div>
     );
   }
@@ -94,7 +94,7 @@ function OrdersContent() {
               <h1 className="font-display text-2xl font-semibold text-neutral-900">My Orders</h1>
               <p className="text-sm text-neutral-400 mt-0.5">{orders.length} order{orders.length !== 1 ? "s" : ""} total</p>
             </div>
-            <Link href="/shop" className="text-sm text-[#d98c2a] hover:underline">Continue Shopping</Link>
+            <Link href="/shop" className="text-sm text-[var(--color-brand-primary)] hover:underline">Continue Shopping</Link>
           </div>
         </div>
       </div>
@@ -118,7 +118,7 @@ function OrdersContent() {
             <button key={f} onClick={() => setFilter(f)}
               className={cn(
                 "px-4 py-2 text-xs font-medium rounded-lg whitespace-nowrap transition-colors flex-shrink-0",
-                filter === f ? "bg-[#d98c2a] text-white" : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300"
+                filter === f ? "bg-[var(--color-brand-primary)] text-white" : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300"
               )}>
               {f === "all" ? "All Orders" : STATUS_CONFIG[f]?.label ?? f}
             </button>
@@ -133,7 +133,7 @@ function OrdersContent() {
             <p className="text-neutral-400 text-sm mb-6">{loadError}</p>
             <button
               onClick={load}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors"
             >
               <RefreshCw className="w-3.5 h-3.5" /> Try Again
             </button>
@@ -143,7 +143,7 @@ function OrdersContent() {
             <ShoppingBag className="w-12 h-12 text-neutral-200 mx-auto mb-4" />
             <h3 className="font-display text-lg font-semibold text-neutral-700 mb-2">No orders yet</h3>
             <p className="text-neutral-400 text-sm mb-6">When you place orders, they'll appear here.</p>
-            <Link href="/shop" className="px-6 py-3 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] transition-colors">
+            <Link href="/shop" className="px-6 py-3 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] transition-colors">
               Start Shopping
             </Link>
           </div>
@@ -196,16 +196,16 @@ function OrdersContent() {
                               <div className={cn("flex flex-col items-center gap-1")}>
                                 <div className={cn(
                                   "w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all",
-                                  isDone ? "bg-[#d98c2a] border-[#d98c2a] text-white" : "border-neutral-200 text-neutral-300"
+                                  isDone ? "bg-[var(--color-brand-primary)] border-[var(--color-brand-primary)] text-white" : "border-neutral-200 text-neutral-300"
                                 )}>
                                   <Ic className="w-3.5 h-3.5" />
                                 </div>
-                                <span className={cn("text-[10px] font-medium", isCurrent ? "text-[#d98c2a]" : isDone ? "text-neutral-600" : "text-neutral-300")}>
+                                <span className={cn("text-[10px] font-medium", isCurrent ? "text-[var(--color-brand-primary)]" : isDone ? "text-neutral-600" : "text-neutral-300")}>
                                   {cfg.label}
                                 </span>
                               </div>
                               {i < arr.length - 1 && (
-                                <div className={cn("w-8 h-0.5 flex-shrink-0 mb-4", isDone && statusOrder.indexOf(arr[i+1]) <= currentIdx ? "bg-[#d98c2a]" : "bg-neutral-200")} />
+                                <div className={cn("w-8 h-0.5 flex-shrink-0 mb-4", isDone && statusOrder.indexOf(arr[i+1]) <= currentIdx ? "bg-[var(--color-brand-primary)]" : "bg-neutral-200")} />
                               )}
                             </div>
                           );
@@ -278,7 +278,7 @@ export default function DashboardOrdersPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-cream flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#d98c2a]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand-primary)]" />
       </div>
     }>
       <OrdersContent />

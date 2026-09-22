@@ -36,7 +36,7 @@ export function PlansPricingTab() {
   }
 
   if (!config) {
-    return <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[#d98c2a]" /></div>;
+    return <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[var(--color-brand-primary)]" /></div>;
   }
 
   return (
@@ -58,7 +58,7 @@ export function PlansPricingTab() {
                 </div>
                 <button
                   onClick={() => setConfig((c) => c ? { ...c, services: { ...c.services, [cat]: !c.services[cat] } } : c)}
-                  className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${config.services[cat] ? "bg-[#d98c2a]" : "bg-neutral-200"}`}>
+                  className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${config.services[cat] ? "bg-[var(--color-brand-primary)]" : "bg-neutral-200"}`}>
                   <span className={`inline-block w-4 h-4 transform rounded-full bg-white shadow transition-transform mt-1 ${config.services[cat] ? "translate-x-6" : "translate-x-1"}`} />
                 </button>
               </div>
@@ -79,7 +79,7 @@ export function PlansPricingTab() {
                 <input
                   type="number" min={0} max={100} value={config.markup[cat]}
                   onChange={(e) => setConfig((c) => c ? { ...c, markup: { ...c.markup, [cat]: Number(e.target.value) } } : c)}
-                  className="w-full border border-neutral-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:border-[#d98c2a]"
+                  className="w-full border border-neutral-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]"
                 />
                 <span className="absolute right-3 top-3 text-sm text-neutral-400">%</span>
               </div>
@@ -88,7 +88,7 @@ export function PlansPricingTab() {
         </div>
 
         <button onClick={saveConfig} disabled={saving}
-          className="mt-5 w-full bg-[#c47020] text-white py-3 rounded-xl font-semibold text-sm hover:bg-[#a3551c] transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+          className="mt-5 w-full bg-[var(--color-brand-accent)] text-white py-3 rounded-xl font-semibold text-sm hover:bg-[#a3551c] transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
           {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : "Save Settings"}
         </button>
       </div>

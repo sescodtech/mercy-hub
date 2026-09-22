@@ -44,7 +44,7 @@ export function ResultModal({ result, onClose }: Props) {
                   <div className="rounded-xl p-4 mb-5 text-left" style={{ backgroundColor: "rgba(217,140,42,0.08)", border: "1px solid rgba(217,140,42,0.2)" }}>
                     <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">Your Exam Pins</p>
                     {result.pins.map((pin, i) => (
-                      <p key={i} className="font-mono text-lg font-bold text-center" style={{ color: "#d98c2a" }}>{pin}</p>
+                      <p key={i} className="font-mono text-lg font-bold text-center" style={{ color: "var(--color-brand-primary)" }}>{pin}</p>
                     ))}
                   </div>
                 )}
@@ -64,7 +64,7 @@ export function ResultModal({ result, onClose }: Props) {
               <button
                 onClick={onClose}
                 className="flex items-center gap-2 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
-                style={{ backgroundColor: "#c47020" }}
+                style={{ backgroundColor: "var(--color-brand-accent)" }}
               >
                 <RefreshCw className="w-4 h-4" /> New Purchase
               </button>

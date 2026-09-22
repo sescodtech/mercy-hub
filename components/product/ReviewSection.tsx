@@ -120,7 +120,7 @@ export function ReviewSection({ productId }: { productId: string }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Review Title"
-              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] transition-colors"
+              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] transition-colors"
               required
             />
             <textarea
@@ -128,7 +128,7 @@ export function ReviewSection({ productId }: { productId: string }) {
               onChange={(e) => setComment(e.target.value)}
               placeholder="Share your experience..."
               rows={3}
-              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#d98c2a] transition-colors resize-none"
+              className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2.5 outline-none focus:border-[var(--color-brand-primary)] transition-colors resize-none"
               required
             />
           </div>
@@ -136,7 +136,7 @@ export function ReviewSection({ productId }: { productId: string }) {
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#d98c2a] text-white text-sm font-medium rounded-xl hover:bg-[#c47020] disabled:opacity-60 transition-colors"
+              className="flex items-center gap-2 px-6 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--color-brand-accent)] disabled:opacity-60 transition-colors"
             >
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               {editingId ? "Update Review" : "Submit Review"}

@@ -10,7 +10,7 @@ export function ViewAllLink() {
       className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-neutral-500 transition-colors"
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLAnchorElement).style.color =
-          "var(--color-brand-primary, #d98c2a)";
+          "var(--color-brand-primary, var(--color-brand-primary))";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLAnchorElement).style.color = "";

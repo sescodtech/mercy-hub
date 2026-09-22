@@ -141,7 +141,7 @@ export function Navbar() {
               ) : (
                 <div>
                   <span className="font-display text-xl font-semibold text-neutral-900 tracking-tight">
-                    Mercy<span style={{ color: "var(--color-brand-primary, #d98c2a)" }}>Home</span>
+                    Mercy<span style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }}>Home</span>
                   </span>
                 </div>
               )}
@@ -163,7 +163,7 @@ export function Navbar() {
                       className="flex items-center gap-1 px-3.5 py-2 text-sm font-medium transition-colors duration-150 rounded-md hover:bg-neutral-100/60"
                       style={{
                         color: isActive
-                          ? "var(--color-nav-text-hover, #d98c2a)"
+                          ? "var(--color-nav-text-hover, var(--color-brand-primary))"
                           : "var(--color-nav-text, #404040)",
                       }}
                     >
@@ -205,7 +205,7 @@ export function Navbar() {
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                               } as any}
                               onMouseEnter={(e) => {
-                                (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-nav-text-hover, #d98c2a)";
+                                (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-nav-text-hover, var(--color-brand-primary))";
                                 (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "var(--color-header-bg, #fdf8f0)";
                               }}
                               onMouseLeave={(e) => {
@@ -246,7 +246,7 @@ export function Navbar() {
                 {wishlistCount > 0 && (
                   <span
                     className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full text-white text-[9px] flex items-center justify-center font-bold"
-                    style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                    style={{ backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))" }}
                   >
                     {wishlistCount > 9 ? "9+" : wishlistCount}
                   </span>
@@ -269,7 +269,7 @@ export function Navbar() {
                     initial={{ scale: 1.4 }}
                     animate={{ scale: 1 }}
                     className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full text-white text-[9px] flex items-center justify-center font-bold"
-                    style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                    style={{ backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))" }}
                   >
                     {cartCount > 9 ? "9+" : cartCount}
                   </motion.span>
@@ -282,7 +282,7 @@ export function Navbar() {
                   <button className="flex items-center gap-1.5 pl-2 pr-3 h-8 rounded-full border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:text-neutral-900 transition-colors text-sm">
                     <div
                       className="w-5 h-5 rounded-full text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                      style={{ backgroundColor: "var(--color-brand-primary, #d98c2a)" }}
+                      style={{ backgroundColor: "var(--color-brand-primary, var(--color-brand-primary))" }}
                     >
                       {session.user?.name?.charAt(0).toUpperCase()}
                     </div>
@@ -308,7 +308,7 @@ export function Navbar() {
                       <Link
                         href="/admin"
                         className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-opacity-80 transition-colors border-t border-neutral-100"
-                        style={{ color: "var(--color-brand-primary, #d98c2a)" }}
+                        style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }}
                       >
                         <Settings className="w-4 h-4" /> Admin Panel
                       </Link>
@@ -326,7 +326,7 @@ export function Navbar() {
                   href="/auth/login"
                   className="hidden lg:flex items-center gap-1.5 ml-1 px-3.5 h-8 text-xs font-semibold rounded-full transition-colors"
                   style={{
-                    backgroundColor: "var(--color-button-primary, #d98c2a)",
+                    backgroundColor: "var(--color-button-primary, var(--color-brand-primary))",
                     color: "var(--color-button-text, #ffffff)",
                   }}
                 >
@@ -372,7 +372,7 @@ export function Navbar() {
                     <img src={logo} alt={bizName} className="h-7 w-auto" />
                   ) : (
                     <span className="font-display text-lg font-semibold">
-                      Mercy<span style={{ color: "var(--color-brand-primary, #d98c2a)" }}>Home</span>
+                      Mercy<span style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }}>Home</span>
                     </span>
                   )}
                 </Link>
@@ -396,7 +396,7 @@ export function Navbar() {
                           className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-neutral-50 transition-colors"
                           style={{
                             backgroundColor: isActive ? "rgba(217,140,42,0.08)" : undefined,
-                            color: isActive ? "var(--color-nav-text-hover, #d98c2a)" : "var(--color-nav-text, #404040)",
+                            color: isActive ? "var(--color-nav-text-hover, var(--color-brand-primary))" : "var(--color-nav-text, #404040)",
                           }}
                         >
                           <span className="flex items-center gap-1.5">
@@ -424,7 +424,7 @@ export function Navbar() {
                                 href={link.href}
                                 onClick={() => setMobileOpen(false)}
                                 className="block px-2 py-2 text-sm font-medium rounded-md transition-colors"
-                                style={{ color: "var(--color-nav-text-hover, #d98c2a)" }}
+                                style={{ color: "var(--color-nav-text-hover, var(--color-brand-primary))" }}
                               >
                                 View All {link.label}
                               </Link>
@@ -435,7 +435,7 @@ export function Navbar() {
                                   onClick={() => setMobileOpen(false)}
                                   className="block px-2 py-2 text-sm text-neutral-500 rounded-md transition-colors"
                                   style={{ color: "var(--color-nav-text, #404040)" }}
-                                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-nav-text-hover, #d98c2a)"; }}
+                                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-nav-text-hover, var(--color-brand-primary))"; }}
                                   onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--color-nav-text, #404040)"; }}
                                 >
                                   {child.label}
@@ -457,7 +457,7 @@ export function Navbar() {
                       style={{
                         backgroundColor: isActive ? "rgba(217,140,42,0.08)" : undefined,
                         color: isActive
-                          ? "var(--color-nav-text-hover, #d98c2a)"
+                          ? "var(--color-nav-text-hover, var(--color-brand-primary))"
                           : "var(--color-nav-text, #404040)",
                       }}
                     >
@@ -482,7 +482,7 @@ export function Navbar() {
                     {(session.user as any)?.role === "admin" && (
                       <Link href="/admin" onClick={() => setMobileOpen(false)}
                         className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-lg"
-                        style={{ color: "var(--color-brand-primary, #d98c2a)" }}>
+                        style={{ color: "var(--color-brand-primary, var(--color-brand-primary))" }}>
                         <Settings className="w-4 h-4" /> Admin Panel
                       </Link>
                     )}
@@ -501,7 +501,7 @@ export function Navbar() {
                     <Link href="/auth/register" onClick={() => setMobileOpen(false)}
                       className="flex items-center justify-center py-2.5 text-sm font-medium rounded-lg"
                       style={{
-                        backgroundColor: "var(--color-button-primary, #d98c2a)",
+                        backgroundColor: "var(--color-button-primary, var(--color-brand-primary))",
                         color: "var(--color-button-text, #ffffff)",
                       }}>
                       Register

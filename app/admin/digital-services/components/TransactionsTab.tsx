@@ -65,11 +65,11 @@ export function TransactionsTab() {
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
           <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search by ref, phone…"
-            className="w-full border border-neutral-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-[#d98c2a]"
+            className="w-full border border-neutral-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]"
           />
         </div>
         <select value={statusF} onChange={(e) => { setStatusF(e.target.value); setPage(1); }}
-          className="border border-neutral-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]">
+          className="border border-neutral-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]">
           <option value="">All Status</option>
           <option value="fulfilled">Fulfilled</option>
           <option value="failed">Failed</option>
@@ -77,7 +77,7 @@ export function TransactionsTab() {
           <option value="processing">Processing</option>
         </select>
         <select value={catF} onChange={(e) => { setCatF(e.target.value); setPage(1); }}
-          className="border border-neutral-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#d98c2a]">
+          className="border border-neutral-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-brand-primary)]">
           <option value="">All Categories</option>
           <option value="data">Data</option>
           <option value="airtime">Airtime</option>
@@ -135,7 +135,7 @@ export function TransactionsTab() {
                       {o.status === "failed" && o.retryCount < 3 && (
                         <button onClick={() => retryOrder(o._id)}
                           disabled={retrying === o._id}
-                          className="flex items-center gap-1 text-xs text-[#d98c2a] hover:underline disabled:opacity-50">
+                          className="flex items-center gap-1 text-xs text-[var(--color-brand-primary)] hover:underline disabled:opacity-50">
                           {retrying === o._id ? <Loader2 className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3" />}
                           Retry
                         </button>

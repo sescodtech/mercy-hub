@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { Order } from "@/lib/models";
 import { auth } from "@/lib/auth";
+import { releaseReservedStock } from "@/lib/orders/stock";
 
 // ✅ Next.js 15: params is a Promise
 interface Params { params: Promise<{ id: string }> }
@@ -51,6 +52,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const body = await req.json();
     const { orderStatus, trackingNumber, note } = body;
+    const allowedStatuses = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "returned"];
+    if (orderStatus && !allowedStatuses.includes(orderStatus)) {
+      return NextResponse.json({ success: false, error: "Invalid order status" }, { status: 400 });
+    }
 
     const order = await Order.findById(id);
     if (!order) {
@@ -63,37 +68,35 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 
     const updateFields: Record<string, unknown> = {};
+    const pushFields: Record<string, unknown> = {};
 
     if (orderStatus) {
       updateFields.orderStatus = orderStatus;
-
-      // Push to status history log
-      updateFields.$push = {
-        statusHistory: {
-          status:    orderStatus,
-          timestamp: new Date(),
-          note:      note ?? `Status updated to ${orderStatus}`,
-          updatedBy: session.user.id,
-        },
+      pushFields.statusHistory = {
+        status: orderStatus,
+        timestamp: new Date(),
+        note: note ?? `Status updated to ${orderStatus}`,
+        updatedBy: session.user.id,
       };
-
-      // Set timestamps for specific statuses
       if (orderStatus === "delivered") updateFields.deliveredAt = new Date();
-      if (orderStatus === "shipped")   updateFields.shippedAt   = new Date();
+      if (orderStatus === "shipped") updateFields.shippedAt = new Date();
+      if (orderStatus === "cancelled") updateFields.cancelledAt = new Date();
     }
 
-    if (trackingNumber !== undefined) {
-      updateFields.trackingNumber = trackingNumber;
-    }
+    if (trackingNumber !== undefined) updateFields.trackingNumber = String(trackingNumber).trim();
 
     const updated = await Order.findByIdAndUpdate(
       id,
-      { $set: updateFields, ...(updateFields.$push ? { $push: updateFields.$push } : {}) },
-      { new: true }
+      { $set: updateFields, ...(Object.keys(pushFields).length ? { $push: pushFields } : {}) },
+      { new: true, runValidators: true }
     )
       .populate("user", "name email")
       .populate("items.product", "name images price")
       .lean();
+
+    if (orderStatus === "cancelled" && order.paymentStatus !== "paid") {
+      await releaseReservedStock(String(order._id));
+    }
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
